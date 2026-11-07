@@ -1,0 +1,189 @@
+[
+  {
+    "id": "3JM2zsz0A9MHOtIS0HZg",
+    "title": "RecipeGPT (Web App)",
+    "role": "Full-Stack Developer",
+    "technologies": [
+      "ReactJS",
+      "Spring Boot",
+      "Tailwind CSS",
+      "Firebase",
+      "GitHub",
+      "GitHub Actions",
+      "Docker",
+      "Google Cloud Platform"
+    ],
+    "githubUrl": "https://github.com/mariosakka/RecipeGPT-2.0",
+    "liveUrl": "https://recipegpt-7d00c.web.app",
+    "category": "Web",
+    "description": "A web app that allows users to generate recipes based on queries they input, using OpenAI's API. \n\nUsers have to create accounts in order to be able to save the recipes on the database and also share them with others. \n\nThey can also ask for live assistance from a chatbot if they're trying to follow a recipe and get stuck. ",
+    "socialMedia": [],
+    "longDescription": "aaaa",
+    "teamType": "team",
+    "shortDescription": "AI-powered web platform for generating and sharing culinary recipes",
+    "image": "/img/project-image_1750899197527.webp"
+  },
+  {
+    "id": "8uM94dBTJqtk2yTkQpd2",
+    "image": "/img/project-image_1750896353875.webp",
+    "liveUrl": "",
+    "longDescription": "",
+    "technologies": [
+      "Rust (embassy-rs)",
+      "Python (TKinter & Multi-threading & TCP)",
+      "RP Pico W HAL"
+    ],
+    "teamType": "single",
+    "socialMedia": [],
+    "description": "A cooling Pad for laptops that can be controlled wirelessly or using buttons.",
+    "role": "Embedded & App Developer",
+    "shortDescription": "A DIY laptop cooling pad with a tactile interface, but also a desktop app for controlling it",
+    "category": "Embedded",
+    "githubUrl": "https://github.com/mariosakka/DIY-Laptop-Cooling-Pad",
+    "title": "DIY Laptop Cooling Pad"
+  },
+  {
+    "id": "AMJpCBAm22oA2xx3jFrI",
+    "technologies": [
+      "OpenGL (C++)"
+    ],
+    "shortDescription": "Simple 2D game built as a demo",
+    "image": "/img/project-image_1750897188359.webp",
+    "githubUrl": "https://github.com/mariosakka/Red-Evil-The-Laylasaurus-Quest-2D",
+    "longDescription": "",
+    "description": "In 2024, an unprecedented catastrophe strikes humanity: people begin transforming into dinosaurs! Mario, an ordinary university student, is the first to witness it when his friend and classmate, Layla, turns into one of these ancient creatures. As institutions fall and chaos spreads, people around Mario morph into ferocious dinosaurs, leaving destruction in their wake. But here’s the twist—Layla retains her memories, and she can help Mario find the root of this phenomenon! Join Mario and Layla on a thrilling journey as they search for the source of this mysterious transformation and fight to save humanity from extinction.",
+    "role": "Game Mechanics",
+    "socialMedia": [],
+    "teamType": "team",
+    "liveUrl": "https://www.youtube.com/watch?v=3qEAZw01-Ew&list=PLf34LpXku6i9rz5etayFc05nwu3NNGW3M",
+    "category": "Games",
+    "title": "Red Evil: The Laylasaurus Quest"
+  },
+  {
+    "id": "BV0E8NXJBsscW1Nb22iC",
+    "teamType": "team",
+    "shortDescription": "An app that identifies problems and interprets errors coming from your car's sensors, created at the Build with AI 2025 hackathon",
+    "technologies": [
+      "Flutter",
+      "Android SDK",
+      "Kotlin",
+      "Gemini SDK",
+      "ExpressJS",
+      "Heroku"
+    ],
+    "title": "DashGem",
+    "description": "DashGem is an AI-powered app that helps drivers understand warning lights on their car's dashboard by snapping or uploading a photo. Powered by Gemini 1.5 Pro, DashGem delivers accurate, grounded, and chat-style explanations with actionable next steps.",
+    "socialMedia": [],
+    "role": "Backend Developer",
+    "longDescription": "",
+    "category": "App",
+    "image": "/img/project-image_1750896886909.webp",
+    "liveUrl": "https://www.youtube.com/watch?v=yGHNkooMWwQ",
+    "githubUrl": "https://github.com/andrauritu/DashGem---BuildWithAi"
+  },
+  {
+    "id": "IiuwTr2mkDKZVjbpA2zi",
+    "technologies": [
+      "Flutter",
+      "Arduino",
+      "ExpressJS",
+      "Heroku",
+      "GitHub",
+      "Redis (Pub/Sub Channels)",
+      "MongoDB"
+    ],
+    "role": "Embedded & Full-Stack Dev",
+    "title": "Monitor.IoT",
+    "githubUrl": "https://github.com/mariosakka/monitor.iot",
+    "category": "Embedded",
+    "liveUrl": "",
+    "shortDescription": "End-to-End service for smart home devices, includes devices, deployed web server and an app to control and monitor devices",
+    "image": "/img/project-image_1750896512976.webp",
+    "teamType": "team",
+    "socialMedia": [],
+    "description": "This is a smart things project which implements cameras, sensors and rgb lamps that can be easily controlled or monitored by users through an app that can run on any device as long as it's connected to the internet. Some of the key features are:\n\nEnables monitoring and controlling installed smart devices from anywhere in the world at any time\nUser-friendly, very easy to setup and start using it, it only requires that devices stay connected to the internet\nAllows for multiple users simulataineously to connect on the same account at the same time or just have multiple users with different accounts using it at the same time",
+    "longDescription": ""
+  },
+  {
+    "id": "MiDlwwQTlkFho9jCVedY",
+    "socialMedia": [],
+    "description": "Different implementations for solving the 8 queens problem using genetic algorithms.",
+    "technologies": [
+      "Python"
+    ],
+    "teamType": "single",
+    "title": "8 Queens Problem",
+    "image": "/img/project-image_1750897367348.webp",
+    "githubUrl": "https://github.com/mariosakka/8-Queens-Problem-Genetic-Algorithms",
+    "liveUrl": "",
+    "role": "Algorithm Designer",
+    "shortDescription": "Some implementations for solving the 8 queens problem, using genetic algorithms",
+    "category": "Algorithms",
+    "longDescription": ""
+  },
+  {
+    "id": "QpxG6gJOCdjgVWhtJAV4",
+    "liveUrl": "",
+    "role": "Full-Stack Developer",
+    "title": "RecipeGPT (Android App)",
+    "shortDescription": "Android app for generating recipes with AI, keeping track of ingredients and supplies needed to follow recipes saved on your phone",
+    "technologies": [
+      "Kotlin",
+      "Android SDK",
+      "XML",
+      "Android Views",
+      "ExpressJS",
+      "Heroku",
+      "OpenAI API"
+    ],
+    "longDescription": "",
+    "githubUrl": "https://github.com/mariosakka/RecipeGPT",
+    "teamType": "single",
+    "socialMedia": [],
+    "description": "An Android app used for generating recipes by sending queries to OpenAI's GPT-4o model to process them and return recipes 🤤🍰. It also shares with you cooking wisdom through its AI-generated quotes 🧠👩🏻‍🍳",
+    "category": "App",
+    "image": "/img/project-image_1750899079933.webp"
+  },
+  {
+    "id": "v98wdSjIX6nbygmlGc1u",
+    "role": "Full-Stack Developer",
+    "image": "/img/project-image_1750897096768.webp",
+    "socialMedia": [],
+    "description": "E-Hotel is a private prototype reservation platform for a fictional hotel chain. It showcases a complete software development lifecycle, from business analysis and UML modeling to a working implementation using modern web technologies, containerization, and cloud deployment.",
+    "category": "Web",
+    "liveUrl": "https://e-hotel-sdm.web.app/",
+    "shortDescription": "A simple implementation of a booking platform for a hotel chain",
+    "githubUrl": "https://github.com/mariosakka/E-Hotel",
+    "teamType": "single",
+    "technologies": [
+      "ReactJS",
+      "ExpressJS",
+      "Google Cloud Platform",
+      "Firebase",
+      "Tailwind CSS",
+      "GitHub Actions",
+      "Docker"
+    ],
+    "title": "E-Hotel",
+    "longDescription": ""
+  },
+  {
+    "id": "vTjbrMXKwbaVjI6VKN8S",
+    "title": "Acuranics",
+    "githubUrl": "https://github.com/Abd210/cancer_project",
+    "teamType": "team",
+    "longDescription": "",
+    "shortDescription": "",
+    "socialMedia": [],
+    "description": "A platform built for medical institutions that study breast cancer tumors with the use of AI.",
+    "liveUrl": "",
+    "technologies": [
+      "Flutter",
+      "ExpressJS",
+      "Firebase"
+    ],
+    "image": "/img/project-image_1750898273908.webp",
+    "role": "Backend Developer",
+    "category": "Web"
+  }
+]

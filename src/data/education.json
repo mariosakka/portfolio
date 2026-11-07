@@ -1,0 +1,58 @@
+[
+  {
+    "id": "CA9kTuKmRQlnbcbLAiHL",
+    "socialMedia": [],
+    "image": "/img/education-image_1750892593431.webp",
+    "gpa": "9.6/10",
+    "longDescription": "",
+    "subjects": [
+      "OOP",
+      "DSA",
+      "Web Programming",
+      "OS (Bash, C [with Processes, Threads], Django, Flask)",
+      "Databases",
+      "Microprocessor Architecture (Rust)",
+      "Mobile App Development (Kotlin)",
+      "Internet of Things (Flutter, Firebase, Arduino)",
+      "Computer Graphics (OpenGL)",
+      "Algorithm Design",
+      "Computer Networks",
+      "Computer Architecture",
+      "Formal Languages & Compilers (Python, YACC)"
+    ],
+    "description": "",
+    "department": "Faculty of Engineering in Foreign Languages",
+    "degree": "Bachelor's in Information Engineering in English",
+    "shortDescription": "",
+    "isPresent": true,
+    "startDate": "2022-10-03",
+    "institution": "POLITEHNICA University of Bucharest",
+    "fieldOfStudy": "Computer Science",
+    "endDate": "",
+    "location": "Bucharest, RO",
+    "websiteUrl": "https://upb.ro"
+  },
+  {
+    "id": "OkiNp1tUYTwhZF5V9BYK",
+    "description": "",
+    "isPresent": false,
+    "gpa": "97.3%",
+    "department": "Scientific Stream",
+    "degree": "Baccalaureate",
+    "startDate": "2018-09-03",
+    "subjects": [
+      "Physics",
+      "Maths",
+      "Information Technology (SQL)"
+    ],
+    "shortDescription": "",
+    "socialMedia": [],
+    "image": "/img/education-image_1756892460697.webp",
+    "fieldOfStudy": "Scientific Stream",
+    "websiteUrl": "https://jerusalemschool.ro/",
+    "location": "Bucharest, RO",
+    "institution": "Jerusalem School of Bucharest",
+    "longDescription": "",
+    "endDate": "2022-07-20"
+  }
+]

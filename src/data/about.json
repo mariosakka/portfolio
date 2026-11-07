@@ -1,0 +1,58 @@
+{
+  "id": "about-me",
+  "photo": "/img/profile-photo_1760017448324.webp",
+  "languages": [
+    "Romanian",
+    "English",
+    "Arabic"
+  ],
+  "fullName": "Mohamad-Mario Sakka",
+  "location": "Bucharest, RO",
+  "role": "Full-Stack Developer",
+  "preferredName": "Mario",
+  "repositoryPath": "mariosakka/mms-portfolio",
+  "description": "I'm a 3rd year computer engineering student at University Politehnica of Bucharest, with a strong desire to learn and work with the newest technologies.",
+  "commitMessage": "just completed creating categories for projects",
+  "codeSample": "{\n  \"name\": \"Mohamad-Mario Sakka\",\n  \"role\": \"Full-Stack Developer\",\n  \"location\": \"Bucharest, RO\",\n  \"languages\": [\n    \"Romanian\",\n    \"English\",\n    \"Arabic\"\n  ],\n  \"passion\": \"Web Technologies, App Development & AI\"\n}",
+  "skills": [
+    "Java",
+    "C++",
+    "SpringBoot",
+    "ExpressJS",
+    "Typescript",
+    "HTML",
+    "CSS",
+    "ReactJS",
+    "AngularJS",
+    "Google Cloud Platform",
+    "GitHub",
+    "Python"
+  ],
+  "welcomeMessage": "// Welcome to my portfolio!",
+  "contact": {
+    "methods": [
+      {
+        "id": 1,
+        "type": "Email",
+        "value": "mohamad.mario.sakka@gmail.com"
+      },
+      {
+        "type": "GitHub",
+        "value": "mariosakka",
+        "id": 2
+      },
+      {
+        "id": 3,
+        "value": "+40734523633",
+        "type": "Phone"
+      },
+      {
+        "value": "mohamad-mario-sakka-37388a29b",
+        "id": 4,
+        "type": "LinkedIn"
+      }
+    ],
+    "subtitle": "Ready to collaborate on your next project? Let's build something amazing together.",
+    "title": "Let's Connect!"
+  }
+}

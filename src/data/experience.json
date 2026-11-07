@@ -1,0 +1,48 @@
+[
+  {
+    "id": "O62Y06Oh4OXGhJXAXJi8",
+    "company": "Colete Online",
+    "image": "/img/job-image_1768659089882.webp",
+    "startDate": "2025-09-29",
+    "websiteUrl": "https://colete-online.ro",
+    "longDescription": "",
+    "location": "Bucharest, RO",
+    "shortDescription": "Developed a Magento 2 integration for online stores",
+    "isPresent": true,
+    "technologies": [
+      "PHP",
+      "TypeScript",
+      "Git",
+      "Magento 2"
+    ],
+    "title": "Junior Software Engineer",
+    "endDate": ""
+  },
+  {
+    "id": "prL9RWGFHnvHJNFq8w1D",
+    "startDate": "2025-07-01",
+    "shortDescription": "Integration Testing and Performance Testing, Developing New Features",
+    "isPresent": false,
+    "company": "Colete Online",
+    "longDescription": "During my internship at Colete-Online.ro, I was part of a group of 8 interns, organized into 4 teams of two, each responsible for a different part of the company’s CBox platform. My teammate and I were assigned the agent and zone workflows, which meant designing the testing logic for creating zones, allocating lockers, registering agents, and assigning them to zones. At the start, there were no integration tests for these areas, so we built them entirely from scratch, setting the foundation for a reusable framework that other teams could also build upon.\n\nOnce the initial structure was in place, we worked on extending and connecting the tasks across different modules to simulate full workflows. I created helper classes, wrote unit tests to ensure their correctness, and standardized how test data was set up and cleaned up. Later, we adapted our framework to run with Grafana K6, which allowed us to simulate traffic with multiple virtual users. This introduced new challenges around concurrency, so I helped parallelize the tasks, debug race conditions, and refine error handling to make the pipelines reliable under load.\n\nIn the second half of the internship, I focused more on performance and reliability. I analyzed backend queries for routes like creating and retrieving zones, documented where slowdowns appeared under high load, and suggested optimizations. I also rewrote the final pipeline check that verified whether pickup requests were properly finalized, and improved authorization logic on some backend routes with clearer error handling. By the end of the internship, I had contributed to building the company’s first full integration and performance testing pipelines, while gaining hands-on experience with AngularJS, Express with TypeScript, Prisma, MySQL, and Grafana K6 in a collaborative team environment.",
+    "technologies": [
+      "Node",
+      "Angular",
+      "Express",
+      "Typescript",
+      "MySQL",
+      "Prisma",
+      "Graphana K6",
+      "DBeaver",
+      "Git/GitHub",
+      "Linux"
+    ],
+    "image": "/img/job-image_1750889656149.webp",
+    "isCurrent": false,
+    "endDate": "2025-09-10",
+    "description": "aaa",
+    "title": "Software Engineering Intern",
+    "location": "Bucharest, RO",
+    "websiteUrl": "https://colete-online.ro"
+  }
+]

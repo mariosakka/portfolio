@@ -1,0 +1,70 @@
+[
+  {
+    "id": "A63w2c7ryuFOEH7Z4Wtw",
+    "credentialId": "",
+    "image": "/img/certificate-image_1760017868660.webp",
+    "skills": [
+      "Teamwork",
+      "Teaching",
+      "Flutter",
+      "Django",
+      "Git/GitHub",
+      "GCP",
+      "SQL",
+      "Python"
+    ],
+    "longDescription": "",
+    "issuer": "GDG Europe",
+    "credentialUrl": "",
+    "shortDescription": "Recognition of my activity as part of the core team in Google Developer Groups on Campus UNSTPB",
+    "title": "GDG on Campus Affiliate Letter"
+  },
+  {
+    "id": "K8280iw6LGkU3OqHzk5P",
+    "credentialUrl": "https://learn.digitalstack.ro/mod/linkedincert/verify_certificate.php?code=DMSuUDJRSd",
+    "longDescription": "",
+    "title": "Build with AI 2025 Bucharest",
+    "issuer": "Digital Stack",
+    "description": "Certificate of completion for the Build with AI 2025 hackathon.",
+    "credentialId": "DMSuUDJRSd",
+    "skills": [
+      "Gemini SDK",
+      "Google AI Studio",
+      "Kotlin",
+      "Flutter",
+      "ExpressJS",
+      "GitHub"
+    ],
+    "shortDescription": "Diploma for participating at the Build with AI 2025 hackathon",
+    "image": "/img/certificate-image_1750897678868.webp"
+  },
+  {
+    "id": "ijGIohjwGu7NkL7ZJpYn",
+    "credentialId": "UC-db082d31-17b5-4755-934a-cd7e8321da06",
+    "credentialUrl": "https://www.udemy.com/certificate/UC-db082d31-17b5-4755-934a-cd7e8321da06/",
+    "skills": [
+      "Kotlin",
+      "Android SDK",
+      "XML",
+      "Jetpack Compose",
+      "MVVM"
+    ],
+    "title": "The Complete Android 14 & Kotlin Development Masterclass",
+    "shortDescription": "Completed this android app development with Kotlin course",
+    "issuer": "Udemy",
+    "description": "Learned about app development in Kotlin for Android devices, using old Android Views but also Jetpack Compose.",
+    "image": "/img/certificate-image_1750892247011.webp",
+    "longDescription": ""
+  },
+  {
+    "id": "zPgnzjEjzfp8LRYzg7Bd",
+    "credentialId": "",
+    "image": "/img/certificate-image_1751309087320.webp",
+    "shortDescription": "Awarded for active participation at the faculty's booth at POLIFEST 2023",
+    "credentialUrl": "",
+    "longDescription": "",
+    "issuer": "FILS-UPB",
+    "title": "Diploma of Volunteering",
+    "skills": []
+  }
+]
