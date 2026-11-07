@@ -1,0 +1,6 @@
+# Narrow exceptions for gitleaks (one fingerprint each: commit:file:rule:line).
+# Owner: repo owner. Review whenever the certificate entry moves; remove when it no longer matches.
+#
+# 2be5c80: Microsoft AI-901 credential ID shown on the public Certificates section on purpose.
+# It is a public certificate identifier (not a secret) that the generic-api-key rule mistakes for a key.
+2be5c80190912bff6136068eb6afee26337f4775:src/data/certificates.json:generic-api-key:14
