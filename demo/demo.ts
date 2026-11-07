@@ -1,7 +1,7 @@
 // Dev-only demo (see garden-demo.html): one plant per species, driven by a progress slider or ?p=0.5.
 import { createApp, defineComponent, h, ref } from 'vue'
-import { Plant, parsePath, pointAt } from './index'
-import type { Species } from './index'
+import { Plant, parsePath, pointAt } from '../src/garden'
+import type { Species } from '../src/garden'
 
 const SPECIES: Species[] = ['bloom', 'cornflower', 'bell', 'forgetmenot', 'daisy']
 const PATH = 'M64 -10 C80 70 70 130 62 160 C40 220 70 270 60 330'

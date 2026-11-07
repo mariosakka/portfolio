@@ -15,6 +15,8 @@ export const PHASES = {
 
 export const clamp01 = (n: number): number => Math.min(1, Math.max(0, n))
 export const ramp = (p: number, a: number, b: number): number => (b <= a ? (p >= b ? 1 : 0) : clamp01((p - a) / (b - a)))
+/** Delay (ms) at which a linearly drawn vine of `duration` ms reaches arc fraction `f`: starts a plant when the tip arrives. */
+export const reachDelay = (f: number, duration: number): number => Math.round(clamp01(f) * duration)
 export const easeOut = (t: number): number => 1 - (1 - t) ** 3
 
 /**

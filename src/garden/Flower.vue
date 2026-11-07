@@ -18,8 +18,8 @@ const p = computed(() => (isStatic.value ? 1 : props.progress ?? timeline.value)
 <template>
   <g
     ref="el"
-    class="garden-art flower"
-    :class="[species, { 'is-grown': grown, 'is-static': isStatic, 'is-swaying': p >= 1 && !isStatic }]"
+    class="g-art g-flower"
+    :class="[`g-${species}`, { 'g-is-grown': grown, 'g-is-static': isStatic }]"
     :transform="`translate(${x} ${y}) rotate(${rotate}) scale(${size})`"
   >
     <FlowerArt

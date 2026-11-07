@@ -1,50 +1,39 @@
-/* Hidden-until-grown states apply only when neither .is-grown nor .is-static is set. */
-.garden-art { --delay: 0ms; --duration: 2400ms; }
-.vine { display: block; max-width: 100%; height: auto; }
+/* All garden class names carry the g- prefix so the future package cannot collide with app CSS. */
+.g-art { --delay: 0ms; --duration: 2400ms; }
+.g-vine { display: block; max-width: 100%; height: auto; }
 
-.vine-stem {
+/* Vine: linear draw, so a child starting at fraction * duration starts exactly when the drawn tip arrives. */
+.g-vine-stem {
   stroke-dasharray: 1 2;
   stroke-dashoffset: 1;
-  transition: stroke-dashoffset var(--duration) ease-in-out var(--delay);
+  transition: stroke-dashoffset var(--duration) linear var(--delay);
 }
-.vine.is-grown .vine-stem,
-.vine.is-static .vine-stem { stroke-dashoffset: 0; }
-.vine.is-static .vine-stem { transition: none; }
+.g-vine.g-is-grown .g-vine-stem,
+.g-vine.g-is-static .g-vine-stem { stroke-dashoffset: 0; }
+.g-vine.g-is-static .g-vine-stem { transition: none; }
 
-/* leaves, buds: pop in along the stem */
-.leaf .pop, .bud .pop {
-  opacity: 0;
-  transform: scale(0);
-  transition: transform .7s cubic-bezier(.3, 1.4, .5, 1) var(--delay), opacity .5s ease var(--delay);
-}
-.leaf.is-grown .pop, .bud.is-grown .pop,
-.leaf.is-static .pop, .bud.is-static .pop { opacity: 1; transform: scale(1); }
+/* Page vine: the stem follows --off, written from one scroll listener; it is never animated, so a plant
+   can only start once the drawn vine has really reached its anchor. */
+.g-page-vine { position: absolute; top: 0; display: block; overflow: visible; }
+.g-page-vine.g-is-left { left: 0; }
+.g-page-vine.g-is-right { right: 0; }
+.g-page-vine-stem { stroke-dashoffset: var(--off, 1); }
+.g-page-vine.g-is-static { --off: 0; }
 
-/* the page vine stem follows --off, set from one scroll listener */
-.page-vine { position: absolute; top: 0; display: block; overflow: visible; }
-.page-vine.is-left { left: 0; }
-.page-vine.is-right { right: 0; }
-.page-vine-stem { stroke-dashoffset: var(--off, 1); transition: stroke-dashoffset .35s linear; }
-.page-vine.is-static { --off: 0; }
-.page-vine.is-static .page-vine-stem { transition: none; }
+/* Flower parts animate from inline transform/opacity/dash values; origin is the receptacle. */
+.g-flower-art .g-petal, .g-flower-art .g-sepal, .g-flower-art .g-receptacle, .g-flower-art .g-disk { transform-origin: 0 0; }
+.g-flower-art .g-anther, .g-flower-art .g-pollen { transform-box: fill-box; transform-origin: center; }
+.g-plant-leaf > g, .g-leaf-body { transform-origin: 0 0; }
 
-/* flower parts animate from inline transform/opacity/dash values; origin is the receptacle */
-.flower-art .petal, .flower-art .sepal, .flower-art .receptacle, .flower-art .disk { transform-origin: 0 0; }
-.flower-art .anther, .flower-art .pollen { transform-box: fill-box; transform-origin: center; }
-.plant-leaf > g { transform-origin: 0 0; }
-
-/* gentle sway once open (not in static mode) */
-.is-swaying .sway {
-  animation: garden-sway 7s ease-in-out var(--sd, 0s) infinite alternate;
-}
+/* Gentle sway only while .g-is-swaying (PageVine limits it to a few plants near the viewport). */
+.g-is-swaying .g-sway { animation: garden-sway 7s ease-in-out var(--sd, 0s) infinite alternate; }
 @keyframes garden-sway {
   from { transform: rotate(-2.5deg); }
   to { transform: rotate(2.5deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .garden-art .vine-stem, .garden-art.vine-stem { stroke-dashoffset: 0; transition: none; }
-  .garden-art .pop { opacity: 1; transform: none; transition: none; }
-  .page-vine-stem { stroke-dashoffset: 0; transition: none; }
-  .sway { animation: none !important; }
+  .g-vine-stem { stroke-dashoffset: 0; transition: none; }
+  .g-page-vine-stem { stroke-dashoffset: 0; }
+  .g-sway { animation: none !important; }
 }

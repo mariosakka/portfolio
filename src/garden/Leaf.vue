@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import { ref, useId } from 'vue'
+import { computed, ref, useId } from 'vue'
+import { LEAF } from './flowers'
+import { easeOut, useGrowthTimeline } from './timeline'
 import { artDefaults, useGrown } from './useGrow'
 import type { ArtProps } from './types'
 
+// A leaf with its base at (x, y): put it on an anchor. Unfurls from the base through the shared timeline hook.
 const props = withDefaults(defineProps<ArtProps>(), artDefaults)
 const el = ref<SVGGElement | null>(null)
-const { grown, isStatic, swaying } = useGrown(props, el)
+const { grown, isStatic } = useGrown(props, el)
 const id = useId()
+const timeline = useGrowthTimeline(grown, { duration: 1100, delay: props.delay, isStatic })
+const s = computed(() => easeOut(timeline.value))
 </script>
 
 <template>
   <g
     ref="el"
-    class="garden-art leaf"
-    :class="{ 'is-grown': grown, 'is-static': isStatic, 'is-swaying': swaying }"
+    class="g-art g-leaf"
+    :class="{ 'g-is-grown': grown, 'g-is-static': isStatic }"
     :transform="`translate(${x} ${y}) rotate(${rotate}) scale(${size})`"
-    :style="{ '--delay': delay + 'ms' }"
   >
     <defs>
       <linearGradient
@@ -35,23 +39,26 @@ const id = useId()
         />
       </linearGradient>
     </defs>
-    <g class="pop">
+    <g
+      class="g-leaf-body"
+      :style="{ transform: `scale(${s})`, opacity: s > 0 ? 1 : 0 }"
+    >
       <path
-        d="M0 0 C18 -22 52 -26 78 -4 C52 16 18 14 0 0Z"
+        :d="LEAF.d"
         :fill="`url(#${id}-l)`"
         stroke="#4fa6ba"
         stroke-opacity=".5"
         stroke-width=".8"
       />
       <path
-        d="M2 -1 C25 -6 50 -6 74 -4"
+        :d="LEAF.midrib"
         fill="none"
         stroke="#79bccb"
         stroke-opacity=".7"
         stroke-width="1"
       />
       <path
-        d="M18 -4 L30 -15 M18 -4 L30 7 M36 -5 L48 -15 M36 -5 L48 5 M54 -5 L63 -12 M54 -5 L63 2"
+        :d="LEAF.veins"
         fill="none"
         stroke="#79bccb"
         stroke-opacity=".45"

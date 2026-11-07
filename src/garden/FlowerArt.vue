@@ -31,8 +31,8 @@ const hidden = (n: number) => ({ opacity: n > 0.001 ? 1 : 0 })
 
 <template>
   <g
-    class="flower-art"
-    :class="{ 'is-swaying': idle }"
+    class="g-flower-art"
+    :class="{ 'g-is-swaying': idle }"
     :style="{ '--sd': sd }"
   >
     <defs>
@@ -88,16 +88,16 @@ const hidden = (n: number) => ({ opacity: n > 0.001 ? 1 : 0 })
       </radialGradient>
     </defs>
     <circle
-      class="glow"
+      class="g-glow"
       :r="geometry.glowR"
       :fill="`url(#${id}-g)`"
       :style="{ opacity: ramp(open, 0.3, 1) }"
     />
-    <g class="sway">
+    <g class="g-sway">
       <path
         v-for="(sp, i) in sepals"
         :key="'s' + i"
-        class="sepal"
+        class="g-sepal"
         :d="sp.s.d"
         :fill="geometry.palette.sepal"
         stroke="#4fa6ba"
@@ -108,7 +108,7 @@ const hidden = (n: number) => ({ opacity: n > 0.001 ? 1 : 0 })
       <g
         v-for="pt in petals"
         :key="pt.p.layer + '-' + pt.p.index"
-        class="petal"
+        class="g-petal"
         :style="pt.style"
       >
         <path
@@ -137,13 +137,13 @@ const hidden = (n: number) => ({ opacity: n > 0.001 ? 1 : 0 })
         />
       </g>
       <circle
-        class="receptacle"
+        class="g-receptacle"
         :r="geometry.receptacleR"
         :fill="geometry.palette.sepal"
         :style="{ transform: `scale(${easeOut(ph.calyx)})` }"
       />
       <circle
-        class="disk"
+        class="g-disk"
         :r="geometry.centerR"
         :fill="geometry.palette.center"
         :style="{ transform: `scale(${easeOut(ramp(open, 0.1, 0.6))})` }"
@@ -151,7 +151,7 @@ const hidden = (n: number) => ({ opacity: n > 0.001 ? 1 : 0 })
       <g
         v-for="(st, i) in geometry.stamens"
         :key="'st' + i"
-        class="stamen"
+        class="g-stamen"
       >
         <path
           :d="st.filament"
@@ -165,7 +165,7 @@ const hidden = (n: number) => ({ opacity: n > 0.001 ? 1 : 0 })
           :style="hidden(ph.stamen)"
         />
         <circle
-          class="anther"
+          class="g-anther"
           :cx="st.ax"
           :cy="st.ay"
           :r="st.r"
@@ -175,7 +175,7 @@ const hidden = (n: number) => ({ opacity: n > 0.001 ? 1 : 0 })
         <circle
           v-for="(k, j) in st.specks"
           :key="j"
-          class="pollen"
+          class="g-pollen"
           :cx="k.x"
           :cy="k.y"
           :r="k.r"

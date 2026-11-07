@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { PageVine, Vine, Plant, Leaf, parsePath, pointAt } from '../garden'
+import { PageVine, Vine, Plant, Leaf, parsePath, pointAt, reachDelay } from '../garden'
 
 // Page-height garden layer. >=1400px: long vines in the side margins (above the sticky nav, which is z-10)
 // plus a hero corner vine; below that, a hairline edge vine behind the content.
 const corner = 'M170 -6 C132 56 176 112 124 172 S96 236 130 290'
 const cornerModel = parsePath(corner)
+const DURATION = 3000
 const a1 = pointAt(cornerModel, 0.52)
 const a2 = pointAt(cornerModel, 0.8)
 const a3 = pointAt(cornerModel, 1)
@@ -21,7 +22,7 @@ const a3 = pointAt(cornerModel, 1)
         :width="180"
       />
     </div>
-    <div class="absolute bottom-0 right-0 top-[17rem] z-20 hidden w-[180px] opacity-90 min-[1400px]:block">
+    <div class="absolute bottom-0 right-0 top-[17rem] z-20 hidden w-[180px] opacity-90 [mask-image:linear-gradient(to_bottom,transparent,black_7rem)] min-[1400px]:block">
       <PageVine
         :seed="23"
         :width="180"
@@ -34,14 +35,14 @@ const a3 = pointAt(cornerModel, 1)
       <Vine
         :path="corner"
         view-box="0 0 180 300"
-        :duration="3000"
+        :duration="DURATION"
       >
         <Leaf
           :x="a1.x"
           :y="a1.y"
           :rotate="a1.angle - 55"
           :size="0.6"
-          :delay="1500"
+          :delay="reachDelay(0.52, DURATION)"
         />
         <Plant
           species="bloom"
@@ -51,7 +52,8 @@ const a3 = pointAt(cornerModel, 1)
           :reach="62"
           :size="1.15"
           :branches="3"
-          :delay="1600"
+          sway
+          :delay="reachDelay(0.52, DURATION)"
         />
         <Plant
           species="bell"
@@ -60,7 +62,8 @@ const a3 = pointAt(cornerModel, 1)
           :side="-1"
           :reach="46"
           :size="0.95"
-          :delay="2300"
+          sway
+          :delay="reachDelay(0.8, DURATION)"
         />
         <Plant
           species="forgetmenot"
@@ -70,7 +73,7 @@ const a3 = pointAt(cornerModel, 1)
           :reach="30"
           :size="1"
           :leaves="1"
-          :delay="2800"
+          :delay="reachDelay(1, DURATION)"
         />
       </Vine>
     </div>

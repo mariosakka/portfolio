@@ -10,7 +10,7 @@ import type { PlantProps } from './types'
 // A flower growing out of a vine: stem from the anchor, leaves on the stem, bud, petals, stamens, pollen.
 const props = withDefaults(defineProps<PlantProps>(), {
   seed: 1, side: 1, reach: 60, size: 1, leaves: 2, branches: 0, bud: false, spread: 120, branchSpecies: undefined,
-  grown: undefined, delay: 0, duration: 3200, isStatic: false, progress: undefined,
+  grown: undefined, delay: 0, duration: 3200, isStatic: false, progress: undefined, sway: false,
 })
 const el = ref<SVGGElement | null>(null)
 const id = useId()
@@ -34,8 +34,8 @@ const nodes = computed(() => geo.value.nodes.map((n) => {
 <template>
   <g
     ref="el"
-    class="garden-art plant"
-    :class="{ 'is-grown': grown, 'is-static': isStatic }"
+    class="g-art g-plant"
+    :class="{ 'g-is-grown': grown, 'g-is-static': isStatic }"
   >
     <defs>
       <linearGradient
@@ -58,10 +58,10 @@ const nodes = computed(() => geo.value.nodes.map((n) => {
     <g
       v-for="(nd, i) in nodes"
       :key="i"
-      class="plant-node"
+      class="g-plant-node"
     >
       <path
-        class="plant-stem"
+        class="g-plant-stem"
         :d="nd.n.stem.d"
         fill="none"
         stroke="#26788d"
@@ -75,7 +75,7 @@ const nodes = computed(() => geo.value.nodes.map((n) => {
       <g
         v-for="(lf, j) in nd.leaves"
         :key="'l' + j"
-        class="plant-leaf"
+        class="g-plant-leaf"
         :transform="`translate(${lf.l.x} ${lf.l.y}) rotate(${lf.l.rotate})`"
       >
         <g :style="{ transform: `scale(${lf.l.size * lf.s})`, opacity: lf.s > 0 ? 1 : 0 }">
@@ -98,7 +98,7 @@ const nodes = computed(() => geo.value.nodes.map((n) => {
         <FlowerArt
           :geometry="nd.n.flower"
           :progress="nd.lp"
-          :idle="nd.lp >= 1 && !isStatic"
+          :idle="nd.lp >= 1 && sway && !isStatic"
         />
       </g>
     </g>

@@ -145,7 +145,7 @@ export interface SepalGeom {
  * Place it with `translate(tip) rotate(rotate)` so the base sits exactly on a stem end.
  */
 export interface FlowerGeometry {
-  species: string
+  species: Species | 'custom'
   seed: number
   palette: Palette
   layers: number
@@ -236,6 +236,8 @@ export interface PlantProps extends Omit<PlantSpec, 'seed'> {
   isStatic?: boolean
   /** Drive the whole plant manually (0..1) instead of the timeline. */
   progress?: number
+  /** Gentle idle sway once fully grown (default false; PageVine enables it only for plants near the viewport). */
+  sway?: boolean
 }
 
 export interface FlowerProps extends ArtProps {

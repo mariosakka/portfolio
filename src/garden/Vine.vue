@@ -22,8 +22,8 @@ provide(GROWN_KEY, { grown: isGrown, isStatic })
 <template>
   <svg
     ref="el"
-    class="garden-art vine"
-    :class="{ 'is-grown': isGrown, 'is-static': isStatic }"
+    class="g-art g-vine"
+    :class="{ 'g-is-grown': isGrown, 'g-is-static': isStatic }"
     :viewBox="viewBox"
     :style="{ '--duration': duration + 'ms', '--delay': delay + 'ms', width: size * 100 + '%' }"
     aria-hidden="true"
@@ -31,7 +31,7 @@ provide(GROWN_KEY, { grown: isGrown, isStatic })
     overflow="visible"
   >
     <path
-      class="vine-stem"
+      class="g-vine-stem"
       :d="path"
       pathLength="1"
       fill="none"
@@ -40,7 +40,7 @@ provide(GROWN_KEY, { grown: isGrown, isStatic })
       stroke-linecap="round"
     />
     <path
-      class="vine-stem vine-shine"
+      class="g-vine-stem g-vine-shine"
       :d="path"
       pathLength="1"
       fill="none"

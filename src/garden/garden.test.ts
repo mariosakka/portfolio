@@ -6,7 +6,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { useGrow, Vine, Bloom, Cornflower, Leaf, Bud, Bell, ForgetMeNot, Daisy, Spray, Plant, PageVine, scrollProgress, makeVinePath, placeItems, pointAt, parsePath, distanceToPath, generateFlower, growPlant, phase, petalPhase, PHASES, useGrowthTimeline, FLOWER_SPECIES } from './index'
-import type { GrowOptions, PlantSpec, Species } from './index'
+import type { Cubic, GrowOptions, PlantSpec, Species } from './index'
 
 const here = dirname(fileURLToPath(import.meta.url))
 
@@ -71,31 +71,31 @@ describe('components', () => {
   it('Vine renders its path and is-grown only after growth', async () => {
     mockMedia(false); mockIO()
     const w = mount(Vine, { props: { path: 'M0 0 L10 10' }, slots: { default: () => h(Leaf) } })
-    expect(w.find('path.vine-stem').attributes('d')).toBe('M0 0 L10 10')
+    expect(w.find('path.g-vine-stem').attributes('d')).toBe('M0 0 L10 10')
     expect(w.find('svg').attributes('aria-hidden')).toBe('true')
-    expect(w.classes()).not.toContain('is-grown')
+    expect(w.classes()).not.toContain('g-is-grown')
     io().fire(true); await nextTick()
-    expect(w.classes()).toContain('is-grown')
-    expect(w.find('.leaf').classes()).toContain('is-grown')
+    expect(w.classes()).toContain('g-is-grown')
+    expect(w.find('.g-leaf').classes()).toContain('g-is-grown')
   })
   it('is-static shows everything and reduced motion renders grown', () => {
     mockMedia(false); mockIO()
-    expect(mount(Vine, { props: { path: 'M0 0', isStatic: true } }).classes()).toContain('is-static')
+    expect(mount(Vine, { props: { path: 'M0 0', isStatic: true } }).classes()).toContain('g-is-static')
     mockMedia(true)
-    expect(mount(Bloom, { attrs: {} }).classes()).toContain('is-grown')
+    expect(mount(Bloom, { attrs: {} }).classes()).toContain('g-is-grown')
   })
   it('static Vine makes Leaf/Bud children static without an observer firing', () => {
     mockMedia(false); mockIO()
     const w = mount(Vine, { props: { path: 'M0 0', isStatic: true }, slots: { default: () => [h(Leaf), h(Bud)] } })
-    expect(w.find('.leaf').classes()).toContain('is-static')
-    expect(w.find('.bud').classes()).toContain('is-static')
+    expect(w.find('.g-leaf').classes()).toContain('g-is-static')
+    expect(w.find('.g-bud').classes()).toContain('g-is-static')
   })
   it('static Bloom inside a grown Vine has no sway class', () => {
     mockMedia(false); mockIO()
     const w = mount(Vine, { props: { path: 'M0 0', grown: true }, slots: { default: () => h(Bloom, { isStatic: true }) } })
-    expect(w.find('.bloom').classes()).toContain('is-static')
-    expect(w.find('.bloom').classes()).not.toContain('is-swaying')
-    expect(w.find('.vine').classes()).not.toContain('is-swaying')
+    expect(w.find('.g-bloom').classes()).toContain('g-is-static')
+    expect(w.find('.g-bloom').classes()).not.toContain('g-is-swaying')
+    expect(w.find('.g-vine').classes()).not.toContain('g-is-swaying')
   })
   it('children inside a Vine create no observer of their own', () => {
     mockMedia(false); mockIO()
@@ -209,7 +209,7 @@ describe('growPlant', () => {
   const all = (['bloom', 'cornflower', 'bell', 'forgetmenot', 'daisy'] as Species[]).flatMap((sp) => [1, 2, 3].map((n) => spec(sp, n)))
   const far = { x: 1e9, y: 1e9 }
   it('is deterministic', () => { for (const s of all) expect(growPlant(s)).toEqual(growPlant(s)) })
-  it('starts its stem on the vine and ends the stem exactly at the flower base', () => {
+  it('starts its stem on the vine and places the flower base on the stem end', () => {
     for (const s of all) {
       const g = growPlant(s)
       const start = g.nodes[0]?.stem.segs[0]?.p0 ?? far
@@ -217,7 +217,7 @@ describe('growPlant', () => {
       expect(distanceToPath(vine, start, 400)).toBeLessThan(0.1)
       for (const n of g.nodes) {
         const end = n.stem.segs[n.stem.segs.length - 1]?.p3 ?? far
-        expect(Math.hypot(n.at.x - end.x, n.at.y - end.y)).toBeLessThan(0.5)
+        expect(Math.hypot(n.at.x - end.x, n.at.y - end.y)).toBeLessThan(1e-6)
       }
     }
   })
@@ -229,11 +229,24 @@ describe('growPlant', () => {
       for (const b of subs) expect(distanceToPath(main.stem, b.stem.segs[0]?.p0 ?? far, 400)).toBeLessThan(0.1)
     }
   })
-  it('flower axis follows the stem end tangent plus the declared tilt', () => {
+  it('flower axis points along the stem end tangent (finite difference of the cubic) plus the declared tilt', () => {
+    const bez = (c: Cubic, t: number): { x: number; y: number } => {
+      const u = 1 - t
+      return {
+        x: u * u * u * c.p0.x + 3 * u * u * t * c.p1.x + 3 * u * t * t * c.p2.x + t * t * t * c.p3.x,
+        y: u * u * u * c.p0.y + 3 * u * u * t * c.p1.y + 3 * u * t * t * c.p2.y + t * t * t * c.p3.y,
+      }
+    }
     for (const s of all) for (const n of growPlant(s).nodes) {
-      const end = pointAt(n.stem, 1)
-      const d = ((((n.at.rotate - (end.angle + 90 + n.tilt)) % 360) + 540) % 360) - 180
-      expect(Math.abs(d)).toBeLessThan(1e-6)
+      const c = n.stem.segs[n.stem.segs.length - 1]
+      if (!c) throw new Error('no stem')
+      const e = bez(c, 1)
+      const near = bez(c, 1 - 1e-7)
+      const phi = Math.atan2(e.y - near.y, e.x - near.x) + (n.tilt * Math.PI) / 180
+      const th = (n.at.rotate * Math.PI) / 180
+      // rotate(th) applied to the flower axis (0, -1)
+      expect(Math.sin(th)).toBeCloseTo(Math.cos(phi), 6)
+      expect(-Math.cos(th)).toBeCloseTo(Math.sin(phi), 6)
       expect(Math.abs(n.tilt)).toBeLessThanOrEqual(14)
     }
   })
@@ -347,7 +360,7 @@ describe('growth timeline', () => {
 })
 
 describe('flower components', () => {
-  const pollenOpacity = (w: ReturnType<typeof mount>): number[] => w.findAll('.pollen, .anther').map((e) => Number(/opacity: ([\d.]+)/.exec(e.attributes('style') ?? '')?.[1]))
+  const pollenOpacity = (w: ReturnType<typeof mount>): number[] => w.findAll('.g-pollen, .g-anther').map((e) => Number(/opacity: ([\d.]+)/.exec(e.attributes('style') ?? '')?.[1]))
   it('render pollen only in the final state: absent early, present when done', () => {
     mockMedia(false); mockIO()
     const early = mount(Bloom, { props: { progress: 0.7, grown: true } })
@@ -355,13 +368,13 @@ describe('flower components', () => {
     expect(pollenOpacity(early).every((o) => o === 0)).toBe(true)
     const done = mount(Bloom, { props: { progress: 1, grown: true } })
     expect(pollenOpacity(done).every((o) => o === 1)).toBe(true)
-    expect(done.find('.flower-art').classes()).toContain('is-swaying')
+    expect(done.find('.g-flower-art').classes()).toContain('g-is-swaying')
   })
   it('isStatic and reduced motion render the final state including pollen', () => {
     mockMedia(true)
     for (const C of [Bloom, Cornflower, Bell, ForgetMeNot, Daisy]) {
       const w = mount(C, { attrs: {} })
-      expect(w.classes()).toContain('is-grown')
+      expect(w.classes()).toContain('g-is-grown')
       expect(pollenOpacity(w).every((o) => o === 1)).toBe(true)
     }
     mockMedia(false); mockIO()
@@ -369,32 +382,67 @@ describe('flower components', () => {
   })
   it('wrappers keep their species class and work inside a Vine', () => {
     mockMedia(true)
-    expect(mount(Bell).classes()).toContain('bell')
-    expect(mount(Daisy).classes()).toContain('daisy')
-    expect(mount(Vine, { props: { path: 'M0 0' }, slots: { default: () => h(ForgetMeNot) } }).find('.forgetmenot').exists()).toBe(true)
+    expect(mount(Bell).classes()).toContain('g-bell')
+    expect(mount(Daisy).classes()).toContain('g-daisy')
+    expect(mount(Vine, { props: { path: 'M0 0' }, slots: { default: () => h(ForgetMeNot) } }).find('.g-forgetmenot').exists()).toBe(true)
   })
   it('Plant and Spray draw their stem from the anchor and finish static', () => {
     mockMedia(true)
     const anchor = { x: 40, y: 100, angle: 90 }
     const w = mount(Plant, { props: { species: 'bell', anchor, branches: 2 } })
-    expect(w.findAll('.plant-stem')).toHaveLength(3)
-    expect(w.find('.plant-stem').attributes('d')).toMatch(/^M40 100 /)
-    expect(w.findAll('.plant-stem').every((p) => p.attributes('stroke-dashoffset') === '0')).toBe(true)
-    expect(mount(Spray, { props: { species: 'bloom', anchor } }).findAll('.plant-stem')).toHaveLength(4)
+    expect(w.findAll('.g-plant-stem')).toHaveLength(3)
+    expect(w.find('.g-plant-stem').attributes('d')).toMatch(/^M40 100 /)
+    expect(w.findAll('.g-plant-stem').every((p) => p.attributes('stroke-dashoffset') === '0')).toBe(true)
+    expect(mount(Spray, { props: { species: 'bloom', anchor } }).findAll('.g-plant-stem')).toHaveLength(4)
     mockMedia(false); mockIO()
     const manual = mount(Plant, { props: { species: 'bloom', anchor, progress: 0.1, grown: true } })
-    const off = Number(manual.find('.plant-stem').attributes('stroke-dashoffset'))
+    const off = Number(manual.find('.g-plant-stem').attributes('stroke-dashoffset'))
     expect(off).toBeGreaterThan(0)
     expect(off).toBeLessThan(1)
     expect(pollenOpacity(manual).every((o) => o === 0)).toBe(true)
   })
 })
 
+/** Parse the rendered stem path and the flower group transform of a plant node (DOM level). */
+function nodeGeometry(node: Element): { p0: number[]; p2: number[]; p3: number[]; t: number[] } {
+  const d = node.querySelector('.g-plant-stem')?.getAttribute('d') ?? ''
+  const n = [...d.matchAll(/-?\d+(?:\.\d+)?/g)].map((m) => Number(m[0]))
+  const flower = node.lastElementChild
+  const tr = /translate\((\S+) (\S+)\) rotate\((\S+)\) scale\((\S+)\)/.exec(flower?.getAttribute('transform') ?? '')
+  if (n.length !== 8 || !tr) throw new Error(`bad node markup: ${d}`)
+  return { p0: n.slice(0, 2), p2: n.slice(4, 6), p3: n.slice(6, 8), t: tr.slice(1).map(Number) }
+}
+const wrap180 = (a: number): number => ((((a + 180) % 360) + 360) % 360) - 180
+
+describe('rendered anchoring (DOM)', () => {
+  it('Plant and PageVine render each flower at its stem end, axis along the end tangent plus an integer tilt', () => {
+    mockMedia(true); mockIO()
+    const roots = [
+      mount(Plant, { props: { species: 'bell', anchor: { x: 40, y: 100, angle: 90 }, branches: 2, seed: 4 } }),
+      mount(PageVine, { props: { height: 3000, seed: 3 } }),
+    ]
+    let checked = 0
+    for (const w of roots) {
+      for (const node of w.element.querySelectorAll('.g-plant-node')) {
+        const g = nodeGeometry(node)
+        expect(g.t[0]).toBeCloseTo(g.p3[0] ?? NaN, 6)
+        expect(g.t[1]).toBeCloseTo(g.p3[1] ?? NaN, 6)
+        const tangent = (Math.atan2((g.p3[1] ?? 0) - (g.p2[1] ?? 0), (g.p3[0] ?? 0) - (g.p2[0] ?? 0)) * 180) / Math.PI
+        const tilt = wrap180((g.t[2] ?? 0) - (tangent + 90))
+        expect(Math.abs(tilt - Math.round(tilt))).toBeLessThan(1e-3) // tilt is a declared integer
+        expect(Math.abs(tilt)).toBeLessThanOrEqual(14)
+        checked++
+      }
+    }
+    expect(checked).toBeGreaterThan(8)
+  })
+})
+
 describe('PageVine', () => {
-  const art = (w: ReturnType<typeof mount>) => w.findAll('g.garden-art')
+  const art = (w: ReturnType<typeof mount>) => w.findAll('g.g-art')
   const off = (w: ReturnType<typeof mount>): number => {
     const m = /--off: ([\d.]+)/.exec(w.find('svg').attributes('style') ?? '')
-    return m ? Number(m[1]) : w.find('svg').classes().includes('is-static') ? 0 : 1 // static: the stylesheet sets --off: 0
+    return m ? Number(m[1]) : w.find('svg').classes().includes('g-is-static') ? 0 : 1 // static: the stylesheet sets --off: 0
   }
   it('renders fully drawn and fully grown with reduced motion', () => {
     mockMedia(true); mockIO()
@@ -402,12 +450,13 @@ describe('PageVine', () => {
     expect(w.find('svg').attributes('aria-hidden')).toBe('true')
     expect(off(w)).toBe(0)
     expect(art(w).length).toBeGreaterThan(10)
-    art(w).forEach((g) => { expect(g.classes()).toContain('is-static') })
-    expect(w.findAll('.pollen').every((e) => /opacity: 1/.test(e.attributes('style') ?? ''))).toBe(true)
-    expect(w.findAll('.plant-stem').every((p) => p.attributes('stroke-dashoffset') === '0')).toBe(true)
+    art(w).forEach((g) => { expect(g.classes()).toContain('g-is-static') })
+    expect(w.findAll('.g-pollen').every((e) => /opacity: 1/.test(e.attributes('style') ?? ''))).toBe(true)
+    expect(w.findAll('.g-plant-stem').every((p) => p.attributes('stroke-dashoffset') === '0')).toBe(true)
+    expect(w.findAll('.g-is-swaying')).toHaveLength(0) // reduced motion: no sway
     expect(instances).toHaveLength(0) // no per-flower observers
   })
-  it('draws with scroll and starts plants as the tip passes, keeping them grown', async () => {
+  it('draws with scroll but never retracts, and never grows art beyond the drawn vine (also after a jump)', async () => {
     mockMedia(false); mockIO()
     let queue: (() => void)[] = []
     vi.stubGlobal('requestAnimationFrame', (cb: () => void) => { queue.push(cb); return 1 })
@@ -421,37 +470,51 @@ describe('PageVine', () => {
     set(0)
     const w = mount(PageVine, { props: { height: 6000, seed: 1 } })
     await nextTick()
-    const grown = () => w.findAll('g.garden-art.is-grown').length
-    const top = grown()
-    expect(off(w)).toBeGreaterThan(0.5)
-    expect(top).toBeLessThan(art(w).length / 2)
-    set(3000); await nextTick()
-    const mid = off(w)
-    expect(mid).toBeLessThan(0.6)
-    const midGrown = grown()
-    expect(midGrown).toBeGreaterThan(top)
-    set(0); await nextTick()
-    expect(off(w)).toBeGreaterThan(mid) // stem follows scroll back up
-    expect(grown()).toBe(midGrown) // plants stay grown
-    set(6000); await nextTick()
-    expect(off(w)).toBe(0)
-    expect(grown()).toBe(art(w).length)
+    const items = placeItems(makeVinePath({ seed: 1, height: 6000 }), { seed: 1 })
+    const drawn = (): number => 1 - off(w)
+    const grownCount = (): number => w.findAll('g.g-art.g-leaf.g-is-grown, g.g-art.g-plant.g-is-grown').length
+    // Every grown item's anchor lies within the drawn length, and every reached item is grown.
+    const consistent = (): void => { expect(grownCount()).toBe(items.filter((i) => i.f <= drawn() + 1e-9).length) }
+    expect(drawn()).toBeLessThan(0.5)
+    consistent()
+    set(4200) // about 70% of the page
+    await nextTick()
+    const mid = drawn()
+    expect(mid).toBeGreaterThan(0.6)
+    consistent()
+    const midGrown = grownCount()
+    expect(midGrown).toBeGreaterThan(5)
+    set(0) // back to the top: nothing retracts
+    await nextTick()
+    expect(drawn()).toBe(mid)
+    expect(grownCount()).toBe(midGrown)
+    consistent()
+    set(6000) // nav jump to the bottom: the vine catches up in the same frame
+    await nextTick()
+    expect(drawn()).toBe(1)
+    expect(grownCount()).toBe(items.length)
     Object.defineProperty(window, 'scrollY', { value: 0, configurable: true })
+  })
+  it('caps simultaneously swaying plants', async () => {
+    mockMedia(false); mockIO()
+    const w = mount(Plant, { props: { species: 'bloom', anchor: { x: 20, y: 20, angle: 90 }, progress: 1, grown: true } })
+    expect(w.findAll('.g-is-swaying')).toHaveLength(0) // sway is opt-in
+    const s = mount(Plant, { props: { species: 'bloom', anchor: { x: 20, y: 20, angle: 90 }, progress: 1, grown: true, sway: true } })
+    expect(s.findAll('.g-is-swaying')).toHaveLength(1)
   })
   it('places the same art on every render of a seed', () => {
     mockMedia(true)
-    const sig = (seed: number): (string | undefined)[] => mount(PageVine, { props: { height: 4000, seed } }).findAll('.plant-stem, .plant-leaf').map((g) => g.attributes('d') ?? g.attributes('transform'))
+    const sig = (seed: number): (string | undefined)[] => mount(PageVine, { props: { height: 4000, seed } }).findAll('.g-plant-stem, .g-plant-leaf').map((g) => g.attributes('d') ?? g.attributes('transform'))
     expect(sig(7)).toEqual(sig(7))
     expect(sig(7)).not.toEqual(sig(8))
   })
-  it('every plant stem that leaves the vine starts exactly on it', () => {
+  it('every main plant stem starts exactly on the vine', () => {
     mockMedia(true)
     const vine = makeVinePath({ seed: 3, height: 3000 })
     const w = mount(PageVine, { props: { height: 3000, seed: 3 } })
-    const starts = w.findAll('.plant-stem').map((p) => /^M(\S+) (\S+)/.exec(p.attributes('d') ?? ''))
-    expect(starts.length).toBeGreaterThan(5)
-    const onVine = starts.filter((m) => m && distanceToPath(vine, { x: Number(m[1]), y: Number(m[2]) }, 400) < 0.1)
-    expect(onVine.length).toBeGreaterThanOrEqual(starts.length / 3)
+    const mains = w.findAll('.g-plant').map((p) => /^M(\S+) (\S+)/.exec(p.find('.g-plant-stem').attributes('d') ?? ''))
+    expect(mains.length).toBeGreaterThan(5)
+    for (const m of mains) expect(distanceToPath(vine, { x: Number(m?.[1]), y: Number(m?.[2]) }, 400)).toBeLessThan(0.1)
   })
 })
 
@@ -468,10 +531,22 @@ describe('garden folder rules', () => {
       }
     }
   })
-  it('uses no Tailwind', () => {
+  it('uses no Tailwind: every class token is g- prefixed and no utility pattern appears in class bindings', () => {
+    const utility = /^(?:-?z-\d+|absolute|relative|fixed|sticky|hidden|block|inline(?:-block)?|flex|grid|(?:inset|top|left|right|bottom)-.+|[wh]-(?:\[.+\]|\d.*|full|screen)|(?:min|max|sm|md|lg|xl)(?:-\[.+\])?:.+|[mp][trblxy]?-(?:\d.*|auto)|text-.+|bg-.+|font-.+|rounded.*|border.*|opacity-\d+|overflow-.+|pointer-events-none|items-.+|justify-.+|gap-.+|!.+|\[.+\])$/
+    let tokens = 0
     for (const f of files) {
       const src = readFileSync(join(here, f), 'utf8')
-      expect(src, f).not.toMatch(/@apply|@tailwind|\btw-[\w-]+|class="[^"]*\b(?:flex|px-\d|py-\d|text-(?:sm|lg|xl)|bg-\w+-\d{3})\b/)
+      expect(src, f).not.toMatch(/@apply|@tailwind|\btw-[\w-]+/)
+      if (!f.endsWith('.vue')) continue
+      for (const m of src.matchAll(/(:?)class="([^"]*)"/g)) {
+        const raw = m[1] ? [...(m[2] ?? '').matchAll(/'([^']*)'|`([^`]*)`/g)].map((x) => x[1] ?? x[2] ?? '').join(' ') : (m[2] ?? '')
+        for (const t of raw.split(/\s+/).filter(Boolean)) {
+          tokens++
+          expect(t, `${f}: ${t}`).not.toMatch(utility)
+          expect(t.startsWith('g-'), `${f}: unprefixed class ${t}`).toBe(true)
+        }
+      }
     }
+    expect(tokens).toBeGreaterThan(30)
   })
 })

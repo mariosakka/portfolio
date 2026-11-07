@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { Vine, Leaf, Bud, Plant, parsePath, pointAt } from '../garden'
+import { Vine, Leaf, Plant, parsePath, pointAt, reachDelay } from '../garden'
 
 defineProps<{ id: string; title: string }>()
 
-// Long heading vine trailing to the right, curling up at the tip into a small flower.
+// Long heading vine trailing to the right, curling up at the tip into a small flower. Everything on it is
+// anchored with pointAt and starts when the (linearly drawn) vine tip reaches its anchor: delay = fraction * duration.
+const DURATION = 2200
 const path = 'M2 42 C60 24 110 58 180 40 S300 22 360 42 S450 56 486 38 C506 28 506 14 494 12'
 const model = parsePath(path)
-const mid = pointAt(model, 0.35)
-const mid2 = pointAt(model, 0.62)
-const tip = pointAt(model, 0.96)
+const f1 = 0.35
+const f2 = 0.62
+const f3 = 0.96
+const a1 = pointAt(model, f1)
+const a2 = pointAt(model, f2)
+const a3 = pointAt(model, f3)
 </script>
 
 <template>
@@ -22,39 +27,36 @@ const tip = pointAt(model, 0.96)
     <Vine
       :path="path"
       view-box="0 0 520 64"
-      :duration="2200"
+      :duration="DURATION"
       class="-mt-1 mb-4 !w-[32rem]"
     >
       <Leaf
-        :x="mid.x"
-        :y="mid.y"
-        :rotate="mid.angle + 55"
+        :x="a1.x"
+        :y="a1.y"
+        :rotate="a1.angle + 55"
         :size="0.55"
-        :delay="700"
+        :delay="reachDelay(f1, DURATION)"
       />
-      <Leaf
-        :x="mid2.x"
-        :y="mid2.y"
-        :rotate="mid2.angle - 55"
-        :size="0.5"
-        :delay="1200"
-      />
-      <Bud
-        :x="mid2.x"
-        :y="mid2.y"
-        :rotate="-30"
-        :size="0.45"
-        :delay="1500"
+      <Plant
+        species="bloom"
+        :seed="7"
+        :anchor="a2"
+        :side="-1"
+        :reach="22"
+        :size="0.8"
+        :leaves="1"
+        bud
+        :delay="reachDelay(f2, DURATION)"
       />
       <Plant
         species="cornflower"
         :seed="2"
-        :anchor="tip"
+        :anchor="a3"
         :side="-1"
         :reach="14"
         :size="0.6"
         :leaves="0"
-        :delay="1900"
+        :delay="reachDelay(f3, DURATION)"
       />
     </Vine>
     <slot />

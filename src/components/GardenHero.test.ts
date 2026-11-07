@@ -8,10 +8,10 @@ describe('garden placement', () => {
   it('renders fully grown art with reduced motion and adds no text', () => {
     window.matchMedia = vi.fn().mockReturnValue({ matches: true })
     const w = mount(GardenHero)
-    expect(w.findAll('svg.vine, svg.page-vine').length).toBeGreaterThanOrEqual(4)
+    expect(w.findAll('svg.g-vine, svg.g-page-vine').length).toBeGreaterThanOrEqual(4)
     w.findAll('svg').forEach((v) => expect(v.attributes('aria-hidden')).toBe('true'))
-    w.findAll('svg.vine').forEach((v) => expect(v.classes()).toContain('is-grown'))
-    w.findAll('svg.page-vine').forEach((v) => expect(v.classes()).toContain('is-static'))
+    w.findAll('svg.g-vine').forEach((v) => expect(v.classes()).toContain('g-is-grown'))
+    w.findAll('svg.g-page-vine').forEach((v) => expect(v.classes()).toContain('g-is-static'))
     expect(w.text()).toBe('')
     expect(w.attributes('aria-hidden')).toBe('true')
     expect(w.classes()).toContain('pointer-events-none')
@@ -20,10 +20,10 @@ describe('garden placement', () => {
     window.matchMedia = vi.fn().mockReturnValue({ matches: true })
     const s = mount(SectionBlock, { props: { id: 'x', title: 'Hello' } })
     expect(s.text()).toBe('Hello')
-    expect(s.find('svg.vine').exists()).toBe(true)
+    expect(s.find('svg.g-vine').exists()).toBe(true)
     const c = mount(ItemCard, { props: { title: 'T', bud: true } })
     expect(c.text()).toBe('T')
-    expect(c.find('.bud').exists()).toBe(true)
+    expect(c.find('.g-bud').exists()).toBe(true)
   })
 })
 
@@ -36,7 +36,7 @@ describe('garden breakpoints', () => {
     const wide = w.findAll('svg').filter((v) => cls(v).includes('min-[1400px]:block'))
     expect(wide.length).toBeGreaterThanOrEqual(3) // left, right, hero corner
     wide.forEach((v) => { expect(cls(v)).toContain('hidden'); expect(cls(v)).toContain('z-20') })
-    const edge = w.findAll('svg.page-vine.is-compact')
+    const edge = w.findAll('svg.g-page-vine.g-is-compact')
     expect(edge).toHaveLength(2) // phone strip and tablet/laptop strip
     edge.forEach((v) => { expect(cls(v)).toContain('-z-10'); expect(cls(v)).toContain('overflow-hidden') })
   })
