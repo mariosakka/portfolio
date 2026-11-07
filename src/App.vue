@@ -4,6 +4,7 @@ import SectionBlock from './components/SectionBlock.vue'
 import GardenHero from './components/GardenHero.vue'
 import SiteNav from './components/SiteNav.vue'
 import AboutSection from './components/sections/AboutSection.vue'
+import SkillsSection from './components/sections/SkillsSection.vue'
 import ExperienceSection from './components/sections/ExperienceSection.vue'
 import ProjectsSection from './components/sections/ProjectsSection.vue'
 import EducationSection from './components/sections/EducationSection.vue'
@@ -19,6 +20,7 @@ interface Section {
 
 const sections: Section[] = [
   { id: 'about', label: 'About', body: AboutSection },
+  { id: 'skills', label: 'Skills', body: SkillsSection },
   { id: 'experience', label: 'Experience', body: ExperienceSection },
   { id: 'projects', label: 'Projects', body: ProjectsSection },
   { id: 'education', label: 'Education', body: EducationSection },

@@ -7,35 +7,23 @@ const about: About = aboutJson
 </script>
 
 <template>
-  <div class="grid gap-8 text-ink md:grid-cols-[14rem_1fr]">
+  <div class="grid items-center gap-8 text-ink md:grid-cols-[16rem_1fr] md:gap-12">
     <img
       v-if="about.photo"
       :src="about.photo"
       :alt="about.fullName"
-      class="w-56 rounded-2xl object-cover"
+      class="aspect-[4/5] w-56 rounded-[1.75rem] border border-line object-cover md:w-64"
     >
-    <div class="min-w-0 space-y-4">
-      <h3 class="font-serif text-2xl">
+    <div class="min-w-0 space-y-5">
+      <h3 class="font-serif text-3xl leading-tight sm:text-4xl">
         {{ about.fullName }}
       </h3>
-      <p class="opacity-80">
+      <p class="text-xs uppercase tracking-[0.18em] text-accent">
         {{ [about.role, about.location].filter(Boolean).join(' - ') }}
       </p>
-      <p class="whitespace-pre-line">
+      <p class="max-w-prose whitespace-pre-line text-lg text-ink/85">
         {{ about.description }}
       </p>
-      <ul
-        aria-label="Skills"
-        class="flex flex-wrap gap-2"
-      >
-        <li
-          v-for="s in about.skills"
-          :key="s"
-          class="rounded-full border border-line px-2 py-0.5 text-xs"
-        >
-          {{ s }}
-        </li>
-      </ul>
       <p class="text-sm opacity-80">
         Languages: {{ about.languages.join(', ') }}
       </p>

@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import GardenHero from './GardenHero.vue'
-import ItemCard from './ItemCard.vue'
 import SectionBlock from './SectionBlock.vue'
 
 describe('garden placement', () => {
@@ -21,9 +20,6 @@ describe('garden placement', () => {
     const s = mount(SectionBlock, { props: { id: 'x', title: 'Hello' } })
     expect(s.text()).toBe('Hello')
     expect(s.find('svg.g-vine').exists()).toBe(true)
-    const c = mount(ItemCard, { props: { title: 'T', bud: true } })
-    expect(c.text()).toBe('T')
-    expect(c.find('.g-bud').exists()).toBe(true)
   })
 })
 

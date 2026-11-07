@@ -1,22 +1,26 @@
 <script setup lang="ts">
-import CardList from './CardList.vue'
+import HeroCard from '../HeroCard.vue'
 import raw from '../../data/organizations.json'
 import type { Organization } from '../../types/data'
 import { formatPeriod } from '../../lib/normalize'
 
 const data: Organization[] = raw
-const first = (...v: (string | undefined)[]): string => v.find((s) => s && s.trim()) || ''
-const items = data.map((d) => ({
-  title: d.name,
-  subtitle: [d.role, d.shortDescription].filter(Boolean).join(' - '),
-  period: formatPeriod(d.startDate, d.endDate, d.isPresent),
-  image: d.image,
-  tags: [],
-  links: [{ label: 'Website', url: d.websiteUrl }, { label: 'Social', url: d.socialUrl }],
-  detail: first(d.longDescription, d.description, d.shortDescription),
-}))
 </script>
 
 <template>
-  <CardList :items="items" />
+  <div class="space-y-8 sm:space-y-10">
+    <HeroCard
+      v-for="d in data"
+      :key="d.id"
+      :title="d.name"
+      :eyebrow="[d.role, d.shortDescription].filter(Boolean).join(' · ')"
+      :meta="formatPeriod(d.startDate, d.endDate, d.isPresent)"
+      :image="d.image"
+      logo
+      :description="d.description"
+      :long-description="d.longDescription"
+      :facts="[{ label: 'Location', value: d.location }]"
+      :links="[{ label: 'Website', url: d.websiteUrl }, { label: 'Social', url: d.socialUrl }]"
+    />
+  </div>
 </template>
