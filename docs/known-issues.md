@@ -17,7 +17,10 @@ Owner "repo owner" = content or manual checks; "code" = a future code task. Next
 | No test asserts anything about the commit badge inside About | Weak test | low | open | code | none | next release pass |
 | About lacks an array guard for languages, Skills for skills | Robustness | low | open | code | none | next release pass |
 | Carousel counts reachable scroll stops, not slides: with two certificates in view the last two share the end stop, so 4 certificates show 3 dots and "n / 3" on desktop (4 on phones) | Intended; each Next moves the view | low | accepted | code | none | none |
-| Carousel dot buttons are 28px wide (44px tall) so nine dots fit a 360px phone; below the 44px tap-target width | Slightly harder dot taps on touch; swipe and the 44px arrows cover it | low | accepted | code | swipe or arrows | next release pass |
+| Carousel dots are hidden below 640px wide (the counter, 44px arrows and swipe remain) so the controls take one row; on wider touch screens the dots are 28px wide (44px tall) | Small dot targets on tablets only | low | accepted | code | swipe or arrows | next release pass |
+| Sections fit one screen only down to about 600px of viewport height (phones in landscape, very short windows); below that they overflow and scroll normally | Expected; nothing is clipped | low | accepted | code | none | none |
+| On short phones (<= 800px tall, < 640px wide) card chips are hidden to fit the screen; the full chip list is in Read more | Less at a glance on small phones | low | accepted | code | open Read more | none |
+| Garden: on phones the left edge vine runs through the 16px side gutter right next to card borders (seen in fit-shots at 390px) | Cosmetic; art is behind content and never blocks taps | low | open | code (garden) | none | next garden pass |
 | Exec-bit CI check misses odd filenames | Only unusual script names | low | open | code | avoid spaces in script names | next release pass |
 | Garden: the right page vine fades in at the top (CSS mask) but can still show a short leafless stub there before the scrolling tip reaches its first plant | Cosmetic | low | accepted | code | none | next release pass |
 | Garden: spray (branches) plants overlap their side flowers a bit | Slightly cluttered clusters | low | accepted | code | lower `branches` or `size` in `placeItems` | next release pass |

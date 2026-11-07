@@ -24,6 +24,7 @@ Prerequisites: Node 24+, git, [gitleaks](https://github.com/gitleaks/gitleaks), 
 | `scripts/build-data.ts` | convert the Firestore export to `src/data/*.json` | `node scripts/build-data.ts [exportDir]` | none |
 | `scripts/fetch-images.ts` | download and optimize images to `public/img` (sharp, webp) | `node scripts/fetch-images.ts [exportDir]` | none |
 | `docs/reference/export-firestore.mjs` | one-off export of the old Firestore data | `node docs/reference/export-firestore.mjs` | none |
+| `docs/reference/measure-fit.mjs` | viewport-fit table: does each section fit one screen and sit centered (Playwright, run from a temp folder, see [testing](docs/testing.md)) | `node <repo>/docs/reference/measure-fit.mjs <preview url>` | none (manual release check) |
 
 ## Docs
 - [Test strategy and enforcement matrix](docs/testing.md)
