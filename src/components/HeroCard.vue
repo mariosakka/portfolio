@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import DetailModal from './DetailModal.vue'
 import type { CardLink } from '../types/card'
+import { fitTags } from '../lib/normalize'
 
 const props = withDefaults(defineProps<{
   title: string
@@ -45,6 +46,8 @@ const shownFacts = computed(() => props.facts.filter((f, i) => f.value.trim() &&
 const shownLinks = computed(() => props.links
   .map((l) => ({ label: l.label, url: typeof l.url === 'string' ? l.url.trim() : '' }))
   .filter((l) => l.url))
+// About two rows of chips; the rest is a +k chip and the full list is in the Read more dialog.
+const chips = computed(() => fitTags(props.tags, props.compact ? 40 : 56))
 const split = computed(() => props.layout === 'split')
 const open = ref(false)
 const wash = ref<HTMLCanvasElement | null>(null)
@@ -63,13 +66,19 @@ function paintWash(e: Event) {
 <template>
   <article
     class="relative grid w-full overflow-hidden rounded-[1.75rem] border border-line bg-surface text-ink"
-    :class="split ? 'md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]' : ''"
+    :class="[
+      // Stacked: the image row keeps its height and the text row takes any extra (equal-height slides).
+      image ? 'grid-rows-[auto_1fr]' : '',
+      split ? 'md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:grid-rows-none' : '',
+    ]"
   >
+    <!-- Phones and stacked cards: the image band takes a share of the screen height; split: it fills the row. -->
     <figure
       v-if="image"
       class="relative m-2 flex items-center justify-center overflow-hidden rounded-[1.35rem] bg-night-900 [contain:paint] sm:m-3"
       :class="[
-        split ? 'aspect-[16/10] md:aspect-auto md:min-h-[20rem]' : 'aspect-[16/10]',
+        'h-[clamp(7rem,20vh,15rem)] sm:h-[clamp(7rem,24vh,15rem)] supports-[height:1svh]:h-[clamp(7rem,20svh,15rem)] supports-[height:1svh]:sm:h-[clamp(7rem,24svh,15rem)]',
+        split ? 'md:h-auto md:min-h-[clamp(14rem,42vh,26rem)] supports-[height:1svh]:md:h-auto supports-[height:1svh]:md:min-h-[clamp(14rem,42svh,26rem)]' : '',
         split && imageSide === 'right' ? 'md:order-last' : '',
       ]"
     >
@@ -87,8 +96,7 @@ function paintWash(e: Event) {
         :src="image"
         alt=""
         loading="lazy"
-        class="relative"
-        :class="logo ? 'h-28 w-28 rounded-2xl object-cover shadow-[0_12px_28px_rgba(0,0,0,0.45)] sm:h-36 sm:w-36' : 'h-full w-full object-contain p-[7%]'"
+        :class="logo ? 'relative aspect-square h-[62%] max-h-36 w-auto rounded-2xl object-cover shadow-[0_12px_28px_rgba(0,0,0,0.45)]' : 'absolute inset-0 h-full w-full object-contain p-[7%]'"
         @load="paintWash"
       >
       <span
@@ -99,11 +107,11 @@ function paintWash(e: Event) {
 
     <div
       class="flex min-w-0 flex-col"
-      :class="compact ? 'gap-3 p-5 sm:p-6' : 'gap-4 p-6 sm:p-8 lg:p-10'"
+      :class="compact ? 'gap-2.5 p-5 short:p-4' : 'gap-3 p-4 sm:p-7 lg:p-9 short:gap-2.5 sm:short:p-5 lg:short:p-7'"
     >
       <p
         v-if="eyebrow || meta"
-        class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs uppercase tracking-[0.18em]"
+        class="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 text-xs uppercase tracking-[0.1em] sm:tracking-[0.18em]"
       >
         <span
           v-if="eyebrow"
@@ -116,48 +124,56 @@ function paintWash(e: Event) {
       </p>
       <h3
         class="font-serif leading-[1.05] tracking-tight text-ink"
-        :class="compact ? 'text-2xl sm:text-[1.7rem]' : 'text-3xl sm:text-4xl lg:text-[2.75rem]'"
+        :class="compact ? 'text-2xl sm:text-[1.7rem] short:text-[1.4rem]' : 'text-[1.65rem] sm:text-4xl lg:text-[2.75rem] sm:short:text-3xl lg:short:text-[2.1rem] xshort:text-2xl'"
       >
         {{ title }}
       </h3>
       <p
         v-if="summary"
         class="max-w-prose text-ink/75"
-        :class="compact ? 'line-clamp-3' : 'line-clamp-4 sm:text-lg'"
+        :class="compact ? 'line-clamp-2 text-sm sm:text-base' : 'line-clamp-3 sm:text-lg short:line-clamp-2 short:text-base xshort:text-sm'"
       >
         {{ summary }}
       </p>
       <dl
         v-if="shownFacts.length"
-        class="flex flex-wrap gap-x-8 gap-y-2 text-sm"
+        class="flex flex-wrap gap-x-5 gap-y-0.5 text-sm"
       >
         <div
           v-for="f in shownFacts"
           :key="f.label"
+          class="flex items-baseline gap-2"
         >
-          <dt class="text-xs uppercase tracking-[0.18em] text-ink/50">
+          <dt class="text-[0.65rem] uppercase tracking-[0.16em] text-ink/50">
             {{ f.label }}
           </dt>
-          <dd class="mt-0.5 font-serif text-lg text-ink">
+          <dd class="font-serif text-base text-ink">
             {{ f.value }}
           </dd>
         </div>
       </dl>
       <ul
-        v-if="tags.length"
-        class="flex flex-wrap gap-1.5"
+        v-if="chips.shown.length"
+        class="flex flex-wrap gap-1.5 [@media(max-width:639px)]:short:hidden"
       >
         <li
-          v-for="(t, i) in tags"
+          v-for="(t, i) in chips.shown"
           :key="i"
           class="rounded-full border border-line bg-night-950/40 px-2.5 py-0.5 text-xs text-ink/80"
         >
           {{ t }}
         </li>
+        <li
+          v-if="chips.more"
+          data-more-tags
+          class="rounded-full border border-dashed border-line px-2.5 py-0.5 text-xs text-ink/60"
+        >
+          +{{ chips.more }}<span class="sr-only"> and {{ chips.more }} more, listed under Read more</span>
+        </li>
       </ul>
       <div
-        v-if="shownLinks.length || paras.length"
-        class="mt-auto flex flex-wrap items-center gap-2 pt-2"
+        v-if="shownLinks.length || paras.length || tags.length"
+        class="mt-auto flex flex-wrap items-center gap-1.5 pt-1 sm:gap-2"
       >
         <a
           v-for="(l, i) in shownLinks"
@@ -165,7 +181,7 @@ function paintWash(e: Event) {
           :href="l.url"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex h-11 items-center gap-1.5 rounded-full border px-4 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          class="inline-flex h-11 items-center gap-1.5 rounded-full border px-3.5 text-sm sm:px-4 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           :class="i === 0 ? 'border-accent/40 bg-accent/15 text-ink hover:bg-accent/25' : 'border-line text-ink/85 hover:border-accent/50 hover:text-accent'"
         >
           {{ l.label }}<span class="sr-only"> ({{ title }}, opens in a new tab)</span>
@@ -182,13 +198,16 @@ function paintWash(e: Event) {
           /></svg>
         </a>
         <button
-          v-if="paras.length"
+          v-if="paras.length || tags.length"
           type="button"
-          class="inline-flex h-11 items-center gap-2 rounded-full px-3 text-sm text-accent transition-colors hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          class="inline-flex h-11 items-center gap-2 rounded-full px-2 text-sm text-accent sm:px-3 transition-colors hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           @click="open = true"
         >
           Read more<span class="sr-only"> about {{ title }}</span>
-          <span aria-hidden="true">&rarr;</span>
+          <span
+            aria-hidden="true"
+            class="hidden sm:inline"
+          >&rarr;</span>
         </button>
       </div>
     </div>
@@ -204,6 +223,18 @@ function paintWash(e: Event) {
       >
         {{ p }}
       </p>
+      <ul
+        v-if="tags.length"
+        class="mt-4 flex flex-wrap gap-1.5"
+      >
+        <li
+          v-for="(t, i) in tags"
+          :key="i"
+          class="rounded-full border border-line px-2.5 py-0.5 text-xs text-ink/80"
+        >
+          {{ t }}
+        </li>
+      </ul>
     </DetailModal>
   </article>
 </template>

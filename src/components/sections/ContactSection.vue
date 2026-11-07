@@ -15,10 +15,10 @@ const others = methods.filter((m) => m !== email)
 </script>
 
 <template>
-  <div class="relative overflow-hidden rounded-[1.75rem] border border-line bg-surface p-6 text-ink sm:p-10 lg:p-14">
-    <div class="grid gap-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:gap-14">
+  <div class="relative overflow-hidden rounded-[1.75rem] border border-line bg-surface p-5 text-ink sm:p-10 lg:p-14 short:lg:p-10">
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:gap-14">
       <div class="min-w-0">
-        <h3 class="font-serif text-4xl leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
+        <h3 class="font-serif text-4xl leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl xshort:text-3xl">
           {{ contact.title }}
         </h3>
         <p class="mt-4 max-w-prose text-lg text-ink/75">
@@ -27,7 +27,7 @@ const others = methods.filter((m) => m !== email)
         <a
           v-if="email"
           :href="prefix[email.type] + email.value"
-          class="group mt-8 inline-flex max-w-full flex-col gap-1 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+          class="group mt-6 inline-flex sm:mt-8 max-w-full flex-col gap-1 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
         >
           <span class="text-xs uppercase tracking-[0.18em] text-accent">Email me</span>
           <span class="flex items-center gap-3 font-serif text-xl text-ink sm:text-[1.75rem]">
@@ -47,7 +47,7 @@ const others = methods.filter((m) => m !== email)
         >
           <a
             :href="prefix[m.type] + m.value"
-            class="group flex min-h-14 items-center justify-between gap-4 py-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+            class="group flex min-h-12 items-center sm:min-h-14 justify-between gap-4 py-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
           >
             <span class="min-w-0">
               <span class="block text-xs uppercase tracking-[0.18em] text-ink/50">{{ m.type }}</span>

@@ -40,6 +40,19 @@ test('projects: changing the filter resets the carousel to the first slide', asy
   expect(w.text()).toContain('1 / 3')
 })
 
+test.each([
+  ['experience', ExperienceSection, 'Experience', 2],
+  ['education', EducationSection, 'Education', 2],
+])('%s: a carousel of hero cards with dots and arrows', (_, C, label, n) => {
+  w = mount(C)
+  expect(w.get('[role="region"]').attributes('aria-label')).toBe(label)
+  expect(slides(w)).toHaveLength(n)
+  expect(slides(w).every((s) => s.find('article').exists())).toBe(true)
+  expect(w.findAll('[data-dots] button')).toHaveLength(n)
+  expect(w.find('button[aria-label="Next slide"]').exists()).toBe(true)
+  expect(w.text()).toContain(`1 / ${n}`)
+})
+
 test('experience: hero cards, isPresent shows Present and modal opens with longDescription', async () => {
   w = mount(ExperienceSection, { attachTo: document.body })
   expect(w.findAll('article')).toHaveLength(experience.length)

@@ -12,7 +12,7 @@ const data: Certificate[] = raw
   <Carousel
     :items="data"
     label="Certificates"
-    slide-class="basis-[88%] md:basis-[46%]"
+    slide-class="basis-[92%] sm:basis-[88%] md:basis-[46%]"
   >
     <template #slide="{ item }">
       <HeroCard

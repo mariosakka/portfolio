@@ -4,6 +4,21 @@ export function toList(value: string | string[] | null | undefined): string[] {
   return parts.map((s) => String(s).trim()).filter(Boolean)
 }
 
+// Chips that fit a rough character budget (about two rows on a card), in order, plus how many are left
+// for a "+k" chip. Cost per chip = length + 4 (padding, gap); room for the "+k" chip (6) is kept while
+// tags remain. The first tag always shows.
+export function fitTags(tags: string[], budget: number): { shown: string[]; more: number } {
+  const shown: string[] = []
+  let used = 0
+  for (const [i, t] of tags.entries()) {
+    const reserve = i < tags.length - 1 ? 6 : 0
+    if (shown.length && used + t.length + 4 + reserve > budget) break
+    shown.push(t)
+    used += t.length + 4
+  }
+  return { shown, more: tags.length - shown.length }
+}
+
 const fmt = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })
 const month = (d: string): string => fmt.format(new Date(d))
 

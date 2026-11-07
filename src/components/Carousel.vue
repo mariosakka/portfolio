@@ -7,7 +7,7 @@ const props = withDefaults(defineProps<{
   label: string
   // Slide width; under 100% so the next slide peeks in. A lone slide is always full width.
   slideClass?: string
-}>(), { slideClass: 'basis-[88%] md:basis-[84%]' })
+}>(), { slideClass: 'basis-[92%] sm:basis-[88%] md:basis-[84%]' })
 defineSlots<{ slide(p: { item: T; index: number }): unknown }>()
 
 const track = ref<HTMLElement | null>(null)
@@ -112,7 +112,7 @@ onBeforeUnmount(() => {
     </div>
     <div
       v-if="count > 1"
-      class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3"
+      class="mt-4 flex items-center gap-x-6 short:mt-3"
     >
       <p
         class="font-serif text-lg tabular-nums text-ink/70"
@@ -123,7 +123,7 @@ onBeforeUnmount(() => {
       </p>
       <div
         data-dots
-        class="order-last flex w-full flex-wrap items-center sm:order-none sm:w-auto sm:flex-1"
+        class="hidden flex-1 flex-wrap items-center sm:flex"
       >
         <button
           v-for="i in count"

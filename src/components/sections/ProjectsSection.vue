@@ -18,14 +18,15 @@ const items = computed(() => data.filter((d) => active.value === 'All' || d.cate
     data-filter
     role="group"
     aria-label="Filter projects by category"
-    class="mb-8 flex flex-wrap gap-2"
+    class="nav-scroll -mx-1 mb-4 flex gap-2 overflow-x-auto p-1 short:mb-2 sm:flex-wrap"
   >
+    <!-- one swipeable row on phones so the filter costs a single line of height -->
     <button
       v-for="c in cats"
       :key="c"
       type="button"
       :aria-pressed="active === c"
-      class="[@media(pointer:coarse)]:min-h-11 rounded-full border border-line px-4 py-1.5 text-sm text-ink transition-colors hover:border-accent/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-night-950"
+      class="[@media(pointer:coarse)]:min-h-11 shrink-0 whitespace-nowrap rounded-full border border-line px-4 py-1.5 text-sm text-ink transition-colors hover:border-accent/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-night-950"
       @click="active = c"
     >
       {{ c }}

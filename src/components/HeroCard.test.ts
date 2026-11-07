@@ -27,15 +27,29 @@ describe('HeroCard', () => {
     expect(w!.findAll('a').map((a) => a.attributes('href'))).toEqual(['https://x.io'])
   })
 
+  it('long tag lists show the first tags and a +k chip; the modal lists them all', async () => {
+    const tags = ['Kotlin', 'Android SDK', 'XML', 'Android Views', 'ExpressJS', 'Heroku', 'OpenAI API', 'Firebase', 'GitHub Actions', 'Docker']
+    make({ tags, description: 'D' })
+    const chips = w!.findAll('article ul li').map((l) => l.text())
+    const plus = chips[chips.length - 1]
+    expect(plus).toMatch(/^\+\d+/)
+    const k = Number(plus.match(/^\+(\d+)/)![1])
+    expect(chips.slice(0, -1)).toEqual(tags.slice(0, tags.length - k))
+    expect(w!.get('[data-more-tags]').text()).toContain(`and ${k} more`)
+    await readMore()!.trigger('click')
+    const dialog = document.querySelector('[role="dialog"]')!
+    expect([...dialog.querySelectorAll('li')].map((l) => l.textContent?.trim())).toEqual(tags)
+  })
+
   it('facts hide empty and repeated values', () => {
     make({ facts: [{ label: 'Field', value: 'X' }, { label: 'Dept', value: 'X' }, { label: 'GPA', value: '' }, { label: 'Loc', value: 'Y' }] })
     expect(w!.findAll('dt').map((d) => d.text())).toEqual(['Field', 'Loc'])
   })
 
-  it('logo images are a fixed tile, other images fill the frame uncropped', () => {
+  it('logo images are a square tile scaled to the image band, other images fill the frame uncropped', () => {
     make({ image: '/a.webp', logo: true })
     expect(w!.findAll('img')).toHaveLength(1)
-    expect(w!.get('img').classes()).toContain('h-28')
+    expect(w!.get('img').classes()).toEqual(expect.arrayContaining(['aspect-square', 'h-[62%]', 'max-h-36']))
     w!.unmount()
     make({ image: '/a.webp' })
     expect(w!.get('img').classes()).toContain('object-contain')
