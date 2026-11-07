@@ -1,4 +1,5 @@
-<script setup>
+<script setup lang="ts">
+import type { Component } from 'vue'
 import SectionBlock from './components/SectionBlock.vue'
 import GardenHero from './components/GardenHero.vue'
 import SiteNav from './components/SiteNav.vue'
@@ -10,7 +11,13 @@ import CertificatesSection from './components/sections/CertificatesSection.vue'
 import OrganizationsSection from './components/sections/OrganizationsSection.vue'
 import ContactSection from './components/sections/ContactSection.vue'
 
-const sections = [
+interface Section {
+  id: string
+  label: string
+  body: Component
+}
+
+const sections: Section[] = [
   { id: 'about', label: 'About', body: AboutSection },
   { id: 'experience', label: 'Experience', body: ExperienceSection },
   { id: 'projects', label: 'Projects', body: ProjectsSection },

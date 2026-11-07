@@ -1,9 +1,9 @@
 # garden
 
-Animated SVG night-garden art for Vue 3. Depends only on `vue`; plain CSS in `garden.css` (imported by `index.js`). All art is decorative (`aria-hidden`).
+Animated SVG night-garden art for Vue 3. Depends only on `vue`; plain CSS in `garden.css` (imported by `index.ts`). All art is decorative (`aria-hidden`).
 
 ```vue
-<script setup>
+<script setup lang="ts">
 import { Vine, Bloom, Leaf, Bud, Cornflower } from './garden'
 </script>
 
@@ -28,3 +28,7 @@ Bloom / Cornflower / Bud / Leaf (render a `<g>`, so place inside `Vine` or any `
 ## useGrow(el, { once = true, threshold = 0.2 })
 
 Returns a ref that becomes `true` when `el` enters the viewport (immediately `true` for reduced motion or no `IntersectionObserver`).
+
+## Types
+
+`index.ts` exports the types `VineProps`, `ArtProps` (Bloom, Cornflower, Bud, Leaf), `GrowOptions` and `GardenContext`. `useGrow(el: Ref<Element | null>, options?: GrowOptions): Ref<boolean>`.

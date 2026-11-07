@@ -1,21 +1,18 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
 import { lockScroll, unlockScroll } from '../lib/scrollLock'
 
-const props = defineProps({
-  open: { type: Boolean, default: false },
-  title: { type: String, required: true },
-})
-const emit = defineEmits(['close'])
+const props = withDefaults(defineProps<{ open?: boolean; title: string }>(), { open: false })
+const emit = defineEmits<{ close: [] }>()
 
-let opener = null
+let opener: HTMLElement | null = null
 let locked = false // this instance owns one lock count
-const box = ref(null)
-const onKey = (e) => {
+const box = ref<HTMLElement | null>(null)
+const onKey = (e: KeyboardEvent) => {
   if (e.key === 'Escape') return emit('close')
   if (e.key !== 'Tab' || !box.value) return
-  const f = [...box.value.querySelectorAll('a[href], button, input, select, textarea, [tabindex]')]
-    .filter((el) => !el.matches(':disabled') && el.type !== 'hidden' && el.tabIndex >= 0)
+  const f = [...box.value.querySelectorAll<HTMLElement>('a[href], button, input, select, textarea, [tabindex]')]
+    .filter((el) => !el.matches(':disabled') && !(el instanceof HTMLInputElement && el.type === 'hidden') && el.tabIndex >= 0)
   if (!box.value.contains(document.activeElement)) {
     e.preventDefault()
     return (f[0] ?? box.value).focus()
@@ -33,7 +30,7 @@ const onKey = (e) => {
 }
 
 function lock() {
-  opener = document.activeElement
+  opener = document.activeElement as HTMLElement | null // Element -> HTMLElement: only used for .focus(), kept optional below
   if (!locked) { locked = true; lockScroll() }
   document.addEventListener('keydown', onKey)
   nextTick(() => box.value?.focus())

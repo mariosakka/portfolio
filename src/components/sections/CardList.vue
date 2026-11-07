@@ -1,12 +1,12 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import ItemCard from '../ItemCard.vue'
 import DetailModal from '../DetailModal.vue'
+import type { CardItem } from '../../types/card'
 
-// items: [{ title, subtitle, period, image, tags, links, detail }]
-defineProps({ items: { type: Array, required: true } })
-const current = ref(null)
-const paras = (s) => (s || '').split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
+defineProps<{ items: CardItem[] }>()
+const current = ref<CardItem | null>(null)
+const paras = (s?: string): string[] => (s || '').split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
 </script>
 
 <template>

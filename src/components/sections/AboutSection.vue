@@ -1,6 +1,9 @@
-<script setup>
-import about from '../../data/about.json'
+<script setup lang="ts">
+import aboutJson from '../../data/about.json'
+import type { About } from '../../types/data'
 import CommitBadge from '../CommitBadge.vue'
+
+const about: About = aboutJson
 </script>
 
 <template>

@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { Vine } from '../garden'
 
-defineProps({ id: { type: String, required: true }, title: { type: String, required: true } })
+defineProps<{ id: string; title: string }>()
 </script>
 
 <template>

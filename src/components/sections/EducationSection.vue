@@ -1,9 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import CardList from './CardList.vue'
-import data from '../../data/education.json'
+import raw from '../../data/education.json'
+import type { Education } from '../../types/data'
 import { formatPeriod, toList } from '../../lib/normalize'
 
-const first = (...v) => v.find((s) => s && s.trim()) || ''
+const data: Education[] = raw
+const first = (...v: (string | undefined)[]): string => v.find((s) => s && s.trim()) || ''
 const items = data.map((d) => ({
   title: d.degree,
   subtitle: [d.institution, d.fieldOfStudy].filter(Boolean).join(' - '),

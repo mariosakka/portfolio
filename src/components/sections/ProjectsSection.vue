@@ -1,10 +1,12 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 import CardList from './CardList.vue'
-import data from '../../data/projects.json'
+import raw from '../../data/projects.json'
+import type { Project } from '../../types/data'
 import { toList } from '../../lib/normalize'
 
-const first = (...v) => v.find((s) => s && s.trim()) || ''
+const data: Project[] = raw
+const first = (...v: (string | undefined)[]): string => v.find((s) => s && s.trim()) || ''
 const cats = ['All', ...new Set(data.map((d) => d.category).filter(Boolean))]
 const active = ref('All')
 const items = computed(() => data

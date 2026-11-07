@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
-const props = defineProps({ sections: { type: Array, required: true } })
+const props = defineProps<{ sections: { id: string; label: string }[] }>()
 const active = ref('')
-let observer
+let observer: IntersectionObserver | undefined
 
 onMounted(() => {
   // Without IntersectionObserver (e.g. jsdom) no link is highlighted.
@@ -17,7 +17,7 @@ onMounted(() => {
   )
   props.sections.forEach(({ id }) => {
     const el = document.getElementById(id)
-    if (el) observer.observe(el)
+    if (el) observer?.observe(el)
   })
 })
 

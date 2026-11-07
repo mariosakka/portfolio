@@ -1,17 +1,17 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, provide } from 'vue'
-import { GROWN_KEY, useGrow } from './useGrow.js'
+import { GROWN_KEY, useGrow } from './useGrow'
+import type { VineProps } from './types'
 
-const props = defineProps({
-  path: { type: String, required: true },
-  duration: { type: Number, default: 2400 },
-  grown: { type: Boolean, default: undefined },
-  size: { type: Number, default: 1 },
-  delay: { type: Number, default: 0 },
-  viewBox: { type: String, default: '0 0 400 600' },
-  isStatic: { type: Boolean, default: false },
+const props = withDefaults(defineProps<VineProps>(), {
+  duration: 2400,
+  grown: undefined, // undefined (not false) so it can fall back to own visibility
+  size: 1,
+  delay: 0,
+  viewBox: '0 0 400 600',
+  isStatic: false,
 })
-const el = ref(null)
+const el = ref<SVGSVGElement | null>(null)
 const own = useGrow(el)
 const isGrown = computed(() => props.grown ?? own.value)
 const isStatic = computed(() => props.isStatic)

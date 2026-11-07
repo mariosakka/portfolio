@@ -1,7 +1,9 @@
-<script setup>
-import { contact } from '../../data/about.json'
+<script setup lang="ts">
+import aboutJson from '../../data/about.json'
+import type { About } from '../../types/data'
 
-const prefix = {
+const { contact }: About = aboutJson
+const prefix: Record<string, string> = {
   Email: 'mailto:',
   Phone: 'tel:',
   GitHub: 'https://github.com/',

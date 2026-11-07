@@ -32,7 +32,7 @@ describe('garden breakpoints', () => {
     const w = mount(GardenHero)
     expect(w.classes()).toContain('z-20')
     w.findAll('svg.vine').forEach((v) => {
-      const cls = v.element.parentElement.className
+      const cls = v.element.parentElement?.className ?? ''
       expect(cls).toContain('hidden')
       expect(cls).toContain('min-[1400px]:block')
     })

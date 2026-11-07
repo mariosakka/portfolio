@@ -1,11 +1,13 @@
 import { ref, computed, inject, onMounted, onBeforeUnmount } from 'vue'
+import type { ComputedRef, InjectionKey, Ref } from 'vue'
+import type { ArtProps, GardenContext, GrowOptions } from './types'
 
-export const GROWN_KEY = 'garden-grown'
+export const GROWN_KEY: InjectionKey<GardenContext> = Symbol('garden-grown')
 
-export function useGrow(el, { once = true, threshold = 0.2 } = {}) {
+export function useGrow(el: Ref<Element | null>, { once = true, threshold = 0.2 }: GrowOptions = {}): Ref<boolean> {
   const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   const grown = ref(Boolean(reduce) || typeof IntersectionObserver === 'undefined')
-  let io
+  let io: IntersectionObserver | undefined
   onMounted(() => {
     if (grown.value || !el.value) return
     io = new IntersectionObserver((entries) => {
@@ -20,23 +22,22 @@ export function useGrow(el, { once = true, threshold = 0.2 } = {}) {
   return grown
 }
 
+export interface GrownState {
+  grown: ComputedRef<boolean>
+  isStatic: ComputedRef<boolean>
+  swaying: ComputedRef<boolean>
+}
+
 // Shared by art components: explicit props win, then a parent Vine (which owns the single
 // observer), then own visibility.
-export function useGrown(props, el) {
+export function useGrown(props: Pick<ArtProps, 'grown' | 'isStatic'>, el: Ref<Element | null>): GrownState {
   const parent = inject(GROWN_KEY, null)
   const own = parent ? null : useGrow(el)
-  const grown = computed(() => props.grown ?? parent?.grown.value ?? own.value)
+  const grown = computed(() => props.grown ?? parent?.grown.value ?? own?.value ?? false)
   const isStatic = computed(() => props.isStatic || Boolean(parent?.isStatic.value))
   const swaying = computed(() => grown.value && !isStatic.value)
   return { grown, isStatic, swaying }
 }
 
-export const artProps = {
-  grown: { type: Boolean, default: undefined },
-  size: { type: Number, default: 1 },
-  delay: { type: Number, default: 0 },
-  x: { type: Number, default: 0 },
-  y: { type: Number, default: 0 },
-  rotate: { type: Number, default: 0 },
-  isStatic: { type: Boolean, default: false },
-}
+// `grown: undefined` is deliberate: an absent Boolean prop must stay undefined (not false) so it can inherit.
+export const artDefaults = { grown: undefined, size: 1, delay: 0, x: 0, y: 0, rotate: 0, isStatic: false }

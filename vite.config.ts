@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 import { execSync } from 'node:child_process'
-import { readCommit } from './src/lib/commit.js'
+import { readCommit } from './src/lib/commit.ts'
 
 const commit = readCommit(process.env, () =>
   execSync('git log -1 --format="%h %s"', { stdio: ['ignore', 'pipe', 'ignore'] }).toString(),

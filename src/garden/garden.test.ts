@@ -4,33 +4,40 @@ import { defineComponent, h, ref, nextTick } from 'vue'
 import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { useGrow, Vine, Bloom, Leaf, Bud } from './index.js'
+import { useGrow, Vine, Bloom, Leaf, Bud } from './index'
+import type { GrowOptions } from './index'
 
 const here = dirname(fileURLToPath(import.meta.url))
 
-function mockMedia(reduce) {
+function mockMedia(reduce: boolean) {
   window.matchMedia = vi.fn().mockReturnValue({ matches: reduce })
 }
-let observer
-let created = 0
-function mockIO() {
-  globalThis.IntersectionObserver = class {
-    constructor(cb) { this.cb = cb; observer = this; created++ }
-    observe() {}
-    disconnect() {}
-    fire(isIntersecting) { this.cb([{ isIntersecting }]) }
-  }
+class MockIO {
+  private cb: (entries: { isIntersecting: boolean }[]) => void
+  constructor(cb: (entries: { isIntersecting: boolean }[]) => void) { this.cb = cb; instances.push(this) }
+  observe() {}
+  disconnect() {}
+  fire(isIntersecting: boolean) { this.cb([{ isIntersecting }]) }
 }
-function probe(opts) {
-  let grown
+const instances: MockIO[] = []
+const io = (): MockIO => {
+  const last = instances[instances.length - 1]
+  if (!last) throw new Error('no IntersectionObserver was created')
+  return last
+}
+function mockIO() {
+  vi.stubGlobal('IntersectionObserver', MockIO)
+}
+function probe(opts?: GrowOptions) {
+  let grown: ReturnType<typeof useGrow> | undefined
   const C = defineComponent({
     setup() { const el = ref(null); grown = useGrow(el, opts); return () => h('div', { ref: el }) },
   })
   mount(C)
-  return () => grown.value
+  return () => grown?.value
 }
 
-afterEach(() => { created = 0; delete globalThis.IntersectionObserver; observer = undefined })
+afterEach(() => { instances.length = 0; vi.unstubAllGlobals() })
 
 describe('useGrow', () => {
   it('is true immediately with reduced motion', () => {
@@ -45,16 +52,16 @@ describe('useGrow', () => {
     mockMedia(false); mockIO()
     const g = probe()
     expect(g()).toBe(false)
-    observer.fire(true); await nextTick()
+    io().fire(true); await nextTick()
     expect(g()).toBe(true)
   })
   it('once:true stays true after leaving; otherwise toggles', async () => {
     mockMedia(false); mockIO()
     const g = probe({ once: true })
-    observer.fire(true); observer.fire(false)
+    io().fire(true); io().fire(false)
     expect(g()).toBe(true)
     const g2 = probe({ once: false })
-    observer.fire(true); observer.fire(false)
+    io().fire(true); io().fire(false)
     expect(g2()).toBe(false)
   })
 })
@@ -66,7 +73,7 @@ describe('components', () => {
     expect(w.find('path.vine-stem').attributes('d')).toBe('M0 0 L10 10')
     expect(w.find('svg').attributes('aria-hidden')).toBe('true')
     expect(w.classes()).not.toContain('is-grown')
-    observer.fire(true); await nextTick()
+    io().fire(true); await nextTick()
     expect(w.classes()).toContain('is-grown')
     expect(w.find('.leaf').classes()).toContain('is-grown')
   })
@@ -92,13 +99,15 @@ describe('components', () => {
   it('children inside a Vine create no observer of their own', () => {
     mockMedia(false); mockIO()
     mount(Vine, { props: { path: 'M0 0' }, slots: { default: () => [h(Leaf), h(Bloom), h(Bud)] } })
-    expect(created).toBe(1)
+    expect(instances).toHaveLength(1)
   })
 })
 
 describe('garden folder rules', () => {
-  const files = readdirSync(here).filter((f) => /\.(vue|js|css)$/.test(f) && f !== 'garden.test.js')
+  const files = readdirSync(here).filter((f) => /\.(vue|ts|css)$/.test(f) && !f.endsWith('.test.ts'))
   it('has no imports from outside src/garden except vue', () => {
+    expect(files.length).toBeGreaterThan(0)
+    expect(files).toEqual(expect.arrayContaining(['index.ts', 'useGrow.ts', 'types.ts', 'Vine.vue', 'garden.css']))
     for (const f of files) {
       const src = readFileSync(join(here, f), 'utf8')
       for (const m of src.matchAll(/(?:from|import)\s*\(?\s*['"]([^'"]+)['"]/g)) {

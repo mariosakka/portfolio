@@ -8,7 +8,8 @@ import certificates from './certificates.json'
 import education from './education.json'
 import organizations from './organizations.json'
 
-const paths = [about, ...projects, ...experience, ...certificates, ...education, ...organizations].flatMap((i) => [i.image, i.photo]).filter(Boolean)
+const items: { image?: string; photo?: string }[] = [about, ...projects, ...experience, ...certificates, ...education, ...organizations]
+const paths = items.flatMap((i) => [i.image, i.photo]).filter(Boolean)
 const pub = resolve(process.cwd(), 'public')
 
 describe('images', () => {

@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils'
+import type { VueWrapper } from '@vue/test-utils'
 import { afterEach, expect, test } from 'vitest'
 import AboutSection from './AboutSection.vue'
 import ExperienceSection from './ExperienceSection.vue'
@@ -10,7 +11,7 @@ import ContactSection from './ContactSection.vue'
 import experience from '../../data/experience.json'
 import organizations from '../../data/organizations.json'
 
-let w
+let w: VueWrapper | undefined
 afterEach(() => w?.unmount())
 
 test('projects: 9 cards, exact filters, filtering', async () => {

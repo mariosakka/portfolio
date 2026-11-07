@@ -1,17 +1,26 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { Bud } from '../garden'
+import type { CardLink } from '../types/card'
 
-const props = defineProps({
-  image: { type: String, default: '' },
-  title: { type: String, required: true },
-  bud: { type: Boolean, default: false },
-  subtitle: { type: String, default: '' },
-  period: { type: String, default: '' },
-  tags: { type: Array, default: () => [] },
-  links: { type: Array, default: () => [] },
+const props = withDefaults(defineProps<{
+  image?: string
+  title: string
+  bud?: boolean
+  subtitle?: string
+  period?: string
+  tags?: string[]
+  links?: CardLink[]
+}>(), {
+  image: '',
+  bud: false,
+  subtitle: '',
+  period: '',
+  tags: () => [],
+  links: () => [],
 })
-defineEmits(['open'])
+defineEmits<{ open: [] }>()
+// The runtime typeof check stays: link urls come from JSON that may hold non-strings.
 const shownLinks = computed(() => props.links
   .map((l) => ({ label: l.label, url: typeof l.url === 'string' ? l.url.trim() : '' }))
   .filter((l) => l.url))

@@ -1,6 +1,11 @@
-const firstLine = (s) => s.split(/\r?\n/)[0].trim()
+export interface Commit {
+  message: string
+  sha: string
+}
 
-export function readCommit(env, gitLog) {
+const firstLine = (s: string): string => s.split(/\r?\n/)[0].trim()
+
+export function readCommit(env: Record<string, string | undefined>, gitLog: () => string): Commit | null {
   try {
     if (env.GITHUB_SHA && env.COMMIT_MESSAGE) {
       return { message: firstLine(env.COMMIT_MESSAGE), sha: env.GITHUB_SHA.slice(0, 7) }

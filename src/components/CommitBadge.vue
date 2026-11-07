@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 const commit = __LATEST_COMMIT__
 </script>
 

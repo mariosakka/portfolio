@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { readCommit } from './commit.js'
+import { readCommit } from './commit'
 
 describe('readCommit', () => {
   it('uses env', () => {
@@ -12,6 +12,6 @@ describe('readCommit', () => {
     expect(readCommit({}, () => { throw new Error('x') })).toBeNull()
   })
   it('cuts to first line', () => {
-    expect(readCommit({ GITHUB_SHA: 'abcdef1234', COMMIT_MESSAGE: 'one\ntwo' }, () => '').message).toBe('one')
+    expect(readCommit({ GITHUB_SHA: 'abcdef1234', COMMIT_MESSAGE: 'one\ntwo' }, () => '')?.message).toBe('one')
   })
 })

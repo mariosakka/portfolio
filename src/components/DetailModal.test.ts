@@ -3,13 +3,18 @@ import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import DetailModal from './DetailModal.vue'
 
-const opts = (open) => ({ props: { open, title: 'Hello' }, slots: { default: '<p>body</p>' }, attachTo: document.body })
-afterEach(() => { document.body.innerHTML = ''; document.body.removeAttribute('style'); document.documentElement.removeAttribute('style'); vi.restoreAllMocks(); delete window.scrollY })
+const q = <T extends Element = HTMLElement>(sel: string, root: ParentNode = document): T => {
+  const el = root.querySelector<T>(sel)
+  if (!el) throw new Error(`missing ${sel}`)
+  return el
+}
+const opts = (open: boolean) => ({ props: { open, title: 'Hello' }, slots: { default: '<p>body</p>' }, attachTo: document.body })
+afterEach(() => { document.body.innerHTML = ''; document.body.removeAttribute('style'); document.documentElement.removeAttribute('style'); vi.restoreAllMocks(); Reflect.deleteProperty(window, 'scrollY') })
 
 describe('DetailModal', () => {
   it('is a labelled modal dialog', () => {
     const w = mount(DetailModal, opts(true))
-    const d = document.querySelector('[role="dialog"]')
+    const d = q('[role="dialog"]')
     expect(d.getAttribute('aria-modal')).toBe('true')
     expect(d.getAttribute('aria-label')).toBe('Hello')
     w.unmount()
@@ -17,7 +22,7 @@ describe('DetailModal', () => {
   it('emits close on Escape and backdrop click', async () => {
     const w = mount(DetailModal, opts(true))
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
-    document.querySelector('[data-backdrop]').click()
+    q('[data-backdrop]').click()
     expect(w.emitted('close')).toHaveLength(2)
     w.unmount()
   })
@@ -39,12 +44,12 @@ describe('DetailModal', () => {
     const w = mount(DetailModal, { props: { open: false, title: 'Hello' }, slots: { default: '<a href="#a">a</a><button id="z">z</button>' }, attachTo: document.body })
     await w.setProps({ open: true })
     await nextTick()
-    const d = document.querySelector('[role="dialog"]')
+    const d = q('[role="dialog"]')
     expect(document.activeElement).toBe(d)
-    const first = d.querySelector('button[aria-label="Close"]')
-    const last = d.querySelector('#z')
+    const first = q('button[aria-label="Close"]', d)
+    const last = q('#z', d)
     last.focus()
-    const tab = (shiftKey) => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey, cancelable: true }))
+    const tab = (shiftKey: boolean) => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey, cancelable: true }))
     tab(false)
     expect(document.activeElement).toBe(first)
     tab(true)
@@ -55,10 +60,10 @@ describe('DetailModal', () => {
     const w = mount(DetailModal, { props: { open: false, title: 'Hello' }, slots: { default: '<button id="ok">ok</button><button id="off" disabled>off</button>' }, attachTo: document.body })
     await w.setProps({ open: true })
     await nextTick()
-    const d = document.querySelector('[role="dialog"]')
-    d.querySelector('#ok').focus()
+    const d = q('[role="dialog"]')
+    q('#ok', d).focus()
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', cancelable: true }))
-    expect(document.activeElement).toBe(d.querySelector('button[aria-label="Close"]'))
+    expect(document.activeElement).toBe(q('button[aria-label="Close"]', d))
     w.unmount()
   })
   it('pulls focus into the dialog when it is outside', async () => {
@@ -71,25 +76,25 @@ describe('DetailModal', () => {
     const ev = new KeyboardEvent('keydown', { key: 'Tab', cancelable: true })
     document.dispatchEvent(ev)
     expect(ev.defaultPrevented).toBe(true)
-    expect(document.querySelector('[role="dialog"]').contains(document.activeElement)).toBe(true)
+    expect(q('[role="dialog"]').contains(document.activeElement)).toBe(true)
     w.unmount()
   })
   it.each([
     ['fieldset-disabled control', '<button id="ok">ok</button><fieldset disabled><button>in</button></fieldset>'],
     ['tabindex=-2 element', '<button id="ok">ok</button><div tabindex="-2">n</div>'],
     ['hidden input', '<button id="ok">ok</button><input type="hidden">'],
-  ])('ignores %s as last item', async (_n, html) => {
+  ])('ignores %s as last item', async (_n: string, html: string) => {
     const w = mount(DetailModal, { props: { open: false, title: 'Hello' }, slots: { default: html }, attachTo: document.body })
     await w.setProps({ open: true })
     await nextTick()
-    const d = document.querySelector('[role="dialog"]')
-    d.querySelector('#ok').focus()
+    const d = q('[role="dialog"]')
+    q('#ok', d).focus()
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', cancelable: true }))
-    expect(document.activeElement).toBe(d.querySelector('button[aria-label="Close"]'))
+    expect(document.activeElement).toBe(q('button[aria-label="Close"]', d))
     w.unmount()
   })
   describe('scroll lock', () => {
-    const scrollAt = (y) => {
+    const scrollAt = (y: number) => {
       Object.defineProperty(window, 'scrollY', { value: y, configurable: true })
       return vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
     }

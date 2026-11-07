@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { Vine, Bloom, Cornflower, Bud, Leaf } from '../garden'
 
 const main = 'M-20 540 C40 470 120 450 110 380 S40 300 90 240 S170 190 150 120 S120 40 150 -10'

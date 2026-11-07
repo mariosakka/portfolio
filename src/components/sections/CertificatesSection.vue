@@ -1,9 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import CardList from './CardList.vue'
-import data from '../../data/certificates.json'
+import raw from '../../data/certificates.json'
+import type { Certificate } from '../../types/data'
 import { toList } from '../../lib/normalize'
 
-const first = (...v) => v.find((s) => s && s.trim()) || ''
+const data: Certificate[] = raw
+const first = (...v: (string | undefined)[]): string => v.find((s) => s && s.trim()) || ''
 const items = data.map((d) => ({
   title: d.title,
   subtitle: first(d.shortDescription, d.issuer),

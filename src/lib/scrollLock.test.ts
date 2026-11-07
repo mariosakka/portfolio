@@ -2,13 +2,13 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { lockScroll, unlockScroll } from './scrollLock'
 
 const html = document.documentElement
-const setScroll = (y) => {
+const setScroll = (y: number) => {
   Object.defineProperty(window, 'scrollY', { value: y, configurable: true })
   return vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
 }
 afterEach(() => {
   unlockScroll(); unlockScroll()
-  delete window.scrollY
+  Reflect.deleteProperty(window, 'scrollY')
   vi.restoreAllMocks()
   document.body.removeAttribute('style')
   html.removeAttribute('style')

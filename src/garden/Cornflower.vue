@@ -1,9 +1,10 @@
-<script setup>
+<script setup lang="ts">
 import { ref, useId } from 'vue'
-import { artProps, useGrown } from './useGrow.js'
+import { artDefaults, useGrown } from './useGrow'
+import type { ArtProps } from './types'
 
-const props = defineProps(artProps)
-const el = ref(null)
+const props = withDefaults(defineProps<ArtProps>(), artDefaults)
+const el = ref<SVGGElement | null>(null)
 const { grown, isStatic, swaying } = useGrown(props, el)
 const id = useId()
 const angles = Array.from({ length: 12 }, (_, i) => i * 30)
