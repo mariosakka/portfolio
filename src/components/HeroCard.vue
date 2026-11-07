@@ -47,6 +47,17 @@ const shownLinks = computed(() => props.links
   .filter((l) => l.url))
 const split = computed(() => props.layout === 'split')
 const open = ref(false)
+const wash = ref<HTMLCanvasElement | null>(null)
+// Image -> 6x4 pixels -> smoothed up to the 48x30 canvas: two one-off draws act as a blur
+// (no ctx.filter, which older Safari lacks), so the CSS stretch shows a soft gradient, not cells.
+function paintWash(e: Event) {
+  const c = wash.value
+  const ctx = c?.getContext('2d')
+  if (!c || !ctx) return
+  ctx.drawImage(e.target as HTMLImageElement, 0, 0, 6, 4)
+  ctx.globalCompositeOperation = 'copy' // replace, so the 6x4 draft never shows through transparent images
+  ctx.drawImage(c, 0, 0, 6, 4, 0, 0, c.width, c.height)
+}
 </script>
 
 <template>
@@ -56,26 +67,29 @@ const open = ref(false)
   >
     <figure
       v-if="image"
-      class="relative m-2 flex items-center justify-center overflow-hidden rounded-[1.35rem] bg-night-900 sm:m-3"
+      class="relative m-2 flex items-center justify-center overflow-hidden rounded-[1.35rem] bg-night-900 [contain:paint] sm:m-3"
       :class="[
         split ? 'aspect-[16/10] md:aspect-auto md:min-h-[20rem]' : 'aspect-[16/10]',
         split && imageSide === 'right' ? 'md:order-last' : '',
       ]"
     >
-      <!-- Real images are square or portrait logos and shots: a blurred cover fills the frame, the image itself is never cropped. -->
-      <img
-        :src="image"
-        alt=""
+      <!-- Real images are square or portrait logos and shots, so the image is never cropped; a soft wash of its
+           colors fills the frame. The wash is a 48x30 canvas painted once from the already loaded image and stretched
+           by CSS: no filter layer, no extra request, no per-frame cost. -->
+      <canvas
+        ref="wash"
+        width="48"
+        height="30"
         aria-hidden="true"
-        loading="lazy"
-        class="absolute inset-0 h-full w-full scale-125 object-cover opacity-35 blur-2xl"
-      >
+        class="absolute inset-0 h-full w-full opacity-35"
+      />
       <img
         :src="image"
         alt=""
         loading="lazy"
-        class="relative drop-shadow-[0_12px_24px_rgba(0,0,0,0.45)]"
-        :class="logo ? 'h-28 w-28 rounded-2xl object-cover sm:h-36 sm:w-36' : 'h-full w-full object-contain p-[7%]'"
+        class="relative"
+        :class="logo ? 'h-28 w-28 rounded-2xl object-cover shadow-[0_12px_28px_rgba(0,0,0,0.45)] sm:h-36 sm:w-36' : 'h-full w-full object-contain p-[7%]'"
+        @load="paintWash"
       >
       <span
         aria-hidden="true"

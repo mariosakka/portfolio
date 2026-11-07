@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import type { VueWrapper } from '@vue/test-utils'
 import HeroCard from './HeroCard.vue'
@@ -34,10 +34,29 @@ describe('HeroCard', () => {
 
   it('logo images are a fixed tile, other images fill the frame uncropped', () => {
     make({ image: '/a.webp', logo: true })
-    expect(w!.findAll('img')[1].classes()).toContain('h-28')
+    expect(w!.findAll('img')).toHaveLength(1)
+    expect(w!.get('img').classes()).toContain('h-28')
     w!.unmount()
     make({ image: '/a.webp' })
-    expect(w!.findAll('img')[1].classes()).toContain('object-contain')
+    expect(w!.get('img').classes()).toContain('object-contain')
+  })
+
+  it('paints the backdrop wash once from the loaded image into a tiny canvas, with no blur filter', async () => {
+    const ctx = { globalCompositeOperation: 'source-over', drawImage: vi.fn(() => ops.push(ctx.globalCompositeOperation)) }
+    const ops: string[] = []
+    const drawImage = ctx.drawImage
+    const spy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(ctx as unknown as CanvasRenderingContext2D)
+    make({ image: '/a.webp' })
+    const canvas = w!.get('canvas')
+    expect([canvas.attributes('width'), canvas.attributes('height')]).toEqual(['48', '30'])
+    expect(w!.html()).not.toMatch(/blur-|drop-shadow/)
+    await w!.get('img').trigger('load')
+    expect(drawImage.mock.calls).toEqual([
+      [w!.get('img').element, 0, 0, 6, 4],
+      [canvas.element, 0, 0, 6, 4, 0, 0, 48, 30],
+    ])
+    expect(ops).toEqual(['source-over', 'copy'])
+    spy.mockRestore()
   })
 
   it('split layout puts the image on the requested side', () => {
