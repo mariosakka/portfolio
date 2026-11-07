@@ -3,6 +3,7 @@ import type { Component } from 'vue'
 import SectionBlock from './components/SectionBlock.vue'
 import GardenHero from './components/GardenHero.vue'
 import SiteNav from './components/SiteNav.vue'
+import SiteFooter from './components/SiteFooter.vue'
 import AboutSection from './components/sections/AboutSection.vue'
 import SkillsSection from './components/sections/SkillsSection.vue'
 import ExperienceSection from './components/sections/ExperienceSection.vue'
@@ -37,7 +38,10 @@ const sections: Section[] = [
   >
     <GardenHero />
     <header class="mx-auto max-w-5xl px-4 pt-16 sm:px-8">
-      <h1 class="font-serif text-4xl sm:text-5xl">
+      <h1
+        data-page-top
+        class="font-serif text-4xl sm:text-5xl"
+      >
         Mohamad-Mario Sakka
       </h1>
     </header>
@@ -52,5 +56,6 @@ const sections: Section[] = [
         <component :is="s.body" />
       </SectionBlock>
     </main>
+    <SiteFooter :sections="sections" />
   </div>
 </template>

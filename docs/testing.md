@@ -57,7 +57,7 @@ Decision per layer (details in the sections below):
 - The real animation (timing, smoothness, real-browser reduced-motion setting) is a manual release check. See [known-issues.md](known-issues.md).
 
 ### Other foundation areas (N/A)
-- API contracts, localization catalogs, database migrations, release versioning: there is no API, content is single-language JSON, there is no database, and the site deploys continuously from `main`.
+- API contracts, localization catalogs, database migrations, release versioning (beyond the Release Please drift test): there is no API, content is single-language JSON, there is no database, and the site deploys continuously from `main`.
 
 ## Enforcement matrix
 
@@ -72,6 +72,8 @@ Decision per layer (details in the sections below):
 | Shebang exec bits (100755) | `ci.yml` step | no | scans `scripts/` and `.githooks/` |
 | Agent-instruction check | `ci.yml` step | yes | |
 | Test-sync guard | `ci.yml` step | yes | needs `fetch-depth: 0` (set) |
+| Release config drift | `ci.yml` `npm test` (`scripts/release-config.test.ts`) | yes | manifest equals package.json version, node release type, pinned release-please action is a 40-hex SHA with a `# v5.0.0` comment (format only, the SHA value is not checked; dependabot bumps it), job-level write permissions only |
+| Release automation | `.github/workflows/release-please.yml` (push to `main`) | n/a | opens the release PR; Conventional Commits are not enforced (non-conforming commits are ignored) |
 | Pinned action SHAs | none (convention: every `uses:` is a 40-char SHA) | no | manual review; dependabot bumps them |
 | Dependabot | `.github/dependabot.yml` (npm and github-actions, weekly) | n/a | no auto-merge; owner reviews PRs |
 

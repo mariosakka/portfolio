@@ -7,6 +7,7 @@ Static Vue 3 + Vite portfolio, deployed to GitHub Pages. Design: [docs/design/20
 - MUST NOT commit secrets or `docs/reference/firestore-export/` (gitignored).
 - Run `scripts/install-hooks.sh` once after cloning.
 - TypeScript everywhere (`strict`, no `any`); `npm run typecheck` must pass. Scripts run natively on Node 24, so use erasable syntax only (no enums/namespaces) and `.ts` import extensions.
+- Use Conventional Commits (release automation reads them).
 - Animated flower components stay dependency-free and Tailwind-free (they become an npm package later) and export typed props from `src/garden/index.ts`.
 
 ## Commands
