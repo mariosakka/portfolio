@@ -27,7 +27,7 @@ const shownLinks = computed(() => props.links
 </script>
 
 <template>
-  <article class="relative flex flex-col overflow-hidden rounded-2xl border border-[rgba(127,176,255,.3)] bg-[#0b1f4a] text-[#e4edff]">
+  <article class="relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface text-ink">
     <svg
       v-if="bud"
       aria-hidden="true"
@@ -39,7 +39,7 @@ const shownLinks = computed(() => props.links
     </svg>
     <button
       type="button"
-      class="flex flex-1 flex-col gap-2 p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#4f8bff]"
+      class="flex flex-1 flex-col gap-2 p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
       @click="$emit('open')"
     >
       <img
@@ -65,7 +65,7 @@ const shownLinks = computed(() => props.links
       <li
         v-for="(t, i) in tags"
         :key="i"
-        class="rounded-full border border-[rgba(127,176,255,.3)] px-2 py-0.5 text-xs"
+        class="rounded-full border border-line px-2 py-0.5 text-xs"
       >
         {{ t }}
       </li>
@@ -82,7 +82,7 @@ const shownLinks = computed(() => props.links
           :href="l.url"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex [@media(pointer:coarse)]:min-h-11 items-center text-[#4f8bff] underline"
+          class="inline-flex [@media(pointer:coarse)]:min-h-11 items-center text-accent underline"
         >{{ l.label }}</a>
       </template>
     </div>

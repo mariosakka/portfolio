@@ -64,7 +64,7 @@ Decision per layer (details in the sections below):
 | Secret scanning | `ci.yml` gitleaks-action (+ weekly schedule) | `gitleaks git` | hook fails if gitleaks is missing |
 | Type check | `ci.yml` and `deploy.yml` `npm run typecheck` | yes | `vue-tsc --build`, `strict`, covers app and node/scripts projects |
 | Lint | `ci.yml` `npm run lint` | yes | `--max-warnings 0`, typescript-eslint |
-| Tests | `ci.yml` `npm test` | yes | includes data, image size, garden rule |
+| Tests | `ci.yml` `npm test` | yes | includes data, image size, garden rule, theme (flat html/body background, WCAG AA contrast of text tokens in `src/theme.test.ts`) |
 | Build | `ci.yml` `npm run build`, `deploy.yml` | no (slow) | |
 | Placeholder check | `ci.yml`, `deploy.yml` (non-blocking) | no | warns only |
 | Shebang exec bits (100755) | `ci.yml` step | no | scans `scripts/` and `.githooks/` |

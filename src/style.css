@@ -2,8 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Flat page color on html too, so overscroll never shows white. */
+html {
+  background-color: #060a18; /* keep in sync with night.950 in tailwind.config.ts */
+  color-scheme: dark;
+}
+
 body {
-  @apply bg-gradient-to-b from-night-950 to-night-800 font-sans text-ink;
+  @apply bg-night-950 font-sans text-ink;
+  /* Faint static starfield: one 640px tile of dots repeated, scrolls with the page, no JS. */
+  background-image:
+    radial-gradient(circle at 0px 589px, rgba(200, 218, 255, 0.27) 0, rgba(200, 218, 255, 0.27) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 467px 341px, rgba(200, 218, 255, 0.29) 0, rgba(200, 218, 255, 0.29) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 483px 347px, rgba(200, 218, 255, 0.40) 0, rgba(200, 218, 255, 0.40) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 523px 155px, rgba(200, 218, 255, 0.30) 0, rgba(200, 218, 255, 0.30) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 447px 34px, rgba(200, 218, 255, 0.40) 0, rgba(200, 218, 255, 0.40) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 590px 517px, rgba(200, 218, 255, 0.22) 0, rgba(200, 218, 255, 0.22) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 591px 441px, rgba(200, 218, 255, 0.39) 0, rgba(200, 218, 255, 0.39) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 584px 581px, rgba(200, 218, 255, 0.30) 0, rgba(200, 218, 255, 0.30) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 536px 213px, rgba(200, 218, 255, 0.23) 0, rgba(200, 218, 255, 0.23) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 274px 189px, rgba(200, 218, 255, 0.48) 0, rgba(200, 218, 255, 0.48) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 467px 562px, rgba(200, 218, 255, 0.20) 0, rgba(200, 218, 255, 0.20) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 359px 326px, rgba(200, 218, 255, 0.31) 0, rgba(200, 218, 255, 0.31) 1.2px, transparent 1.8px),
+    radial-gradient(circle at 582px 35px, rgba(200, 218, 255, 0.30) 0, rgba(200, 218, 255, 0.30) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 425px 592px, rgba(200, 218, 255, 0.34) 0, rgba(200, 218, 255, 0.34) 1.2px, transparent 1.8px),
+    radial-gradient(circle at 260px 182px, rgba(200, 218, 255, 0.30) 0, rgba(200, 218, 255, 0.30) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 213px 340px, rgba(200, 218, 255, 0.38) 0, rgba(200, 218, 255, 0.38) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 580px 293px, rgba(200, 218, 255, 0.46) 0, rgba(200, 218, 255, 0.46) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 406px 330px, rgba(200, 218, 255, 0.34) 0, rgba(200, 218, 255, 0.34) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 601px 254px, rgba(200, 218, 255, 0.41) 0, rgba(200, 218, 255, 0.41) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 376px 224px, rgba(200, 218, 255, 0.29) 0, rgba(200, 218, 255, 0.29) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 509px 562px, rgba(200, 218, 255, 0.22) 0, rgba(200, 218, 255, 0.22) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 50px 260px, rgba(200, 218, 255, 0.23) 0, rgba(200, 218, 255, 0.23) 1.2px, transparent 1.8px),
+    radial-gradient(circle at 638px 141px, rgba(200, 218, 255, 0.38) 0, rgba(200, 218, 255, 0.38) 1.2px, transparent 1.8px),
+    radial-gradient(circle at 293px 379px, rgba(200, 218, 255, 0.22) 0, rgba(200, 218, 255, 0.22) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 566px 570px, rgba(200, 218, 255, 0.46) 0, rgba(200, 218, 255, 0.46) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 487px 176px, rgba(200, 218, 255, 0.18) 0, rgba(200, 218, 255, 0.18) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 49px 1px, rgba(200, 218, 255, 0.38) 0, rgba(200, 218, 255, 0.38) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 474px 313px, rgba(200, 218, 255, 0.40) 0, rgba(200, 218, 255, 0.40) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 565px 151px, rgba(200, 218, 255, 0.30) 0, rgba(200, 218, 255, 0.30) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 76px 313px, rgba(200, 218, 255, 0.18) 0, rgba(200, 218, 255, 0.18) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 408px 590px, rgba(200, 218, 255, 0.19) 0, rgba(200, 218, 255, 0.19) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 120px 620px, rgba(200, 218, 255, 0.36) 0, rgba(200, 218, 255, 0.36) 0.8px, transparent 1.4px);
+  background-size: 640px 640px;
   min-height: 100vh;
   min-height: 100dvh;
   padding-inline: env(safe-area-inset-left) calc(env(safe-area-inset-right) + var(--scrollbar-comp, 0px));
@@ -47,7 +88,7 @@ button {
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  -webkit-tap-highlight-color: rgba(79, 139, 255, 0.25);
+  -webkit-tap-highlight-color: rgba(123, 155, 217, 0.25);
   scroll-behavior: smooth;
 }
 

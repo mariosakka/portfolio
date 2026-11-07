@@ -34,7 +34,7 @@ const items = computed(() => data
       :key="c"
       type="button"
       :aria-pressed="active === c"
-      class="[@media(pointer:coarse)]:min-h-11 rounded-full border border-[rgba(127,176,255,.3)] px-4 text-sm text-[#e4edff] aria-pressed:bg-[#4f8bff] aria-pressed:text-[#06122e]"
+      class="[@media(pointer:coarse)]:min-h-11 rounded-full border border-line px-4 text-sm text-ink aria-pressed:bg-accent aria-pressed:text-night-950"
       @click="active = c"
     >
       {{ c }}
