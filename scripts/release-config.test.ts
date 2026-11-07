@@ -1,10 +1,12 @@
 import { readFileSync } from 'node:fs'
 import { expect, test } from 'vitest'
 
-const read = (p: string) => readFileSync(p, 'utf8') // vitest runs from the repo root
+// vitest runs from the repo root; normalize CRLF so the regexes pass on Windows checkouts too
+const read = (p: string) => readFileSync(p, 'utf8').replace(/\r\n/g, '\n')
 const pkg = JSON.parse(read('package.json')) as { version: string }
 const manifest = JSON.parse(read('.release-please-manifest.json')) as Record<string, string>
 const config = JSON.parse(read('release-please-config.json')) as {
+  'initial-version'?: string
   packages: Record<string, { 'release-type': string }>
 }
 const workflow = read('.github/workflows/release-please.yml')
@@ -19,6 +21,10 @@ test('manifest root version equals package.json version', () => {
 
 test('config releases the root package as node', () => {
   expect(config.packages['.']?.['release-type']).toBe('node')
+})
+
+test('first release starts at 0.1.0, not the default 1.0.0', () => {
+  expect(config['initial-version']).toBe('0.1.0')
 })
 
 test('workflow pins release-please to a 40-hex SHA with a v5.0.0 comment', () => {
