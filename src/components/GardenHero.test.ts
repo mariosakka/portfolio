@@ -8,9 +8,10 @@ describe('garden placement', () => {
   it('renders fully grown art with reduced motion and adds no text', () => {
     window.matchMedia = vi.fn().mockReturnValue({ matches: true })
     const w = mount(GardenHero)
-    const vines = w.findAll('svg.vine')
-    expect(vines.length).toBeGreaterThanOrEqual(2)
-    vines.forEach((v) => expect(v.classes()).toContain('is-grown'))
+    expect(w.findAll('svg.vine, svg.page-vine').length).toBeGreaterThanOrEqual(4)
+    w.findAll('svg').forEach((v) => expect(v.attributes('aria-hidden')).toBe('true'))
+    w.findAll('svg.vine').forEach((v) => expect(v.classes()).toContain('is-grown'))
+    w.findAll('svg.page-vine').forEach((v) => expect(v.classes()).toContain('is-static'))
     expect(w.text()).toBe('')
     expect(w.attributes('aria-hidden')).toBe('true')
     expect(w.classes()).toContain('pointer-events-none')
@@ -27,14 +28,16 @@ describe('garden placement', () => {
 })
 
 describe('garden breakpoints', () => {
-  it('shows the big vines only from 1400px and sits above the nav', () => {
+  it('shows the long vines only from 1400px, above the nav; the edge vine sits behind content', () => {
     window.matchMedia = vi.fn().mockReturnValue({ matches: true })
     const w = mount(GardenHero)
-    expect(w.classes()).toContain('z-20')
-    w.findAll('svg.vine').forEach((v) => {
-      const cls = v.element.parentElement?.className ?? ''
-      expect(cls).toContain('hidden')
-      expect(cls).toContain('min-[1400px]:block')
-    })
+    expect(w.classes()).not.toContain('z-20') // a z-index on the root would trap the edge vine above the content
+    const cls = (v: { element: Element }): string => v.element.parentElement?.className ?? ''
+    const wide = w.findAll('svg').filter((v) => cls(v).includes('min-[1400px]:block'))
+    expect(wide.length).toBeGreaterThanOrEqual(3) // left, right, hero corner
+    wide.forEach((v) => { expect(cls(v)).toContain('hidden'); expect(cls(v)).toContain('z-20') })
+    const edge = w.findAll('svg.page-vine.is-compact')
+    expect(edge).toHaveLength(2) // phone strip and tablet/laptop strip
+    edge.forEach((v) => { expect(cls(v)).toContain('-z-10'); expect(cls(v)).toContain('overflow-hidden') })
   })
 })

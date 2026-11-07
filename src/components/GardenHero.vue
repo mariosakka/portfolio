@@ -1,104 +1,92 @@
 <script setup lang="ts">
-import { Vine, Bloom, Cornflower, Bud, Leaf } from '../garden'
+import { PageVine, Vine, Plant, Leaf, parsePath, pointAt } from '../garden'
 
-const main = 'M-20 540 C40 470 120 450 110 380 S40 300 90 240 S170 190 150 120 S120 40 150 -10'
-// Above the sticky nav (z-10) so its blurred bg does not dim the art; shown only >=1400px where the margins hold no text.
+// Page-height garden layer. >=1400px: long vines in the side margins (above the sticky nav, which is z-10)
+// plus a hero corner vine; below that, a hairline edge vine behind the content.
+const corner = 'M170 -6 C132 56 176 112 124 172 S96 236 130 290'
+const cornerModel = parsePath(corner)
+const a1 = pointAt(cornerModel, 0.52)
+const a2 = pointAt(cornerModel, 0.8)
+const a3 = pointAt(cornerModel, 1)
 </script>
 
 <template>
   <div
     aria-hidden="true"
-    class="pointer-events-none absolute inset-x-0 top-0 z-20 h-[40rem] overflow-x-clip"
+    class="pointer-events-none absolute inset-0 overflow-x-clip"
   >
-    <div class="absolute left-0 top-0 hidden w-44 opacity-70 min-[1400px]:block">
+    <div class="absolute inset-y-0 left-0 z-20 hidden w-[180px] opacity-90 min-[1400px]:block">
+      <PageVine
+        :seed="11"
+        :width="180"
+      />
+    </div>
+    <div class="absolute bottom-0 right-0 top-[28rem] z-20 hidden w-[180px] opacity-90 min-[1400px]:block">
+      <PageVine
+        :seed="23"
+        :width="180"
+        side="right"
+        :density="0.6"
+        :coverage="0.92"
+      />
+    </div>
+    <div class="absolute right-0 top-0 z-20 hidden w-44 opacity-90 min-[1400px]:block">
       <Vine
-        :path="main"
-        view-box="-20 -10 280 560"
-        :duration="3200"
+        :path="corner"
+        view-box="0 0 180 300"
+        :duration="3000"
       >
         <Leaf
-          :x="112"
-          :y="378"
-          :rotate="-25"
-          :delay="800"
+          :x="a1.x"
+          :y="a1.y"
+          :rotate="a1.angle - 55"
+          :size="0.6"
+          :delay="1500"
         />
-        <Leaf
-          :x="98"
-          :y="238"
-          :rotate="-35"
+        <Plant
+          species="bloom"
+          :seed="5"
+          :anchor="a1"
+          :side="1"
+          :reach="62"
+          :size="1.15"
+          :branches="3"
           :delay="1600"
         />
-        <Leaf
-          :x="40"
-          :y="470"
-          :rotate="-20"
-          :delay="400"
+        <Plant
+          species="bell"
+          :seed="9"
+          :anchor="a2"
+          :side="-1"
+          :reach="46"
+          :size="0.95"
+          :delay="2300"
         />
-        <Bloom
-          :x="200"
-          :y="330"
-          :size="1.15"
-          :delay="1400"
-        />
-        <Bloom
-          :x="40"
-          :y="190"
-          :size="0.8"
-          :delay="2000"
-        />
-        <Bloom
-          :x="230"
-          :y="90"
-          :size="0.7"
-          :delay="2600"
-        />
-        <Cornflower
-          :x="190"
-          :y="470"
-          :size="1.3"
-          :delay="1000"
-        />
-        <Cornflower
-          :x="120"
-          :y="40"
-          :size="0.9"
+        <Plant
+          species="forgetmenot"
+          :seed="3"
+          :anchor="a3"
+          :side="1"
+          :reach="30"
+          :size="1"
+          :leaves="1"
           :delay="2800"
-        />
-        <Bud
-          :x="168"
-          :y="392"
-          :rotate="40"
-          :delay="1800"
-        />
-        <Bud
-          :x="190"
-          :y="52"
-          :rotate="35"
-          :size="0.8"
-          :delay="3000"
         />
       </Vine>
     </div>
-    <div class="absolute bottom-0 right-0 hidden w-32 opacity-70 min-[1400px]:block">
-      <Vine
-        path="M920 540 C860 500 870 450 820 430 S790 400 800 380"
-        view-box="780 360 160 190"
-      >
-        <Leaf
-          :x="850"
-          :y="462"
-          :rotate="-160"
-          :size="0.9"
-          :delay="800"
-        />
-        <Bloom
-          :x="800"
-          :y="380"
-          :size="0.6"
-          :rotate="15"
-          :delay="1600"
-        />
-      </Vine>
+    <div class="absolute inset-y-0 left-0 -z-10 w-4 overflow-hidden opacity-50 sm:hidden">
+      <PageVine
+        :seed="5"
+        :width="16"
+        compact
+      />
+    </div>
+    <div class="absolute inset-y-0 left-0 -z-10 hidden w-8 overflow-hidden opacity-50 sm:block min-[1400px]:hidden">
+      <PageVine
+        :seed="5"
+        :width="32"
+        compact
+      />
     </div>
   </div>
 </template>
