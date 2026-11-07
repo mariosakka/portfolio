@@ -20,6 +20,8 @@ const data: Organization[] = raw
       :key="d.id"
       v-pointer
       underline
+      variant="wrap"
+      :density="3"
       image-side="right"
       :title="d.name"
       :eyebrow="[d.role, d.shortDescription].filter(Boolean).join(' · ')"

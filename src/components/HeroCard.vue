@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import DetailModal from './DetailModal.vue'
 import MediaFrame from './MediaFrame.vue'
 import CardGarden from './CardGarden.vue'
+import type { SproutDensity, SproutVariant } from '../garden'
 import type { Fit } from '../lib/motion'
 import type { CardLink } from '../types/card'
 import { fitTags } from '../lib/normalize'
@@ -24,6 +25,10 @@ const props = withDefaults(defineProps<{
   fit?: Fit | 'auto'
   // Spotlight title: an accent underline drawn in when the section enters.
   underline?: boolean
+  // Card sprouts: grow on view by default; pass `active` (coverflow slide, top deck card) to grow when it is true.
+  active?: boolean
+  density?: SproutDensity
+  variant?: SproutVariant | 'auto'
 }>(), {
   eyebrow: '',
   meta: '',
@@ -38,6 +43,9 @@ const props = withDefaults(defineProps<{
   logo: false,
   fit: 'auto',
   underline: false,
+  active: undefined,
+  density: 2,
+  variant: 'auto',
 })
 
 const first = (...v: string[]): string => v.find((s) => s.trim()) ?? ''
@@ -66,7 +74,13 @@ const open = ref(false)
       split ? 'md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:grid-rows-none' : '',
     ]"
   >
-    <CardGarden :seed="title" />
+    <CardGarden
+      :seed="title"
+      :variant="variant"
+      :density="density"
+      :trigger="active === undefined ? 'visible' : 'active'"
+      :active="active"
+    />
     <!-- Phones: the image band takes a share of the screen height; from md (split) it fills the row. -->
     <MediaFrame
       v-if="image"

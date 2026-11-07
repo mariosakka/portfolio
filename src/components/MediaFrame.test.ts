@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import MediaFrame from './MediaFrame.vue'
 import CardGarden from './CardGarden.vue'
+import { Sprouts } from '../garden'
 
 const load = async (w: ReturnType<typeof mount>, nw: number, nh: number, fw: number, fh: number) => {
   Object.defineProperties(w.element, { clientWidth: { value: fw }, clientHeight: { value: fh } })
@@ -40,14 +41,24 @@ describe('MediaFrame', () => {
 })
 
 describe('CardGarden', () => {
-  it('is an empty seam today: renders only its slot, with harmless defaults', () => {
-    const w = mount(CardGarden, { props: { seed: 3 }, slots: { default: '<i>x</i>' } })
-    expect(w.html()).toBe('<i>x</i>')
-    expect(w.props()).toEqual({ seed: 3, variant: 'default', density: 1, active: true, reach: undefined })
-    expect(mount(CardGarden, { props: { seed: 'a' } }).text()).toBe('')
+  it('renders a Sprouts overlay (aria-hidden svg) beside its slot, with the seed, density and reach passed through', () => {
+    const w = mount(CardGarden, { props: { seed: 'card-x', density: 3, reach: 44, isStatic: true }, slots: { default: '<i>x</i>' } })
+    const sprouts = w.findComponent(Sprouts)
+    expect(sprouts.exists()).toBe(true)
+    expect(sprouts.props()).toMatchObject({ seed: 'card-x', density: 3, reach: 44, variant: 'auto', trigger: 'visible', isStatic: true })
+    const svg = w.get('svg.g-sprouts')
+    expect(svg.attributes('aria-hidden')).toBe('true')
+    expect(svg.attributes('style')).toContain('-44px')
+    expect(w.html()).toContain('<i>x</i>')
   })
 
-  it.each([[true, 56], [false, 32]])('passes the sprouts reach by breakpoint (wide %s: %spx), or the override', async (wide, px) => {
+  it('maps variant default to auto, passes a pinned variant and the active trigger through', () => {
+    expect(mount(CardGarden, { props: { seed: 1 } }).findComponent(Sprouts).props('variant')).toBe('auto')
+    const p = mount(CardGarden, { props: { seed: 1, variant: 'hang', trigger: 'active', active: false } }).findComponent(Sprouts).props()
+    expect(p).toMatchObject({ variant: 'hang', trigger: 'active', active: false })
+  })
+
+  it.each([[true, 56], [false, 32]])('passes the slot reach by breakpoint (wide %s: %spx), or the override', async (wide, px) => {
     const saved = window.matchMedia
     window.matchMedia = ((q: string) => ({ matches: q.includes('640px') && wide })) as unknown as typeof window.matchMedia
     const w = mount(CardGarden, { props: { seed: 1 }, slots: { default: '<b>{{ params.reach }}</b>' } })

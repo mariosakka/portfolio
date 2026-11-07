@@ -129,6 +129,8 @@ function pose(i: number): Record<string, string> {
       >
         <HeroCard
           v-pointer
+          variant="climb"
+          :active="i === deck.top"
           :title="d.degree"
           :eyebrow="d.institution"
           :meta="formatPeriod(d.startDate, d.endDate, d.isPresent)"

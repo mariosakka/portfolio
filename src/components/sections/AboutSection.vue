@@ -4,9 +4,11 @@ import type { About } from '../../types/data'
 import CardGarden from '../CardGarden.vue'
 import CommitBadge from '../CommitBadge.vue'
 import MediaFrame from '../MediaFrame.vue'
-import { vReveal } from '../../lib/useMotion'
+import { useMedia, vReveal } from '../../lib/useMotion'
 
 const about: About = aboutJson
+// The photo is 48px (md) or 20px (phones) from the text: the art stays inside that gap.
+const wide = useMedia('(min-width: 768px)')
 </script>
 
 <template>
@@ -25,7 +27,8 @@ const about: About = aboutJson
     >
       <CardGarden
         seed="about"
-        variant="frame"
+        :density="3"
+        :reach="wide ? 40 : 16"
       />
       <MediaFrame
         :src="about.photo"

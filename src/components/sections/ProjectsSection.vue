@@ -40,9 +40,10 @@ const items = computed(() => data.filter((d) => active.value === 'All' || d.cate
       :items="items"
       label="Projects"
     >
-      <template #slide="{ item }">
+      <template #slide="{ item, active: cur }">
         <HeroCard
           v-pointer
+          :active="cur"
           :title="item.title"
           :eyebrow="[item.category, item.role].filter(Boolean).join(' · ')"
           :meta="team[item.teamType] ?? ''"

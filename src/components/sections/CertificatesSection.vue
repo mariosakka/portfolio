@@ -7,9 +7,12 @@ import raw from '../../data/certificates.json'
 import type { Certificate } from '../../types/data'
 import { toList } from '../../lib/normalize'
 import { bentoRows, bentoSpan, monogram } from '../../lib/motion'
-import { vPointer, vReveal } from '../../lib/useMotion'
+import { useMedia, vPointer, vReveal } from '../../lib/useMotion'
 
 const data: Certificate[] = raw
+// Tiles sit 20px (12px on phones) apart: a ring of 40px (24px) keeps most of a tile's art off its neighbours' text.
+const wide = useMedia('(min-width: 640px)')
+const tileReach = computed(() => (wide.value ? 40 : 24))
 // The 2x2 tile shows the first certificate image; a certificate without one gets a small monogram tile.
 const large = Math.max(0, data.findIndex((c) => c.image))
 const open = ref<number | null>(null)
@@ -41,7 +44,11 @@ const url = (c: Certificate) => (typeof c.credentialUrl === 'string' ? c.credent
         class="group relative flex w-full min-w-0 gap-2 rounded-[1.5rem] border border-line bg-surface p-2 text-ink transition-colors hover:border-accent/40"
         :class="c.image ? 'flex-col' : 'flex-row items-center md:flex-col md:items-stretch'"
       >
-        <CardGarden :seed="c.id" />
+        <CardGarden
+          :seed="c.id"
+          :density="i === large ? 3 : 1"
+          :reach="tileReach"
+        />
         <MediaFrame
           v-if="c.image"
           :src="c.image"

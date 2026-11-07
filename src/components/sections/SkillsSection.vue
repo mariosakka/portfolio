@@ -13,11 +13,12 @@ const dy = [0, 14, -8, 10, -12, 4, 12, -6, 8, -10, 2, 14]
 <template>
   <div
     v-if="skills.length"
-    class="relative mx-auto w-full max-w-4xl"
+    class="relative mx-auto w-full max-w-4xl p-3 sm:p-6 short:sm:p-4"
   >
     <CardGarden
       seed="skills"
-      variant="cluster"
+      variant="wrap"
+      :density="2"
     />
     <ul
       v-reveal="'stagger'"

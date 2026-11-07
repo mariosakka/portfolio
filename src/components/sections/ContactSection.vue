@@ -24,7 +24,8 @@ const others = methods.filter((m) => m !== email)
   >
     <CardGarden
       seed="contact"
-      variant="panel"
+      variant="hang"
+      :density="3"
     />
     <div class="grid gap-8 xshort:gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:gap-14">
       <div class="min-w-0">

@@ -8,7 +8,7 @@ import { prefersReducedMotion } from '../lib/useMotion'
 // variables (rotate, scale, shift, opacity) that its pose wrapper reads; Vue never re-renders per frame.
 defineOptions({ name: 'SnapCarousel' })
 const props = defineProps<{ items: T[]; label: string }>()
-defineSlots<{ slide(p: { item: T; index: number }): unknown }>()
+defineSlots<{ slide(p: { item: T; index: number; active: boolean }): unknown }>()
 
 const track = ref<HTMLElement | null>(null)
 const current = ref(0)
@@ -131,13 +131,14 @@ onBeforeUnmount(() => {
             name="slide"
             :item="item"
             :index="i"
+            :active="i === current"
           />
         </div>
       </div>
     </div>
     <div
       v-if="items.length > 1"
-      class="relative z-10 mt-2 flex items-center gap-x-6 sm:mt-1"
+      class="relative z-10 mt-3 flex items-center gap-x-6 sm:mt-1"
     >
       <p
         class="font-serif text-lg tabular-nums text-ink/70"
