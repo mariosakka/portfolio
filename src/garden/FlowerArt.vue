@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { computed, useId } from 'vue'
+import { computed, inject, useId } from 'vue'
 import { easeOut, petalPhase, phase, ramp } from './timeline'
+import { DEFS_KEY } from './useGrow'
 import type { FlowerGeometry } from './types'
 
 // Draws one generated flower at the origin (base) from a single 0..1 progress value.
 const props = defineProps<{ geometry: FlowerGeometry; progress: number; idle?: boolean }>()
-const id = useId()
+const own = useId()
+const shared = inject(DEFS_KEY, null)
+const sharedId = computed(() => shared?.flower(props.geometry.palette) ?? null)
+const id = computed(() => sharedId.value ?? own)
+const glowR = computed(() => (shared ? props.geometry.extent * shared.glow : props.geometry.glowR))
 const ph = computed(() => phase(props.progress))
 const open = computed(() => (props.geometry.closed ? 0 : ph.value.open))
 const perLayer = computed(() => props.geometry.petals.length / props.geometry.layers)
@@ -35,7 +40,7 @@ const hidden = (n: number) => ({ opacity: n > 0.001 ? 1 : 0 })
     :class="{ 'g-is-swaying': idle }"
     :style="{ '--sd': sd }"
   >
-    <defs>
+    <defs v-if="!sharedId">
       <radialGradient
         :id="`${id}-o`"
         cx="50%"
@@ -89,7 +94,7 @@ const hidden = (n: number) => ({ opacity: n > 0.001 ? 1 : 0 })
     </defs>
     <circle
       class="g-glow"
-      :r="geometry.glowR"
+      :r="glowR"
       :fill="`url(#${id}-g)`"
       :style="{ opacity: ramp(open, 0.3, 1) }"
     />

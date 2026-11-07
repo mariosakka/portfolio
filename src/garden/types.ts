@@ -39,6 +39,16 @@ export interface VineProps {
   isStatic?: boolean
 }
 
+/** Shared gradient ids an overlay provides to its plants (see `DEFS_KEY`). */
+export interface GardenDefs {
+  /** Id prefix of the `-o`, `-i`, `-g` gradients for a palette, or null when the overlay has none (the flower draws its own). */
+  flower: (palette: Palette) => string | null
+  /** Id of the leaf gradient. */
+  leaf: string
+  /** Glow radius as a multiple of the petal extent. */
+  glow: number
+}
+
 /** What a Vine provides to the art components inside it. */
 export interface GardenContext {
   grown: Readonly<Ref<boolean>>
@@ -208,6 +218,8 @@ export interface PlantSpec {
   spread?: number
   /** Species of the side branches, cycled. */
   branchSpecies?: Species[]
+  /** Override the species palette (side branches inherit it). */
+  palette?: Palette
 }
 
 export interface PlantNode {
@@ -236,7 +248,7 @@ export interface PlantProps extends Omit<PlantSpec, 'seed'> {
   isStatic?: boolean
   /** Drive the whole plant manually (0..1) instead of the timeline. */
   progress?: number
-  /** Gentle idle sway once fully grown (default false; PageVine enables it only for plants near the viewport). */
+  /** Gentle idle sway once fully grown (default false; Sprouts enables it only for a few plants near the viewport). */
   sway?: boolean
 }
 
@@ -257,61 +269,86 @@ export interface SpeciesProps extends ArtProps {
   progress?: number
 }
 
-export interface VinePathOptions {
-  seed: number
-  /** Total height in px. */
-  height: number
-  /** Strip width in px (default 180). */
-  width?: number
-  /** Inner margin kept free of the stem on both sides (default 28% of width). */
-  pad?: number
-  /** Nominal px per S-curve (default 220). */
-  step?: number
+/** Arrangement of a `Sprouts` overlay; `auto` picks one from the seed. */
+export type SproutVariant = 'corners' | 'edge' | 'wrap' | 'hang' | 'climb' | 'burst'
+/** 1 = about 3-4 flowers, 2 = about 6-9, 3 = about 10-14 per parent. */
+export type SproutDensity = 1 | 2 | 3
+/** `visible`: grows once when ~25% of the parent is visible; `active`: grows once `active` is true; `manual`: `progress` drives it. */
+export type SproutTrigger = 'visible' | 'active' | 'manual'
+
+export interface SproutsProps {
+  seed?: string | number
+  variant?: SproutVariant | 'auto'
+  density?: SproutDensity
+  trigger?: SproutTrigger
+  /** With `trigger="active"`: start growing when this becomes true (never retracts). */
+  active?: boolean
+  /** With `trigger="manual"`: whole overlay progress 0..1. */
+  progress?: number
+  /** Width in px of the ring around the parent the art may use (default 40). */
+  reach?: number
+  /** Final grown state, no animation. */
+  isStatic?: boolean
+  /** Opt-in idle sway once grown; globally capped to a few plants nearest the viewport. */
+  sway?: boolean
 }
 
-export interface PathSample extends Anchor {
-  /** Arc-length fraction 0..1. */
-  f: number
-}
-
-export interface VinePath extends PathModel {
-  samples: PathSample[]
+export interface SproutLayoutOptions {
+  seed: string | number
+  variant?: SproutVariant | 'auto'
+  density?: SproutDensity
+  /** Parent box size in px (the art's coordinate system has the parent at 0,0 to width,height). */
   width: number
   height: number
+  reach?: number
 }
 
-export interface VineItem {
+export interface SproutVine {
   id: string
-  kind: 'leaf' | 'plant'
-  /** Arc fraction of the anchor along the vine. */
-  f: number
-  anchor: Anchor
-  /** Leaves only. */
+  path: PathModel
+  /** Stroke width in px. */
+  width: number
+  /** ms after the trigger. */
+  delay: number
+  duration: number
+  /** Ease-out exponent of the draw: drawn = 1 - (1 - t) ** ease. */
+  ease: number
+}
+
+export interface SproutPlant {
+  id: string
+  spec: PlantSpec
+  delay: number
+  duration: number
+  /** Open flowers on this plant counted in the density band (main plus side branches; 0 for buds and fillers). */
+  flowers: number
+  /** A main flower, a bud, or a tiny filler blossom. */
+  kind: 'flower' | 'bud' | 'filler'
+}
+
+export interface SproutLeaf {
+  id: string
+  x: number
+  y: number
   rotate: number
   size: number
-  plant?: Omit<PlantSpec, 'anchor'>
+  delay: number
+  duration: number
 }
 
-export interface PlaceOptions {
-  seed: number
-  /** Flower frequency multiplier (default 1). */
-  density?: number
-  /** Hairline edge vine: tiny flowers on short stems, no leaves on stems. */
-  compact?: boolean
-}
-
-export interface PageVineProps {
-  seed?: number
-  /** Height in px; omitted or 0 measures the parent with a ResizeObserver. */
-  height?: number
-  /** Strip width in px (default 180). */
-  width?: number
-  /** Which screen edge the strip hugs (default `left`). */
-  side?: 'left' | 'right'
-  density?: number
-  /** Fraction of the parent height the vine covers (default 1). */
-  coverage?: number
-  compact?: boolean
-  /** Fully drawn, no scroll listener. */
-  isStatic?: boolean
+export interface SproutLayout {
+  variant: SproutVariant
+  width: number
+  height: number
+  reach: number
+  vines: SproutVine[]
+  plants: SproutPlant[]
+  leaves: SproutLeaf[]
+  /** Open flowers in total. */
+  flowers: number
+  buds: number
+  /** Tiny filler blossoms (not counted in `flowers`). */
+  fillers: number
+  /** ms until everything is grown. */
+  total: number
 }

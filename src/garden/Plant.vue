@@ -1,23 +1,26 @@
 <script setup lang="ts">
-import { computed, ref, useId } from 'vue'
+import { computed, inject, ref, useId } from 'vue'
 import FlowerArt from './FlowerArt.vue'
 import { LEAF } from './flowers'
 import { growPlant } from './grow'
 import { clamp01, easeOut, phase, ramp, useGrowthTimeline } from './timeline'
-import { useGrown } from './useGrow'
+import { DEFS_KEY, useGrown } from './useGrow'
 import type { PlantProps } from './types'
 
 // A flower growing out of a vine: stem from the anchor, leaves on the stem, bud, petals, stamens, pollen.
 const props = withDefaults(defineProps<PlantProps>(), {
-  seed: 1, side: 1, reach: 60, size: 1, leaves: 2, branches: 0, bud: false, spread: 120, branchSpecies: undefined,
+  seed: 1, side: 1, reach: 60, size: 1, leaves: 2, branches: 0, bud: false, spread: 120, branchSpecies: undefined, palette: undefined,
   grown: undefined, delay: 0, duration: 3200, isStatic: false, progress: undefined, sway: false,
 })
 const el = ref<SVGGElement | null>(null)
 const id = useId()
+const shared = inject(DEFS_KEY, null)
+const leafFill = computed(() => `url(#${shared?.leaf ?? `${id}-l`})`)
 const { grown, isStatic } = useGrown(props, el)
 const geo = computed(() => growPlant({
   species: props.species, seed: props.seed, anchor: props.anchor, side: props.side, reach: props.reach, size: props.size,
   leaves: props.leaves, branches: props.branches, bud: props.bud, spread: props.spread, branchSpecies: props.branchSpecies,
+  ...(props.palette ? { palette: props.palette } : {}),
 }))
 const timeline = useGrowthTimeline(grown, { duration: props.duration, delay: props.delay, isStatic })
 const p = computed(() => (isStatic.value ? 1 : props.progress ?? timeline.value))
@@ -37,7 +40,7 @@ const nodes = computed(() => geo.value.nodes.map((n) => {
     class="g-art g-plant"
     :class="{ 'g-is-grown': grown, 'g-is-static': isStatic }"
   >
-    <defs>
+    <defs v-if="!shared">
       <linearGradient
         :id="`${id}-l`"
         x1="0"
@@ -81,7 +84,7 @@ const nodes = computed(() => geo.value.nodes.map((n) => {
         <g :style="{ transform: `scale(${lf.l.size * lf.s})`, opacity: lf.s > 0 ? 1 : 0 }">
           <path
             :d="LEAF.d"
-            :fill="`url(#${id}-l)`"
+            :fill="leafFill"
             stroke="#4fa6ba"
             stroke-opacity=".5"
             stroke-width=".8"
