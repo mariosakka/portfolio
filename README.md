@@ -18,10 +18,15 @@ Prerequisites: Node 24+, git, [gitleaks](https://github.com/gitleaks/gitleaks), 
 | `.githooks/pre-push` | secret scan + instruction-file check + lint + test | automatic on push | `ci.yml` (authoritative) |
 | shebang scripts (rule: must be mode 100755) | `git update-index --chmod=+x <file>` | n/a | `ci.yml` |
 | `scripts/check_agent_instructions.py` | CLAUDE.md length and links | `python scripts/check_agent_instructions.py .` | `ci.yml` |
+| `scripts/check-test-sync.mjs` | fail when `src/` code changes without a test change (see [testing](docs/testing.md)) | `node scripts/check-test-sync.mjs [baseRef]` | `ci.yml`, `.githooks/pre-push` |
 | `scripts/check-placeholders.mjs` | warn (never fail) on `aaa`/`aaaa`/`lorem` values and empty `longDescription`/`image` in `src/data/*.json` | `node scripts/check-placeholders.mjs [dir]` | `ci.yml`, `deploy.yml` (non-blocking) |
 | `scripts/build-data.mjs` | convert the Firestore export to `src/data/*.json` | `node scripts/build-data.mjs [exportDir]` | none |
 | `scripts/fetch-images.mjs` | download and optimize images to `public/img` (sharp, webp) | `node scripts/fetch-images.mjs [exportDir]` | none |
 | `docs/reference/export-firestore.mjs` | one-off export of the old Firestore data | `node docs/reference/export-firestore.mjs` | none |
+
+## Docs
+- [Test strategy and enforcement matrix](docs/testing.md)
+- [Known issues](docs/known-issues.md)
 
 ## Deploy
 Push to `main` runs `.github/workflows/deploy.yml`: `npm ci`, lint, test, placeholder check, build (commit SHA and message are passed in as `GITHUB_SHA`/`COMMIT_MESSAGE`), then publishes `dist/` to GitHub Pages. `public/CNAME` ends up in `dist/` and sets the custom domain `mohamad-mario-sakka.com`.

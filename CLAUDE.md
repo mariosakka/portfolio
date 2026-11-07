@@ -9,4 +9,4 @@ Static Vue 3 + Vite portfolio, deployed to GitHub Pages. Design: [docs/superpowe
 - Animated flower components stay dependency-free and Tailwind-free (they become an npm package later).
 
 ## Commands
-See [README.md](README.md).
+See [README.md](README.md). Tests and enforcement: [docs/testing.md](docs/testing.md). Open issues: [docs/known-issues.md](docs/known-issues.md).
