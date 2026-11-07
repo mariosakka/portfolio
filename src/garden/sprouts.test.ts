@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
-import { Sprouts, layoutSprouts, pickVariant, SPROUT_VARIANTS, SPROUT_FLOWERS, SPROUT_OVERLAP, enqueueGrowth, growthStats, MAX_GROWING_PLANTS, growPlant, parsePath, pointAt, LEAF } from './index'
+import { Sprouts, layoutSprouts, pickVariant, SPROUT_VARIANTS, SPROUT_FLOWERS, SPROUT_OVERLAP, SPROUT_GLOW, enqueueGrowth, growthStats, MAX_GROWING_PLANTS, growPlant, parsePath, pointAt, LEAF } from './index'
 import type { Pt, SproutDensity, SproutLayout, SproutVariant, SproutsProps } from './index'
 
 const DENSITIES: SproutDensity[] = [1, 2, 3]
@@ -28,7 +28,7 @@ function artPoints(L: SproutLayout): [Pt, number][] {
     for (const n of growPlant(p.spec).nodes) {
       for (let f = 0; f <= 1; f += 1 / 40) out.push([pointAt(n.stem, f), 1.1])
       for (const l of n.leaves) leaf(l.x, l.y, l.rotate, l.size)
-      const r = n.flower.extent * n.at.scale
+      const r = n.flower.extent * n.at.scale * SPROUT_GLOW // the glow counts
       for (let a = 0; a < 360; a += 15) out.push([{ x: n.at.x + r * Math.cos((a * Math.PI) / 180), y: n.at.y + r * Math.sin((a * Math.PI) / 180) }, 0])
       out.push([{ x: n.at.x, y: n.at.y }, 0])
     }
@@ -42,9 +42,9 @@ describe('layoutSprouts containment', () => {
     for (const variant of [...SPROUT_VARIANTS, 'auto'] as const) {
       for (const density of DENSITIES) {
         for (const [w, hh] of SIZES) {
-          for (const seed of [0, 1, 2, 5, 'card-a', 'photo']) {
-            const reach = typeof seed === 'number' && seed % 2 ? 64 : 40
-            const L = layoutSprouts({ seed, variant, density, width: w, height: hh, reach })
+          for (const [si, seed] of [0, 1, 2, 5, 'card-a', 'photo'].entries()) {
+            const L = layoutSprouts({ seed, variant, density, width: w, height: hh, reach: [56, 32, 64, 8, 40, 56][si] })
+            const reach = L.reach
             const id = `${variant}/${density}/${w}x${hh}/${seed}`
             let deepest = -Infinity
             let ring = 0
@@ -61,6 +61,9 @@ describe('layoutSprouts containment', () => {
     }
     expect(checked).toBeGreaterThan(100000)
   }, 60000)
+  it('clamps a reach below 12px to 12', () => {
+    expect(layoutSprouts({ seed: 1, width: 300, height: 200, reach: 4 }).reach).toBe(12)
+  })
   it('anchors every plant on a vine', () => {
     for (const variant of SPROUT_VARIANTS) {
       const L = layoutSprouts({ seed: 3, variant, density: 3, width: 320, height: 200 })
@@ -101,6 +104,7 @@ describe('layoutSprouts variety', () => {
             expect(L.flowers, id).toBeLessThanOrEqual(hi)
             expect(L.flowers, id).toBe(L.plants.reduce((a, p) => a + p.flowers, 0))
             expect(L.buds, id).toBeGreaterThanOrEqual(1)
+            expect(L.fillers + L.buds, id).toBeGreaterThanOrEqual(density + 1) // buds and tiny filler blossoms between the flowers
             expect(L.leaves.length, id).toBeGreaterThanOrEqual(density + 1)
             for (const p of L.plants) {
               species.add(p.spec.species)
@@ -114,6 +118,25 @@ describe('layoutSprouts variety', () => {
     expect(palettes.size).toBeGreaterThanOrEqual(8) // 5 species palettes plus extra blue, violet and pale hues
     const sizes = layoutSprouts({ seed: 4, variant: 'corners', density: 3, width: 640, height: 360 }).plants.map((p) => growPlant(p.spec).nodes[0]).map((n) => (n ? n.flower.extent * n.at.scale : 0))
     expect(Math.max(...sizes) / Math.min(...sizes)).toBeGreaterThan(1.6) // small to large
+  })
+  it('grows bigger flowers at the default desktop reach, with some showpieces, and more flowers on bigger parents', () => {
+    const radii = Array.from({ length: 30 }, (_, seed) => layoutSprouts({ seed, density: 2, width: 420, height: 260, reach: 56 }))
+      .flatMap((L) => L.plants.filter((p) => p.kind === 'flower').map((p) => { const n = growPlant(p.spec).nodes[0]; return n ? n.flower.extent * n.at.scale : 0 }))
+    expect(Math.max(...radii)).toBeGreaterThan(22)
+    expect(radii.filter((r) => r > 16).length / radii.length).toBeGreaterThan(0.2)
+    const mean = (w: number, hh: number): number => Array.from({ length: 24 }, (_, seed) => layoutSprouts({ seed, density: 2, width: w, height: hh, reach: 56 }).flowers).reduce((a, b) => a + b) / 24
+    expect(mean(900, 500)).toBeGreaterThan(mean(160, 100) + 1)
+  })
+  it('burst sprouts always end in a flower or bud (no bare whiskers)', () => {
+    for (let seed = 0; seed < 24; seed++) {
+      const L = layoutSprouts({ seed, variant: 'burst', density: 2, width: 360, height: 220, reach: 56 })
+      for (const v of L.vines) {
+        const end = pointAt(v.path, 1)
+        const tip = L.plants.some((p) => Math.hypot(p.spec.anchor.x - end.x, p.spec.anchor.y - end.y) < 1)
+        expect(tip, `${seed} ${v.id}`).toBe(true)
+      }
+      expect(Math.min(...L.vines.map((v) => v.path.total))).toBeGreaterThan(25) // real branches, not stubs
+    }
   })
   it('starts vines out of sync (staggered up to ~1.4s, not left to right) and blooms in an irregular order', () => {
     let unsortedVines = 0
@@ -141,13 +164,15 @@ describe('layoutSprouts variety', () => {
 
 class MockIO {
   static all: MockIO[] = []
-  cb: (e: { isIntersecting: boolean; intersectionRatio: number }[]) => void
+  cb: (e: Partial<IntersectionObserverEntry>[]) => void
   opts: IntersectionObserverInit | undefined
   disconnected = false
   constructor(cb: MockIO['cb'], opts?: IntersectionObserverInit) { this.cb = cb; this.opts = opts; MockIO.all.push(this) }
   observe() {}
   disconnect() { this.disconnected = true }
-  fire(on: boolean) { this.cb([{ isIntersecting: on, intersectionRatio: on ? 0.3 : 0 }]) }
+  fire(on: boolean, ratio = on ? 0.3 : 0, rect = { width: 0, height: 0 }) {
+    this.cb([{ isIntersecting: on, intersectionRatio: ratio, intersectionRect: rect as DOMRectReadOnly, rootBounds: { width: 1000, height: 800 } as DOMRectReadOnly }])
+  }
 }
 class MockRO {
   static all: MockRO[] = []
@@ -184,10 +209,11 @@ const live: ReturnType<typeof mount>[] = []
 // Mounted into a fresh div (its parent element), the way it sits inside a card.
 const card = (props: SproutsProps) => { const w = mount(Sprouts, { props, attachTo: document.body }); live.push(w); return w }
 const opacities = (w: ReturnType<typeof mount>, sel: string): number[] => w.findAll(sel).map((e) => Number(/opacity: ([\d.]+)/.exec(e.attributes('style') ?? '')?.[1]))
+const artNodes = (w: ReturnType<typeof mount>): number => w.findAll('svg.g-sprouts *').length
 const dash = (w: ReturnType<typeof mount>): number[] => w.findAll('.g-sprout-vine').map((e) => Number(e.attributes('stroke-dashoffset')))
 
 beforeEach(() => setup())
-afterEach(() => { live.splice(0).forEach((w) => { try { w.unmount() } catch { /* already unmounted */ } }); vi.restoreAllMocks(); vi.unstubAllGlobals(); document.body.replaceChildren() })
+afterEach(() => { vi.useRealTimers(); live.splice(0).forEach((w) => { try { w.unmount() } catch { /* already unmounted */ } }); vi.restoreAllMocks(); vi.unstubAllGlobals(); document.body.replaceChildren() })
 
 describe('Sprouts component', () => {
   it('renders one decorative, unfocusable, non-interactive svg around the parent and adds no text', async () => {
@@ -206,6 +232,80 @@ describe('Sprouts component', () => {
     expect(w.text()).toBe('')
     expect(w.findAll('svg svg')).toHaveLength(0)
     expect(w.find('[tabindex]').exists()).toBe(false)
+    // One shared gradient set: plants and flowers inside carry no <defs> of their own.
+    expect(w.findAll('svg.g-sprouts > defs')).toHaveLength(1)
+    expect(w.findAll('.g-plant defs, .g-flower-art defs')).toHaveLength(0)
+    const ids = new Set(w.findAll('[id]').map((e) => e.attributes('id')))
+    for (const e of w.findAll('[fill^="url("]')) expect(ids.has(/url\(#(.+)\)/.exec(e.attributes('fill') ?? '')?.[1])).toBe(true)
+  })
+  it('clamps a reach below 12px', async () => {
+    const w = card({ seed: 1, isStatic: true, reach: 4 })
+    await nextTick()
+    expect(w.find('svg').attributes('width')).toBe('344')
+    expect(w.find('svg').attributes('viewBox')).toBe('-12 -12 344 224')
+  })
+  it('renders no art before it starts, so unseen cards cost nothing', async () => {
+    const w = card({ seed: 1 })
+    const a = card({ seed: 2, trigger: 'active', active: false })
+    await flush(500)
+    expect(artNodes(w)).toBe(0)
+    expect(artNodes(a)).toBe(0)
+    MockIO.all[0]?.fire(true)
+    await flush(100)
+    expect(artNodes(w)).toBeGreaterThan(50)
+  })
+  it('caps density by viewport width: 2 below 640px, 1 below 380px', async () => {
+    const plantsAt = async (vw: number): Promise<number> => {
+      Object.defineProperty(window, 'innerWidth', { value: vw, configurable: true })
+      const w = card({ seed: 3, density: 3, isStatic: true })
+      await nextTick()
+      return w.findAll('.g-plant').length
+    }
+    const size = (d: SproutDensity, reach: number): number => layoutSprouts({ seed: 3, density: d, width: 320, height: 200, reach }).plants.length
+    expect(await plantsAt(1200)).toBe(size(3, 56))
+    expect(await plantsAt(500)).toBe(size(2, 32))
+    expect(await plantsAt(360)).toBe(size(1, 32))
+    Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true })
+  })
+  it('waits for a zero-size parent and then grows from the start instead of popping in', async () => {
+    const wSpy = vi.spyOn(Element.prototype, 'clientWidth', 'get').mockReturnValue(0)
+    const w = card({ seed: 4 })
+    await nextTick()
+    MockIO.all[0]?.fire(true)
+    await flush(300)
+    expect(artNodes(w)).toBe(0)
+    expect(growthStats().running).toBe(0)
+    wSpy.mockReturnValue(320)
+    MockRO.all[0]?.cb()
+    await flush(100)
+    expect(growthStats().running).toBe(1)
+    expect(dash(w).length).toBeGreaterThan(0)
+    expect(dash(w).some((d) => d === 1)).toBe(true) // growing from the start, not shown fully grown
+    expect(opacities(w, '.g-pollen').every((o) => o === 0)).toBe(true)
+  })
+  it('keeps the art on small resizes and re-lays it out (fading in) only after a debounced real change', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const wSpy = vi.spyOn(Element.prototype, 'clientWidth', 'get').mockReturnValue(320)
+    const w = card({ seed: 5, isStatic: true })
+    await nextTick()
+    const before = w.findAll('.g-sprout-vine').map((e) => e.attributes('d'))
+    wSpy.mockReturnValue(323)
+    MockRO.all[0]?.cb()
+    vi.advanceTimersByTime(200)
+    await nextTick()
+    expect(w.find('svg').attributes('width')).toBe(String(320 + 112))
+    expect(w.findAll('.g-sprout-vine').map((e) => e.attributes('d'))).toEqual(before)
+    wSpy.mockReturnValue(420)
+    MockRO.all[0]?.cb()
+    vi.advanceTimersByTime(100)
+    MockRO.all[0]?.cb() // a burst of resize events: still one re-layout, 150ms after the last
+    vi.advanceTimersByTime(100)
+    await nextTick()
+    expect(w.find('svg').attributes('width')).toBe(String(320 + 112))
+    vi.advanceTimersByTime(60)
+    await nextTick()
+    expect(w.find('svg').attributes('width')).toBe(String(420 + 112))
+    expect(w.find('.g-sprouts-art').classes()).toContain('g-is-relayout')
   })
   it('manual: progress 0 shows nothing and no pollen, 1 shows the final state with pollen', async () => {
     const w = card({ seed: 2, trigger: 'manual', progress: 0, density: 3 })
@@ -238,10 +338,12 @@ describe('Sprouts component', () => {
     const w = card({ seed: 4 })
     await nextTick()
     expect(MockIO.all).toHaveLength(1)
-    expect(MockIO.all[0]?.opts?.threshold).toBe(0.25)
-    expect(dash(w).every((d) => d === 1)).toBe(true)
+    expect(MockIO.all[0]?.opts?.threshold).toContain(0.25)
     await flush(500)
-    expect(dash(w).every((d) => d === 1)).toBe(true) // nothing before it is visible
+    expect(artNodes(w)).toBe(0) // nothing before it is visible
+    MockIO.all[0]?.fire(true, 0.1, { width: 200, height: 50 })
+    await flush(100)
+    expect(artNodes(w)).toBe(0) // 10% of a normal card is not enough
     MockIO.all[0]?.fire(true)
     await flush(100)
     expect(MockIO.all[0]?.disconnected).toBe(true)
@@ -255,10 +357,18 @@ describe('Sprouts component', () => {
     expect(frames).toHaveLength(0) // no per-frame work after growth
     expect(growthStats().running).toBe(0)
   })
+  it('visible: a parent much taller than the screen starts once it covers a quarter of the viewport', async () => {
+    const w = card({ seed: 9 })
+    await nextTick()
+    MockIO.all[0]?.fire(true, 0.12, { width: 1000, height: 300 }) // 12% of the parent, 37% of the viewport
+    await flush(200)
+    expect(MockIO.all[0]?.disconnected).toBe(true)
+    expect(artNodes(w)).toBeGreaterThan(0)
+  })
   it('active: waits for active, grows, and stays grown when active turns false', async () => {
     const w = card({ seed: 5, trigger: 'active', active: false })
     await flush(1000)
-    expect(dash(w).every((d) => d === 1)).toBe(true)
+    expect(artNodes(w)).toBe(0)
     expect(MockIO.all).toHaveLength(0)
     await w.setProps({ active: true })
     await flush(12000)
@@ -279,16 +389,48 @@ describe('Sprouts component', () => {
     expect(growthStats()).toMatchObject({ running: 0, queued: 0, plants: 0 })
     for (const c of cards) expect(dash(c).every((d) => d === 0)).toBe(true)
   }, 30000)
-  it('the queue starts the next grower only when slots free up', () => {
-    const done: number[] = []
-    const make = (i: number, plants: number) => enqueueGrowth({ plants, begin: () => { done.push(i) }, tick: (t) => t >= 300 })
-    const cancel = [make(0, MAX_GROWING_PLANTS - 4), make(1, 10), make(2, 4)]
-    expect(done).toEqual([0])
-    expect(growthStats().queued).toBe(2)
-    for (let i = 0; i < 4; i++) { now += 100; const run = frames; frames = []; run.forEach((f) => f(now)) }
-    expect(done).toEqual([0, 1, 2])
-    cancel.forEach((c) => c())
+  const step = (): void => { now += 100; const run = frames; frames = []; run.forEach((f) => f(now)) }
+  it('the queue releases slots plant by plant as each plant finishes', () => {
+    const order: number[] = []
+    // Grower 0: its plants finish one per frame (pending counts down from 10).
+    let left = 10
+    const c0 = enqueueGrowth({ plants: MAX_GROWING_PLANTS - 4, begin: () => { order.push(0) }, tick: () => { left = Math.max(0, left - 1); return { pending: MAX_GROWING_PLANTS - 14 + left, done: false } } })
+    const c1 = enqueueGrowth({ plants: 10, begin: () => { order.push(1) }, tick: () => ({ pending: 10, done: false }) })
+    expect(order).toEqual([0])
+    expect(growthStats().plants).toBe(MAX_GROWING_PLANTS - 4)
+    step()
+    expect(growthStats().plants).toBe(MAX_GROWING_PLANTS - 5) // one plant done, one slot back
+    expect(order).toEqual([0])
+    for (let i = 0; i < 6; i++) step()
+    expect(order).toEqual([0, 1]) // started once enough single plants finished, before grower 0 is done
+    c0(); c1()
     expect(growthStats()).toMatchObject({ running: 0, queued: 0, plants: 0 })
+  })
+  it('the queue starts the overlay nearest the viewport centre first, re-read when popping', () => {
+    const order: string[] = []
+    const dist: Record<string, number> = { a: 900, b: 50, c: 400 }
+    const hold = enqueueGrowth({ plants: MAX_GROWING_PLANTS, begin: () => {}, tick: () => ({ pending: 0, done: true }) })
+    const make = (k: string) => enqueueGrowth({ plants: MAX_GROWING_PLANTS / 2 + 1, priority: () => dist[k] ?? 0, begin: () => { order.push(k) }, tick: () => ({ pending: 0, done: true }) })
+    const cs = [make('a'), make('b'), make('c')]
+    dist.a = 10 // the page scrolled: a is now nearest
+    step()
+    expect(order[0]).toBe('a')
+    step(); step()
+    expect(order).toEqual(['a', 'b', 'c'])
+    hold(); cs.forEach((c) => c())
+  })
+  it('a grower whose tick throws is dropped and the loop keeps running for the others', () => {
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {})
+    let ticks = 0
+    enqueueGrowth({ plants: 2, begin: () => {}, tick: () => { throw new Error('boom') } })
+    const ok = enqueueGrowth({ plants: 2, begin: () => {}, tick: () => { ticks++; return { pending: 2, done: ticks >= 3 } } })
+    step()
+    expect(err).toHaveBeenCalled()
+    expect(growthStats().running).toBe(1)
+    step(); step()
+    expect(ticks).toBe(3)
+    expect(growthStats()).toMatchObject({ running: 0, plants: 0 })
+    ok()
   })
   it('cleans up observers, frames, queue slots and listeners on unmount', async () => {
     const remove = vi.spyOn(window, 'removeEventListener')

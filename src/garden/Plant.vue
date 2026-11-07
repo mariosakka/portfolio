@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, useId } from 'vue'
+import { computed, inject, ref, useId } from 'vue'
 import FlowerArt from './FlowerArt.vue'
 import { LEAF } from './flowers'
 import { growPlant } from './grow'
 import { clamp01, easeOut, phase, ramp, useGrowthTimeline } from './timeline'
-import { useGrown } from './useGrow'
+import { DEFS_KEY, useGrown } from './useGrow'
 import type { PlantProps } from './types'
 
 // A flower growing out of a vine: stem from the anchor, leaves on the stem, bud, petals, stamens, pollen.
@@ -14,6 +14,8 @@ const props = withDefaults(defineProps<PlantProps>(), {
 })
 const el = ref<SVGGElement | null>(null)
 const id = useId()
+const shared = inject(DEFS_KEY, null)
+const leafFill = computed(() => `url(#${shared?.leaf ?? `${id}-l`})`)
 const { grown, isStatic } = useGrown(props, el)
 const geo = computed(() => growPlant({
   species: props.species, seed: props.seed, anchor: props.anchor, side: props.side, reach: props.reach, size: props.size,
@@ -38,7 +40,7 @@ const nodes = computed(() => geo.value.nodes.map((n) => {
     class="g-art g-plant"
     :class="{ 'g-is-grown': grown, 'g-is-static': isStatic }"
   >
-    <defs>
+    <defs v-if="!shared">
       <linearGradient
         :id="`${id}-l`"
         x1="0"
@@ -82,7 +84,7 @@ const nodes = computed(() => geo.value.nodes.map((n) => {
         <g :style="{ transform: `scale(${lf.l.size * lf.s})`, opacity: lf.s > 0 ? 1 : 0 }">
           <path
             :d="LEAF.d"
-            :fill="`url(#${id}-l)`"
+            :fill="leafFill"
             stroke="#4fa6ba"
             stroke-opacity=".5"
             stroke-width=".8"

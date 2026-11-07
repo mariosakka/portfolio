@@ -15,13 +15,14 @@ export { default as Leaf } from './Leaf.vue'
 export { useGrow } from './useGrow'
 export { useGrowthTimeline, reachDelay, phase, petalPhase, PHASES } from './timeline'
 export { generateFlower, FLOWER_SPECIES, SPECIES_SCALE, EXTRA_PALETTES, LEAF } from './flowers'
-export { layoutSprouts, pickVariant, seedNumber, vineDrawn, itemProgress, SPROUT_VARIANTS, SPROUT_FLOWERS, SPROUT_OVERLAP } from './sproutLayout'
-export { enqueueGrowth, growthStats, registerSway, MAX_GROWING_PLANTS, MAX_SWAYING } from './registry'
+export { layoutSprouts, pickVariant, seedNumber, vineDrawn, itemProgress, SPROUT_VARIANTS, SPROUT_FLOWERS, SPROUT_OVERLAP, SPROUT_GLOW } from './sproutLayout'
+export { enqueueGrowth, growthStats, registerSway, viewportDistance, MAX_GROWING_PLANTS, MAX_SWAYING } from './registry'
+export { DEFS_KEY, GROWN_KEY } from './useGrow'
 export { growPlant, growStem } from './grow'
 export { parsePath, pathModel, pointAt, distanceToPath } from './anchor'
 export { mulberry32 } from './rng'
 export type {
-  Anchor, ArtProps, Cubic, FlowerGeometry, FlowerProps, FlowerSpec, GardenContext, GrowOptions, GrowthPhase, PathModel,
+  Anchor, ArtProps, Cubic, FlowerGeometry, FlowerProps, FlowerSpec, GardenContext, GardenDefs, GrowOptions, GrowthPhase, PathModel,
   Palette, PlantGeometry, PlantNode, PlantProps, PlantSpec, Pt, Species, SpeciesProps, SproutDensity, SproutLayout, SproutLayoutOptions,
   SproutLeaf, SproutPlant, SproutsProps, SproutTrigger, SproutVariant, SproutVine, TimelineOptions, VineProps,
 } from './types'

@@ -39,6 +39,16 @@ export interface VineProps {
   isStatic?: boolean
 }
 
+/** Shared gradient ids an overlay provides to its plants (see `DEFS_KEY`). */
+export interface GardenDefs {
+  /** Id prefix of the `-o`, `-i`, `-g` gradients for a palette, or null when the overlay has none (the flower draws its own). */
+  flower: (palette: Palette) => string | null
+  /** Id of the leaf gradient. */
+  leaf: string
+  /** Glow radius as a multiple of the petal extent. */
+  glow: number
+}
+
 /** What a Vine provides to the art components inside it. */
 export interface GardenContext {
   grown: Readonly<Ref<boolean>>
@@ -310,8 +320,10 @@ export interface SproutPlant {
   spec: PlantSpec
   delay: number
   duration: number
-  /** Open flowers on this plant (main plus side branches, buds excluded). */
+  /** Open flowers on this plant counted in the density band (main plus side branches; 0 for buds and fillers). */
   flowers: number
+  /** A main flower, a bud, or a tiny filler blossom. */
+  kind: 'flower' | 'bud' | 'filler'
 }
 
 export interface SproutLeaf {
@@ -335,6 +347,8 @@ export interface SproutLayout {
   /** Open flowers in total. */
   flowers: number
   buds: number
+  /** Tiny filler blossoms (not counted in `flowers`). */
+  fillers: number
   /** ms until everything is grown. */
   total: number
 }

@@ -15,6 +15,9 @@
 /* Sprouts: absolutely positioned over the parent plus `reach` px on every side; never intercepts input. */
 .g-sprouts { position: absolute; display: block; overflow: hidden; pointer-events: none; }
 .g-sprout-leaf > g { transform-origin: 0 0; }
+/* After a real resize the re-laid-out art fades in instead of jumping. */
+.g-sprouts-art.g-is-relayout { animation: garden-fade 0.5s ease-out both; }
+@keyframes garden-fade { from { opacity: 0; } }
 
 /* Flower parts animate from inline transform/opacity/dash values; origin is the receptacle. */
 .g-flower-art .g-petal, .g-flower-art .g-sepal, .g-flower-art .g-receptacle, .g-flower-art .g-disk { transform-origin: 0 0; }
@@ -30,5 +33,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .g-vine-stem { stroke-dashoffset: 0; transition: none; }
-  .g-sway { animation: none !important; }
+  .g-sway, .g-sprouts-art { animation: none !important; }
 }

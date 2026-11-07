@@ -34,13 +34,13 @@ const Gallery = defineComponent({
         h('input', { type: 'range', min: 0, max: 1, step: 0.01, value: p.value, style: 'width:320px', onInput: (e: Event) => { p.value = Number((e.target as HTMLInputElement).value) } }),
       ]),
       ...SPROUT_VARIANTS.map((v, vi) => h('section', { style: 'margin-bottom:56px', 'data-variant': v }, [
-        h('h2', { style: 'font:16px Georgia,serif;color:#9aa7c4;margin:0 0 44px' }, v),
-        h('div', { style: 'display:flex;flex-wrap:wrap;gap:96px;align-items:flex-start' },
+        h('h2', { style: 'font:16px Georgia,serif;color:#9aa7c4;margin:0 0 64px' }, v),
+        h('div', { style: 'display:flex;flex-wrap:wrap;gap:136px;align-items:flex-start' },
           ([1, 2, 3] as SproutDensity[]).map((d, i) => { const [w, hh] = SIZES[i] ?? [200, 120]; return card(`${v} ${d}`, w, hh, v, d, vi * 10 + d, p.value) })),
       ])),
       h('section', { 'data-variant': 'auto' }, [
-        h('h2', { style: 'font:16px Georgia,serif;color:#9aa7c4;margin:0 0 44px' }, 'auto (seeds 0 to 8, like a page of cards)'),
-        h('div', { style: 'display:flex;flex-wrap:wrap;gap:96px;align-items:flex-start' },
+        h('h2', { style: 'font:16px Georgia,serif;color:#9aa7c4;margin:0 0 64px' }, 'auto (seeds 0 to 8, like a page of cards)'),
+        h('div', { style: 'display:flex;flex-wrap:wrap;gap:136px;align-items:flex-start' },
           AUTO_SIZES.map(([w, hh], i) => card(`card ${i}`, w, hh, 'auto', 2, i, p.value))),
       ]),
     ])

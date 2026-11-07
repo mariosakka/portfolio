@@ -13,6 +13,8 @@ export const SPROUT_VARIANTS: readonly SproutVariant[] = ['corners', 'edge', 'wr
 export const SPROUT_FLOWERS: Record<SproutDensity, readonly [number, number]> = { 1: [3, 4], 2: [6, 9], 3: [10, 14] }
 /** Max px any art may reach inside the parent box (along its border only). */
 export const SPROUT_OVERLAP = 8
+/** Flower glow radius in Sprouts as a multiple of the petal extent; containment counts the glow. */
+export const SPROUT_GLOW = 1.1
 // Generator margin below SPROUT_OVERLAP so sampled checks between our sample points stay inside the limit.
 const LIMIT = SPROUT_OVERLAP - 1
 
@@ -121,9 +123,11 @@ interface Program {
   /** Index of the parent vine and the arc fraction it leaves from. */
   parent?: { vine: number; f: number }
   branch?: boolean
+  /** A sprout that must end in a flower or bud; removed if none fits. */
+  bloom?: boolean
 }
 
-interface Built { path: PathModel; tipF: number; branch: boolean; parent?: { vine: number; f: number } }
+interface Built { path: PathModel; tipF: number; branch: boolean; bloom: boolean; parent?: { vine: number; f: number } }
 
 const SPECIES_ALL: Species[] = ['bloom', 'cornflower', 'daisy', 'forgetmenot', 'bell']
 
@@ -135,7 +139,7 @@ export function layoutSprouts(opts: SproutLayoutOptions): SproutLayout {
   const density = opts.density ?? 2
   const seed = seedNumber(opts.seed)
   const variant = !opts.variant || opts.variant === 'auto' ? pickVariant(opts.seed) : opts.variant
-  const empty: SproutLayout = { variant, width: w, height: hgt, reach: R, vines: [], plants: [], leaves: [], flowers: 0, buds: 0, total: 0 }
+  const empty: SproutLayout = { variant, width: w, height: hgt, reach: R, vines: [], plants: [], leaves: [], flowers: 0, buds: 0, fillers: 0, total: 0 }
   if (w < 1 || hgt < 1) return empty
   const rnd = mulberry32((Math.imul(seed, 2246822519) ^ (SPROUT_VARIANTS.indexOf(variant) * 97 + density * 13 + 7)) >>> 0)
   const box: Box = { w, h: hgt, r: R }
@@ -147,7 +151,8 @@ export function layoutSprouts(opts: SproutLayoutOptions): SproutLayout {
   const cap = (n: number): number => Math.min(hMax, n)
 
   // Short sprout leaving the border at `u0` and curling outward.
-  const sprout = (u0: number, len: number, drift: number): Program => ({ u: (t) => u0 + drift * t, h: (t) => 0.8 + cap(len) * t ** 0.9, curl: true })
+  // A curved branch leaving the border at `u0`: rises first, then bends sideways; it must end in a flower or bud.
+  const sprout = (u0: number, len: number, drift: number): Program => ({ u: (t) => u0 + drift * t ** 1.6, h: (t) => 0.8 + cap(len) * Math.sin((t * Math.PI) / 2) ** 0.9, curl: false, bloom: true })
 
   const programs: Program[] = []
   // Side branches start on a knot of their parent vine (resolved once the parent is built).
@@ -176,7 +181,7 @@ export function layoutSprouts(opts: SproutLayoutOptions): SproutLayout {
         }
         const s = j ? 1 : -1
         const [, elen] = per.edge(s > 0 ? c + 1 : c)
-        const along = Math.min(elen * 0.45 + 6, between(35, 90) * k)
+        const along = Math.min(elen * 0.45 + 6, between(35, 90) * k * (1 + clamp01((2 * (w + hgt) - 600) / 1200) * 0.8))
         const lift = between(14, 30) * k
         const start = cu + s * (per.arc / 2 + between(2, 10))
         programs.push({ u: (t) => start + s * along * t, h: (t) => 1.2 + cap(lift) * t ** 1.6, curl: true })
@@ -244,11 +249,11 @@ export function layoutSprouts(opts: SproutLayoutOptions): SproutLayout {
       programs.push({ u: (t) => cu + s * down * t, h: (t) => k * (4.5 + 1.5 * Math.sin(2 * Math.PI * t + ph)) + (top - 4.5 * k - 1.5 * k * Math.sin(ph)) * (1 - t) ** 2, curl: true })
     }
   } else {
-    const n = 2 + density * 2
+    const n = 2 + density + Math.round(clamp01((2 * (w + hgt) - 400) / 1200) * 2)
     const off = rnd()
     for (let i = 0; i < n; i++) {
       const u0 = (per.P * (i + off + (rnd() - 0.5) * 0.6)) / n
-      programs.push(sprout(u0, between(14, 30) * k, (rnd() - 0.5) * 40 * k))
+      programs.push(sprout(u0, between(28, 46) * k, sign() * between(16, 44) * k))
     }
   }
 
@@ -316,7 +321,7 @@ export function layoutSprouts(opts: SproutLayoutOptions): SproutLayout {
     const tipF = pg.curl && pts.length > tipCount ? (path.cum[tipCount - 2] ?? path.total) / path.total : 1
     // Reject any vine that would dip into the parent (it never should by construction).
     for (const seg of path.segs) for (let i = 0; i <= 16; i++) if (!okPoint(box, cubicPoint(seg, i / 16), 1.8 * Math.min(1.4, Math.max(0.8, k)))) return
-    built.push({ path, tipF, branch: Boolean(pg.branch), ...(pg.parent ? { parent: { vine: builtIndex.get(pg.parent.vine) ?? 0, f: pg.parent.f } } : {}) })
+    built.push({ path, tipF, branch: Boolean(pg.branch), bloom: Boolean(pg.bloom), ...(pg.parent ? { parent: { vine: builtIndex.get(pg.parent.vine) ?? 0, f: pg.parent.f } } : {}) })
     builtIndex.set(programs.indexOf(pg), built.length - 1)
     uhKnots[programs.indexOf(pg)] = ks.map((x) => ({ u: x.u, h: x.h }))
   }
@@ -324,11 +329,14 @@ export function layoutSprouts(opts: SproutLayoutOptions): SproutLayout {
 
   // ---- plants ----
   const [lo, hi] = SPROUT_FLOWERS[density]
-  const target = lo + Math.floor(rnd() * (hi - lo + 1))
-  const plants: { spec: PlantSpec; vine: number; f: number; flowers: number }[] = []
-  const discs: { c: Pt; r: number }[] = []
+  // More flowers on bigger parents, within the density band.
+  const fill01 = clamp01((2 * (w + hgt) - 300) / 1100)
+  const target = Math.min(hi, Math.max(lo, lo + Math.round((hi - lo) * fill01 + (rnd() - 0.5))))
+  type Kind = 'flower' | 'bud' | 'filler'
+  const plants: { spec: PlantSpec; vine: number; f: number; flowers: number; kind: Kind; d: { c: Pt; r: number }[]; nb: number; nf: number }[] = []
   let flowers = 0
   let buds = 0
+  let fillers = 0
 
   const outwardAt = (p: Pt): Pt => {
     const cx = Math.min(w, Math.max(0, p.x))
@@ -347,13 +355,14 @@ export function layoutSprouts(opts: SproutLayoutOptions): SproutLayout {
     if (out.y > 0.6 && r < 0.45) return 'bell'
     return SPECIES_ALL[Math.floor(rnd() * SPECIES_ALL.length)] ?? 'bloom'
   }
-  const radiusFor = (bud: boolean): number => {
-    if (bud) return between(4.5, 7) * k
+  const radiusFor = (kind: Kind): number => {
+    if (kind === 'bud') return between(5, 8) * k
+    if (kind === 'filler') return between(3.5, 5.5) * k
     const r = rnd()
-    return (r < 0.3 ? between(6, 9) : r < 0.7 ? between(9.5, 14) : between(14.5, 20)) * k
+    return (r < 0.25 ? between(6, 9) : r < 0.6 ? between(10, 15) : r < 0.9 ? between(16, 21) : between(22, 27)) * k
   }
   /** Validate a plant against the parent box and other flowers; returns its discs and open flower count, or null. */
-  const check = (spec: PlantSpec): { d: { c: Pt; r: number }[]; open: number } | null => {
+  const check = (spec: PlantSpec, gap: number): { d: { c: Pt; r: number }[]; open: number } | null => {
     const g = growPlant(spec)
     const d: { c: Pt; r: number }[] = []
     let open = 0
@@ -361,31 +370,34 @@ export function layoutSprouts(opts: SproutLayoutOptions): SproutLayout {
       for (let i = 0; i <= 16; i++) if (!okPoint(box, pointAt(n.stem, i / 16), 1.6)) return null
       for (const l of n.leaves) if (!okLeaf(box, l.x, l.y, l.rotate, l.size)) return null
       const r = n.flower.extent * n.at.scale
-      if (!okDisc(box, n.at, r)) return null
+      if (!okDisc(box, n.at, r * SPROUT_GLOW)) return null
       d.push({ c: { x: n.at.x, y: n.at.y }, r })
       if (!n.flower.closed) open++
     }
-    for (const a of d) for (const o of discs) if (Math.hypot(a.c.x - o.c.x, a.c.y - o.c.y) < 0.8 * (a.r + o.r)) return null
+    for (const a of d) for (const o of plants.flatMap((q) => q.d)) if (Math.hypot(a.c.x - o.c.x, a.c.y - o.c.y) < gap * (a.r + o.r)) return null
     return { d, open }
   }
-  const tryPlant = (vine: number, f: number, tip: boolean, bud: boolean): boolean => {
+  const tryPlant = (vine: number, f: number, tip: boolean, kind: Kind): boolean => {
+    const bud = kind === 'bud'
     const v = built[vine]
     if (!v) return false
     const anchor: Anchor = pointAt(v.path, f)
     const out = outwardAt(anchor)
-    const species = bud ? SPECIES_ALL[Math.floor(rnd() * SPECIES_ALL.length)] ?? 'bloom' : pickSpecies(out)
-    const r = radiusFor(bud)
+    const species: Species = kind === 'filler' ? (rnd() < 0.7 ? 'forgetmenot' : 'daisy') : bud ? SPECIES_ALL[Math.floor(rnd() * SPECIES_ALL.length)] ?? 'bloom' : pickSpecies(out)
+    const r = radiusFor(kind)
     const ext = FLOWER_SPECIES[species].length * SPECIES_SCALE[species]
     const spread = tip ? between(15, 40) : between(55, 100)
     const rad = (deg: number): number => (deg * Math.PI) / 180
     const sideOut = (s: 1 | -1): number => { const a = rad(anchor.angle - s * spread); return Math.cos(a) * out.x + Math.sin(a) * out.y }
     const side: 1 | -1 = sideOut(1) >= sideOut(-1) ? 1 : -1
     const room = hi - flowers
-    const nb = !bud && density >= 2 && room >= 3 && rnd() < 0.22 ? (rnd() < 0.5 ? 1 : 2) : 0
+    const cluster = kind === 'flower' && tip && v.bloom && room >= 3 && rnd() < 0.6
+    const nb = kind === 'filler' ? (rnd() < 0.3 ? 1 : 0) : cluster ? 2 : kind === 'flower' && density >= 2 && room >= 3 && rnd() < 0.25 ? (rnd() < 0.5 ? 1 : 2) : 0
     const base: PlantSpec = {
       species, seed: (seed % 100003) * 37 + plants.length * 7 + vine * 101 + 3, anchor, side, spread: Math.round(spread),
       reach: round1(r * 1.15 + between(4, 12) * k), size: round1(Math.max(0.08, r / ext) * 100) / 100,
-      leaves: bud ? 1 : r > 10 * k ? 1 + Math.floor(rnd() * 2) : Math.floor(rnd() * 2), branches: nb, bud,
+      leaves: kind === 'filler' ? 0 : bud ? 1 : r > 10 * k ? 1 + Math.floor(rnd() * 2) : Math.floor(rnd() * 2), branches: nb, bud,
+      ...(kind === 'filler' ? { branchSpecies: [species] } : {}),
       ...(rnd() < 0.45 ? { palette: EXTRA_PALETTES[Math.floor(rnd() * EXTRA_PALETTES.length)] } : {}),
     }
     const tries: PlantSpec[] = [
@@ -394,17 +406,19 @@ export function layoutSprouts(opts: SproutLayoutOptions): SproutLayout {
       { ...base, branches: 0, side: side === 1 ? -1 : 1 },
       { ...base, branches: 0, size: round1((base.size ?? 1) * 70) / 100, leaves: Math.min(1, base.leaves ?? 0) },
       { ...base, branches: 0, size: round1((base.size ?? 1) * 70) / 100, reach: round1((base.reach ?? 20) * 0.7), leaves: 0, spread: tip ? 10 : 70 },
+      { ...base, branches: 0, size: round1((base.size ?? 1) * 50) / 100, reach: round1((base.reach ?? 20) * 0.6), leaves: 0, spread: tip ? 10 : 80 },
       { ...base, species: 'forgetmenot', branches: 0, size: round1(Math.max(0.08, (6 * k) / (FLOWER_SPECIES.forgetmenot.length * SPECIES_SCALE.forgetmenot)) * 100) / 100, reach: round1(9 * k), leaves: 0, spread: tip ? 10 : 80 },
     ]
-    for (const spec of tries) {
-      const res = check(spec)
+    for (const spec of kind === 'filler' ? tries.slice(0, 3) : tries) {
+      const res = check(spec, kind === 'filler' ? 0.6 : 0.8)
       if (!res) continue
-      if (!bud && flowers + res.open > hi) continue
-      discs.push(...res.d)
-      plants.push({ spec, vine, f, flowers: bud ? 0 : res.open })
-      if (bud) buds++
-      else flowers += res.open
-      buds += spec.branches && spec.branches > 1 ? 1 : 0
+      if (kind === 'flower' && flowers + res.open > hi) continue
+      const nb = (bud ? 1 : 0) + (spec.branches && spec.branches > 1 ? 1 : 0)
+      const nf = kind === 'filler' ? res.open : 0
+      plants.push({ spec, vine, f, flowers: kind === 'flower' ? res.open : 0, kind, d: res.d, nb, nf })
+      buds += nb
+      fillers += nf
+      if (kind === 'flower') flowers += res.open
       return true
     }
     return false
@@ -422,22 +436,44 @@ export function layoutSprouts(opts: SproutLayoutOptions): SproutLayout {
     return [...shuffle(tips), ...shuffle(sides)]
   }
   let pool = candidates(0)
-  const fill = (): void => { while (flowers < target && pool.length) { const c = pool.shift(); if (c) tryPlant(c.vine, c.f, c.tip, false) } }
+  const fill = (): void => { while (flowers < target && pool.length) { const c = pool.shift(); if (c) tryPlant(c.vine, c.f, c.tip, 'flower') } }
   fill()
-  // Not enough room on the variant's vines (small parents): add short sprouts elsewhere on the border.
-  for (let extra = 0; extra < 14 && flowers < lo; extra++) {
+  const hasTip = (i: number): boolean => { const v = built[i]; return Boolean(v) && plants.some((p) => p.vine === i && Math.abs(p.f - (v?.tipF ?? 1)) < 1e-9) }
+  // A sprout that found no room for a flower or bud at its tip is dropped with its plants: no bare whiskers.
+  const prune = (): void => {
+    const keep = built.map((v, i) => !v.bloom || hasTip(i))
+    if (keep.every(Boolean)) return
+    const remap = new Map<number, number>()
+    keep.forEach((k2, i) => { if (k2) remap.set(i, remap.size) })
+    for (const p of plants.filter((q) => !keep[q.vine])) { flowers -= p.flowers; buds -= p.nb; fillers -= p.nf }
+    const keptPlants = plants.filter((q) => keep[q.vine]).map((q) => ({ ...q, vine: remap.get(q.vine) ?? 0 }))
+    const keptBuilt = built.filter((_, i) => keep[i]).map((b) => (b.parent ? { ...b, parent: { ...b.parent, vine: remap.get(b.parent.vine) ?? 0 } } : b))
+    plants.length = 0
+    plants.push(...keptPlants)
+    built.length = 0
+    built.push(...keptBuilt)
+  }
+  const budBareTips = (): void => { for (let i = 0; i < built.length; i++) if (!hasTip(i)) tryPlant(i, built[i]?.tipF ?? 1, true, 'bud') }
+  budBareTips()
+  prune()
+  // Not enough room on the variant's vines (small parents): add more sprouts elsewhere on the border.
+  for (let extra = 0; extra < 18 && flowers < lo; extra++) {
     const before = built.length
-    const pg = sprout(rnd() * per.P, between(14, 28) * k, (rnd() - 0.5) * 30 * k)
+    const pg = sprout(rnd() * per.P, between(24, 40) * k, sign() * between(12, 36) * k)
     programs.push(pg)
     buildProgram(pg)
     pool = candidates(before)
     fill()
+    budBareTips()
+    prune()
   }
-  const budTarget = density
-  // Bare sprout tips look unfinished: give each a bud when it has room.
-  for (const [vine, v] of built.entries()) if (!plants.some((p) => p.vine === vine && Math.abs(p.f - v.tipF) < 1e-9)) tryPlant(vine, v.tipF, true, true)
+  const budTarget = density + 1
   const budPool = [...pool, ...built.flatMap((v, vine) => Array.from({ length: 6 }, () => ({ vine, f: v.tipF * between(0.15, 1) })))]
-  for (let i = 0; i < budPool.length && buds < budTarget; i++) { const c = budPool[i]; if (c) tryPlant(c.vine, c.f, false, true) }
+  for (let i = 0; i < budPool.length && buds < budTarget; i++) { const c = budPool[i]; if (c && c.vine < built.length) tryPlant(c.vine, c.f, false, 'bud') }
+  // Tiny filler blossoms between the larger flowers (not counted in the density band).
+  const fillerTarget = density * 2 + Math.round(fill01 * 4)
+  const fillerPool = built.flatMap((v, vine) => Array.from({ length: 5 }, () => ({ vine, f: v.tipF * between(0.1, 0.95) })))
+  for (let i = 0; i < fillerPool.length && fillers < fillerTarget; i++) { const c = fillerPool[i]; if (c) tryPlant(c.vine, c.f, false, 'filler') }
 
   // ---- leaves on the vines ----
   const leafRaw: { vine: number; f: number; x: number; y: number; rotate: number; size: number }[] = []
@@ -454,7 +490,13 @@ export function layoutSprouts(opts: SproutLayoutOptions): SproutLayout {
         for (const sd of [side, -side]) {
           const rotate = Math.round(a.angle - sd * turn)
           const sz = round1(size * sc * 100) / 100
-          if (okLeaf(box, a.x, a.y, rotate, sz)) { leafRaw.push({ vine: i, f, x: round1(a.x), y: round1(a.y), rotate, size: sz }); break found }
+          if (okLeaf(box, a.x, a.y, rotate, sz)) {
+            leafRaw.push({ vine: i, f, x: round1(a.x), y: round1(a.y), rotate, size: sz })
+            // Sometimes a pair: the opposite leaf at the same node.
+            const twin = Math.round(a.angle + sd * turn)
+            if (rnd() < 0.4 && okLeaf(box, a.x, a.y, twin, sz)) leafRaw.push({ vine: i, f, x: round1(a.x), y: round1(a.y), rotate: twin, size: sz })
+            break found
+          }
         }
       }
       side = -side
@@ -474,8 +516,8 @@ export function layoutSprouts(opts: SproutLayoutOptions): SproutLayout {
     const duration = Math.min(1800, Math.max(600, 400 + b.path.total * 4)) * between(0.8, 1.2)
     vines.push({ id: `v${i}`, path: b.path, width: round1((b.branch ? 1.6 : 2.4) * Math.min(1.4, Math.max(0.8, k))), delay: round1(delay), duration: Math.round(duration), ease: Math.round(between(1.3, 2.7) * 100) / 100 })
   })
-  const outPlants: SproutPlant[] = plants.map((p, i) => ({ id: `p${i}`, spec: p.spec, delay: round1(timeAt(p.vine, p.f) + 60 + rnd() * 500), duration: Math.round(between(1700, 2700)), flowers: p.flowers }))
+  const outPlants: SproutPlant[] = plants.map((p, i) => ({ id: `p${i}`, spec: p.spec, delay: round1(timeAt(p.vine, p.f) + 60 + rnd() * 500), duration: Math.round(between(1700, 2700)), flowers: p.flowers, kind: p.kind }))
   const leaves: SproutLeaf[] = leafRaw.map((l, i) => ({ id: `l${i}`, x: l.x, y: l.y, rotate: l.rotate, size: l.size, delay: round1(timeAt(l.vine, l.f) + rnd() * 120), duration: Math.round(between(700, 1000)) }))
   const total = Math.ceil(Math.max(0, ...vines.map((v) => v.delay + v.duration), ...outPlants.map((p) => p.delay + p.duration), ...leaves.map((l) => l.delay + l.duration)))
-  return { variant, width: w, height: hgt, reach: R, vines, plants: outPlants, leaves, flowers, buds, total }
+  return { variant, width: w, height: hgt, reach: R, vines, plants: outPlants, leaves, flowers, buds, fillers, total }
 }

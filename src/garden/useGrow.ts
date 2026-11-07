@@ -1,8 +1,10 @@
 import { ref, computed, inject, onMounted, onBeforeUnmount } from 'vue'
 import type { ComputedRef, InjectionKey, Ref } from 'vue'
-import type { ArtProps, GardenContext, GrowOptions } from './types'
+import type { ArtProps, GardenContext, GardenDefs, GrowOptions } from './types'
 
 export const GROWN_KEY: InjectionKey<GardenContext> = Symbol('garden-grown')
+/** Gradients shared by every plant in one overlay (Sprouts), instead of a `<defs>` set per plant and flower. */
+export const DEFS_KEY: InjectionKey<GardenDefs> = Symbol('garden-defs')
 
 export function useGrow(el: Ref<Element | null>, { once = true, threshold = 0.2 }: GrowOptions = {}): Ref<boolean> {
   const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
