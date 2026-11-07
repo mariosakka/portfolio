@@ -74,4 +74,18 @@ describe('DetailModal', () => {
     expect(document.querySelector('[role="dialog"]').contains(document.activeElement)).toBe(true)
     w.unmount()
   })
+  it.each([
+    ['fieldset-disabled control', '<button id="ok">ok</button><fieldset disabled><button>in</button></fieldset>'],
+    ['tabindex=-2 element', '<button id="ok">ok</button><div tabindex="-2">n</div>'],
+    ['hidden input', '<button id="ok">ok</button><input type="hidden">'],
+  ])('ignores %s as last item', async (_n, html) => {
+    const w = mount(DetailModal, { props: { open: false, title: 'Hello' }, slots: { default: html }, attachTo: document.body })
+    await w.setProps({ open: true })
+    await nextTick()
+    const d = document.querySelector('[role="dialog"]')
+    d.querySelector('#ok').focus()
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', cancelable: true }))
+    expect(document.activeElement).toBe(d.querySelector('button[aria-label="Close"]'))
+    w.unmount()
+  })
 })

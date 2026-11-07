@@ -21,4 +21,9 @@ describe('ItemCard', () => {
     await w.find('button').trigger('click')
     expect(w.emitted('open')).toHaveLength(1)
   })
+  it('binds trimmed url to href and tolerates non-string url', () => {
+    const w = mount(ItemCard, { props: { title: 'T', links: [{ label: 'A', url: ' https://x.io ' }, { label: 'B', url: null }, { label: 'C', url: 5 }] } })
+    expect(w.findAll('a')).toHaveLength(1)
+    expect(w.find('a').attributes('href')).toBe('https://x.io')
+  })
 })

@@ -13,7 +13,7 @@ const onKey = (e) => {
   if (e.key === 'Escape') return emit('close')
   if (e.key !== 'Tab' || !box.value) return
   const f = [...box.value.querySelectorAll('a[href], button, input, select, textarea, [tabindex]')]
-    .filter((el) => !el.disabled && el.type !== 'hidden' && el.getAttribute('tabindex') !== '-1')
+    .filter((el) => !el.matches(':disabled') && el.type !== 'hidden' && el.tabIndex >= 0)
   if (!box.value.contains(document.activeElement)) {
     e.preventDefault()
     return (f[0] ?? box.value).focus()
