@@ -21,7 +21,7 @@ const a3 = pointAt(cornerModel, 1)
         :width="180"
       />
     </div>
-    <div class="absolute bottom-0 right-0 top-[28rem] z-20 hidden w-[180px] opacity-90 min-[1400px]:block">
+    <div class="absolute bottom-0 right-0 top-[17rem] z-20 hidden w-[180px] opacity-90 min-[1400px]:block">
       <PageVine
         :seed="23"
         :width="180"

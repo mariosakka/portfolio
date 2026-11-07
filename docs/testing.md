@@ -52,6 +52,7 @@ Decision per layer (details in the sections below):
 
 ### Domain-specific (garden animation)
 - Tests cover the reduced-motion path (`prefers-reduced-motion` renders fully grown, `is-static` mode) and visibility logic in `src/garden/garden.test.ts` and `GardenHero.test.ts`.
+- Also covered: seeded flower and plant generation, anchoring (flower base equals stem end, axis follows the tangent, leaf bases on the path), the 0..1 growth-phase mapping (pollen only after petals open) and scroll-to-progress mapping, all in `src/garden/garden.test.ts`. `garden-demo.html` (dev only) renders plants at any progress for manual frame checks.
 - The real animation (timing, smoothness, real-browser reduced-motion setting) is a manual release check. See [known-issues.md](known-issues.md).
 
 ### Other foundation areas (N/A)
