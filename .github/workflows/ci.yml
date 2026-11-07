@@ -35,9 +35,10 @@ jobs:
       - name: Source/test sync guard
         env:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || (github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000' && github.event.before) || 'origin/main' }}
-        run: node scripts/check-test-sync.mjs "$BASE"
+        run: node scripts/check-test-sync.ts "$BASE"
+      - run: npm run typecheck
       - run: npm run lint
       - run: npm test
       - name: Placeholder check (non-blocking)
-        run: node scripts/check-placeholders.mjs
+        run: node scripts/check-placeholders.ts
       - run: npm run build

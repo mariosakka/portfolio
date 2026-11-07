@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Usage: node scripts/check-placeholders.mjs [dataDir]  (default src/data). Warns only, always exits 0.
+// Usage: node scripts/check-placeholders.ts [dataDir]  (default src/data). Warns only, always exits 0.
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -7,9 +7,9 @@ const dir = process.argv[2] ?? 'src/data'
 const JUNK = /^(aaa|aaaa|lorem)$/i
 const MUST_FILL = ['longDescription', 'image']
 
-function walk(v, path, out) {
+function walk(v: unknown, path: string, out: string[]): void {
   if (typeof v === 'string') {
-    const key = path.match(/(\w+)$/)?.[1]
+    const key = path.match(/(\w+)$/)?.[1] ?? ''
     if (JUNK.test(v.trim()) || (v.trim() === '' && MUST_FILL.includes(key))) out.push(path)
   } else if (Array.isArray(v)) v.forEach((x, i) => walk(x, `${path}[${i}]`, out))
   else if (v && typeof v === 'object')
@@ -18,7 +18,7 @@ function walk(v, path, out) {
 
 let n = 0
 for (const f of readdirSync(dir).filter((f) => f.endsWith('.json'))) {
-  const out = []
+  const out: string[] = []
   walk(JSON.parse(readFileSync(join(dir, f), 'utf8')), f.slice(0, -5), out)
   for (const p of out) console.log(`warn ${p}`)
   n += out.length

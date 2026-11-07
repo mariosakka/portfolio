@@ -51,7 +51,7 @@ A second, later project (separate repo, **out of scope here**) will extract the 
 
 ## Builder's calls (the owner has not decided these; flag for review)
 
-- Vite + Vue 3, plain JavaScript (no TypeScript), Tailwind CSS 3 carried over from the old site.
+- Vite + Vue 3, TypeScript (adopted at the owner's request on 2026-11-07, replacing the original plain-JavaScript call; `strict`, `vue-tsc` type check, scripts run natively as `.ts` on Node 24), Tailwind CSS 3 carried over from the old site.
 - Single page, no router.
 - Arrays normalized: old data mixed comma-separated strings (with `\,` escapes) and arrays for `technologies`/`skills`; the new JSON uses arrays only.
 - Data loaded by direct JSON import at build time (no fetch at runtime).

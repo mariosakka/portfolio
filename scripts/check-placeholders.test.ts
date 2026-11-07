@@ -4,10 +4,10 @@ import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-const run = (data) => {
+const run = (data: unknown) => {
   const dir = mkdtempSync(join(tmpdir(), 'ph-'))
   writeFileSync(join(dir, 'experience.json'), JSON.stringify(data))
-  return spawnSync(process.execPath, ['scripts/check-placeholders.mjs', dir], { encoding: 'utf8' })
+  return spawnSync(process.execPath, ['scripts/check-placeholders.ts', dir], { encoding: 'utf8' })
 }
 
 describe('check-placeholders', () => {

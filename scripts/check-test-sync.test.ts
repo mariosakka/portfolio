@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { evaluate, resolveBase, findBypass, isBot } from './check-test-sync.mjs'
+import { evaluate, resolveBase, findBypass, isBot } from './check-test-sync.ts'
 
-const c = (status, path) => ({ status, path })
+const c = (status: string, path: string) => ({ status, path })
 
 describe('check-test-sync evaluate', () => {
   it('fails when source changes without a test', () => {
@@ -63,6 +63,17 @@ describe('bot detection', () => {
     expect(isBot('dependabot[bot]', '49699333+dependabot[bot]@users.noreply.github.com')).toBe(true)
     expect(isBot('dependabot-fan', 'x@example.com')).toBe(false)
     expect(isBot('dependabot[bot]', 'evil@example.com')).toBe(false)
+  })
+})
+
+describe('JS -> TS conversion', () => {
+  it('a source deleted and re-added with another extension is not a deletion', () => {
+    const changes = [c('D', 'src/lib/commit.js'), c('A', 'src/lib/commit.ts'), c('D', 'src/lib/commit.test.js'), c('A', 'src/lib/commit.test.ts')]
+    expect(evaluate({ changes, existingTests: ['src/lib/commit.test.ts'] }).ok).toBe(true)
+  })
+  it('still fails when the replacement source has no test change', () => {
+    const changes = [c('D', 'src/lib/commit.js'), c('A', 'src/lib/commit.ts')]
+    expect(evaluate({ changes, existingTests: ['src/lib/commit.test.ts'] }).ok).toBe(false)
   })
 })
 
