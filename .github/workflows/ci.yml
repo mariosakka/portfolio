@@ -34,4 +34,6 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      - name: Placeholder check (non-blocking)
+        run: node scripts/check-placeholders.mjs
       - run: npm run build
