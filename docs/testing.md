@@ -20,7 +20,7 @@ Decision per layer (details in the sections below):
 
 ### Component
 - Run: `npm test` (Vue Test Utils + jsdom). Lives in `src/App.test.ts`, `src/components/**/*.test.ts`.
-- Protects: section rendering, filtering, nav, modal open/close and focus trap, commit badge.
+- Protects: section rendering and order (including Skills after About), filtering, carousel (slides, dots, prev/next ends, arrow keys, settled native scroll), hero card links/fallbacks, nav, modal open/close and focus trap, commit badge.
 
 ### Data integrity
 - Run: `npm test`. Lives in `src/data/data.test.ts` and `src/data/images.test.ts`.
@@ -28,7 +28,7 @@ Decision per layer (details in the sections below):
 - Soft check: `node scripts/check-placeholders.ts` warns (never fails) on `aaa`/`lorem` values and empty fields; known cases are in [known-issues.md](known-issues.md).
 
 ### Accessibility
-- Automated (jsdom; `DetailModal.test.ts`, `sections.test.ts`, `GardenHero.test.ts`): roles, aria attributes, focus move/trap, keyboard handling.
+- Automated (jsdom; `DetailModal.test.ts`, `Carousel.test.ts`, `HeroCard.test.ts`, `sections.test.ts`, `GardenHero.test.ts`): roles, aria attributes, focus move/trap, keyboard handling.
 - Manual: jsdom has no layout, contrast or screen reader. A real-browser a11y pass (keyboard tour, contrast, zoom) is part of the release check below. Owner: repo owner.
 
 ### Build smoke
@@ -44,8 +44,8 @@ Decision per layer (details in the sections below):
 - Gitleaks: CI (`gitleaks-action`, also the weekly full-history schedule) and the pre-push hook (`gitleaks git`). A missing scanner fails the hook with install instructions. No allowlist exists; add one only with owner, reason and expiry.
 
 ### End-to-end / visual (manual)
-- Manual release check, owner: repo owner. Before a release, build locally and take Playwright screenshots at 390, 1100 and 1440 px wide; check hero garden, nav, each section, the modal and keyboard tab order. Automating this is not justified for a personal site (flaky pixel diffs).
-- Real iPhone check, owner: repo owner. Open the deployed site in Safari on a real iPhone and look at: (1) modal height: open a card with the toolbar expanded and collapsed, the whole dialog and its close button stay visible and long content scrolls inside it; (2) scroll lock: the page behind the open modal does not move, and closing it returns to the same scroll position; (3) notch and landscape: rotate to landscape, text, nav and modal are not under the notch or home bar; (4) nav scroll: the section strip swipes sideways with no scrollbar and fades at the right edge; (5) tap targets: nav links, project filters, cards, card links, contact links and the modal close button are easy to hit, with no double-tap zoom delay. Playwright WebKit screenshots (iPhone device descriptor) are only an approximation of iOS Safari, not a replacement for this check.
+- Manual release check, owner: repo owner. Before a release, build locally and take Playwright screenshots at 390, 1100 and 1440 px wide; check hero garden, nav, each section, the modal and keyboard tab order; in the Projects and Certificates carousels check arrows, dots, arrow keys and a swipe, and that the page never scrolls sideways. Automating this is not justified for a personal site (flaky pixel diffs).
+- Real iPhone check, owner: repo owner. Open the deployed site in Safari on a real iPhone and look at: (1) modal height: open a card with the toolbar expanded and collapsed, the whole dialog and its close button stay visible and long content scrolls inside it; (2) scroll lock: the page behind the open modal does not move, and closing it returns to the same scroll position; (3) notch and landscape: rotate to landscape, text, nav and modal are not under the notch or home bar; (4) nav scroll: the section strip swipes sideways with no scrollbar and fades at the right edge; (5) tap targets: nav links, project filters, carousel arrows and dots, card link buttons and Read more, contact links and the modal close button are easy to hit, with no double-tap zoom delay. Playwright WebKit screenshots (iPhone device descriptor) are only an approximation of iOS Safari, not a replacement for this check.
 
 ### Performance
 - N/A: static site on GitHub Pages, no backend or heavy computation. The one cheap guard is the 250 KB per-image test in `images.test.ts`. Revisit if Lighthouse scores regress.
