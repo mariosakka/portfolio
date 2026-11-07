@@ -17,6 +17,7 @@ Prerequisites: Node 24+, git, [gitleaks](https://github.com/gitleaks/gitleaks), 
 | `npm test` | Vitest + @vue/test-utils (jsdom) | `npm test` | `ci.yml` |
 | `.githooks/pre-push` | secret scan + instruction-file check + lint + test | automatic on push | `ci.yml` (authoritative) |
 | `scripts/check_agent_instructions.py` | CLAUDE.md length and links | `python scripts/check_agent_instructions.py .` | `ci.yml` |
+| `scripts/build-data.mjs` | convert the Firestore export to `src/data/*.json` | `node scripts/build-data.mjs [exportDir]` | none |
 | `docs/reference/export-firestore.mjs` | one-off export of the old Firestore data | `node docs/reference/export-firestore.mjs` | none |
 
 ## Domain and deploy (to be wired when the app exists)

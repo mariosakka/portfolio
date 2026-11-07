@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1zAwnLSdN8tuYhVpxEFo",
+    "endDate": "",
+    "longDescription": "Nothing( Long) ",
+    "shortDescription": "Core team member",
+    "startDate": "2024-11-01",
+    "websiteUrl": "https://gdg.community.dev/gdg-on-campus-national-university-of-science-and-technology-politehnica-bucharest-bucharest-romania/",
+    "image": "/img/organization-image_1750890814956.webp",
+    "socialUrl": "https://www.linkedin.com/company/gdg-on-campus-unstpb",
+    "socialMedia": [
+      {
+        "platform": "instagram",
+        "url": "https://www.instagram.com/gdg.unstpb"
+      }
+    ],
+    "role": "App Dev Lead",
+    "name": "Google Developer Groups on Campus",
+    "location": "POLITEHNICA University of Bucharest",
+    "isPresent": true,
+    "description": "Organizing the app development workshop, presenting and giving talks at the GIT workshop & others hosted by GDG UNSTPB"
+  }
+]
