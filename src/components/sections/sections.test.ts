@@ -197,12 +197,15 @@ describe('education: card deck', () => {
 })
 
 describe('certificates: bento mosaic', () => {
-  test('all 4 tiles at once with images, the first one large on desktop', () => {
+  test('every certificate at once, the first tile large on desktop', () => {
     w = mount(CertificatesSection)
     const tiles = w.findAll('[aria-label="Certificates"] > li')
     expect(tiles).toHaveLength(certificates.length)
     expect(tiles[0].classes()).toEqual(expect.arrayContaining(['md:col-span-2', 'md:row-span-2']))
-    expect(tiles.map((t) => t.find('img').attributes('src'))).toEqual(certificates.map((c) => c.image))
+    // an image when there is one, otherwise a monogram tile: never an empty frame or a broken image
+    expect(tiles.map((t) => (t.find('img').exists() ? t.get('img').attributes('src') : ''))).toEqual(certificates.map((c) => c.image))
+    for (const [i, c] of certificates.entries()) expect(tiles[i].find('[data-monogram]').exists()).toBe(!c.image)
+    expect(tiles.flatMap((t) => t.findAll('[data-monogram]')).every((m) => /^[A-Z]{1,2}$/.test(m.text()))).toBe(true)
     expect(tiles.every((t) => t.find('article').classes().includes('relative'))).toBe(true)
     expect(w.text()).not.toContain('undefined')
     expect(w.findAll('a').filter((a) => a.attributes('aria-label')?.startsWith('Credential ('))).toHaveLength(certificates.filter((c) => c.credentialUrl.trim()).length)

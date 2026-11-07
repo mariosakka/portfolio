@@ -63,3 +63,19 @@ export function revealNext(current: Reveal | undefined, visible: boolean, reduce
   if (current === 'in' || visible) return 'in'
   return 'pending'
 }
+
+// Bento tile spans (Tailwind classes) for tile i of n on a 2-column phone grid and a 4x2 desktop grid:
+// the first tile is large (2x2); the rest share the other four cells, widening when there are fewer than four.
+// Phones: with an odd count the first tile spans both columns so no row is left half empty.
+export function bentoSpan(i: number, n: number): string {
+  const phone = i === 0 && n % 2 === 1 ? 'col-span-2' : ''
+  if (i === 0) return `${phone} md:col-span-2 md:row-span-2`.trim()
+  const rest = n - 1
+  if (rest === 1) return 'md:col-span-2 md:row-span-2'
+  if (rest === 2 || (rest === 3 && i === n - 1)) return 'md:col-span-2'
+  return ''
+}
+
+// One or two capital initials for a typographic tile ("Microsoft" -> "M", "GDG Europe" -> "GE").
+export const monogram = (name: string): string =>
+  name.split(/\s+/).filter((w) => /^[a-z0-9]/i.test(w)).slice(0, 2).map((w) => w[0].toUpperCase()).join('')

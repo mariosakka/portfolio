@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { coverflowFrame, deckDepth, deckStep, imageFit, revealNext, stepIndex, swipeDirection } from './motion'
+import { bentoSpan, coverflowFrame, deckDepth, deckStep, imageFit, monogram, revealNext, stepIndex, swipeDirection } from './motion'
 
 describe('imageFit', () => {
   it('honors an explicit mode', () => {
@@ -99,5 +99,21 @@ describe('revealNext', () => {
   })
   it('never animates twice', () => {
     expect(revealNext('in', false, false)).toBe('in')
+  })
+})
+
+describe('bentoSpan and monogram', () => {
+  it('fills the 4x2 desktop grid for 2 to 5 tiles and keeps phone rows full', () => {
+    expect([0, 1, 2, 3, 4].map((i) => bentoSpan(i, 5))).toEqual(['col-span-2 md:col-span-2 md:row-span-2', '', '', '', ''])
+    expect([0, 1, 2, 3].map((i) => bentoSpan(i, 4))).toEqual(['md:col-span-2 md:row-span-2', '', '', 'md:col-span-2'])
+    expect([0, 1, 2].map((i) => bentoSpan(i, 3))).toEqual(['col-span-2 md:col-span-2 md:row-span-2', 'md:col-span-2', 'md:col-span-2'])
+    expect(bentoSpan(1, 2)).toBe('md:col-span-2 md:row-span-2')
+    expect(bentoSpan(6, 8)).toBe('')
+  })
+  it('monogram takes up to two initials of real words', () => {
+    expect(monogram('Microsoft')).toBe('M')
+    expect(monogram('GDG Europe')).toBe('GE')
+    expect(monogram('  - FILS-UPB ')).toBe('F')
+    expect(monogram('')).toBe('')
   })
 })

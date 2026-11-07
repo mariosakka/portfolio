@@ -6,11 +6,10 @@ import MediaFrame from '../MediaFrame.vue'
 import raw from '../../data/certificates.json'
 import type { Certificate } from '../../types/data'
 import { toList } from '../../lib/normalize'
+import { bentoSpan, monogram } from '../../lib/motion'
 import { vPointer, vReveal } from '../../lib/useMotion'
 
 const data: Certificate[] = raw
-// Bento from md: the first tile is large (2x2), then two small ones and a wide one; the pattern repeats.
-const span = ['md:col-span-2 md:row-span-2', '', '', 'md:col-span-2']
 const open = ref<number | null>(null)
 const shown = computed(() => (open.value === null ? null : data[open.value]))
 const text = (c: Certificate) => [c.longDescription, c.description ?? '', c.shortDescription].find((s) => s.trim()) ?? ''
@@ -30,7 +29,7 @@ const url = (c: Certificate) => (typeof c.credentialUrl === 'string' ? c.credent
       data-stagger
       :style="{ '--i': i }"
       class="flex min-w-0"
-      :class="span[i % span.length]"
+      :class="bentoSpan(i, data.length)"
     >
       <article
         v-pointer
@@ -38,9 +37,19 @@ const url = (c: Certificate) => (typeof c.credentialUrl === 'string' ? c.credent
       >
         <CardGarden :seed="c.id" />
         <MediaFrame
+          v-if="c.image"
           :src="c.image"
-          class="h-[clamp(5.5rem,15svh,9rem)] shrink-0 md:h-auto md:min-h-[4.5rem] md:flex-1"
+          class="h-[clamp(4.5rem,12svh,9rem)] shrink-0 md:h-auto md:min-h-[4.5rem] md:flex-1"
         />
+        <!-- No image: a typographic tile on the same flat surface (issuer monogram), never an empty frame. -->
+        <div
+          v-else
+          data-monogram
+          aria-hidden="true"
+          class="flex h-[clamp(4.5rem,12svh,9rem)] shrink-0 items-center justify-center rounded-[1.35rem] border border-line bg-night-900 font-serif text-5xl text-accent md:h-auto md:min-h-[4.5rem] md:flex-1 md:text-7xl"
+        >
+          {{ monogram(c.issuer || c.title) }}
+        </div>
         <div class="min-w-0 px-2 pb-1.5">
           <p class="truncate text-[0.65rem] uppercase tracking-[0.14em] text-accent">
             {{ c.issuer }}
