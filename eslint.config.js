@@ -6,5 +6,5 @@ export default [
   { ignores: ['dist/', 'node_modules/', 'docs/'] },
   js.configs.recommended,
   ...pluginVue.configs['flat/recommended'],
-  { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
+  { languageOptions: { globals: { ...globals.browser, ...globals.node, __LATEST_COMMIT__: 'readonly' } }  },
 ]
