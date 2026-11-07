@@ -1,7 +1,8 @@
+/* eslint-disable vue/one-component-per-file -- tiny inline harness components per test */
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { defineComponent, h, withDirectives } from 'vue'
-import { vParallax, vPointer, vReveal } from './useMotion'
+import { defineComponent, h, nextTick, withDirectives } from 'vue'
+import { useMedia, vParallax, vPointer, vReveal } from './useMotion'
 
 // One fake IntersectionObserver for the module's shared observer; tests feed it entries by hand.
 type Cb = (entries: Partial<IntersectionObserverEntry>[]) => void
@@ -76,6 +77,10 @@ describe('vPointer', () => {
     move(el, 'mouse')
     expect([el.style.getPropertyValue('--px'), el.style.getPropertyValue('--py')]).toEqual(['0.500', '-0.500'])
     expect(el.dataset.pointerOn).toBe('')
+    const rectSpy = vi.mocked(el.getBoundingClientRect)
+    move(el, 'mouse')
+    move(el, 'mouse')
+    expect(rectSpy).toHaveBeenCalledTimes(1) // cached for the hover
     el.dispatchEvent(new MouseEvent('pointerleave'))
     expect(el.style.getPropertyValue('--px')).toBe('')
     expect(el.dataset.pointerOn).toBeUndefined()
@@ -117,5 +122,36 @@ describe('vParallax', () => {
     expect(el2.style.getPropertyValue('--parallax')).toBe('')
     raf.mockRestore()
     w2.unmount()
+  })
+})
+
+describe('useMedia', () => {
+  it('follows a media query and its changes', async () => {
+    let listener: (() => void) | undefined
+    const mq = { matches: false, addEventListener: (_: string, f: () => void) => { listener = f }, removeEventListener: vi.fn() }
+    const saved = window.matchMedia
+    window.matchMedia = (() => mq) as unknown as typeof window.matchMedia
+    let on: ReturnType<typeof useMedia> | undefined
+    const w = mount(defineComponent({ setup() { on = useMedia('(min-width: 768px)'); return () => h('i') } }))
+    expect(on!.value).toBe(false)
+    mq.matches = true
+    listener!()
+    await nextTick()
+    expect(on!.value).toBe(true)
+    w.unmount()
+    expect(mq.removeEventListener).toHaveBeenCalled()
+    window.matchMedia = saved
+  })
+})
+
+describe('style.css motion safety', () => {
+  it('print and reduced motion force every final state; the wipe child rule cannot override tilt timing', async () => {
+    const { readFileSync } = await import('node:fs')
+    const css = readFileSync('src/style.css', 'utf8').replace(/\r\n/g, '\n')
+    const block = css.slice(css.indexOf('@media print, (prefers-reduced-motion: reduce) {'))
+    for (const sel of ['[data-enter],', '[data-enter] > *,', '[data-enter] [data-stagger],', '[data-pointer],', '[data-cf-pose] {']) expect(block).toContain(sel)
+    expect(block).toContain('opacity: 1 !important;')
+    expect(css).toContain(":where([data-reveal='wipe'][data-enter='in']) > *")
+    expect(css).not.toMatch(/filter:|blur\(/)
   })
 })

@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import HeroCard from '../HeroCard.vue'
 import raw from '../../data/experience.json'
 import type { Experience } from '../../types/data'
 import { formatPeriod, toList } from '../../lib/normalize'
 import { stepIndex } from '../../lib/motion'
-import { vPointer, vReveal } from '../../lib/useMotion'
+import { useMedia, vPointer, vReveal } from '../../lib/useMotion'
 
 const data: Experience[] = raw
 const sel = ref(0)
-const tabs = ref<HTMLButtonElement[]>([])
+const cur = computed(() => data[sel.value]) // undefined only with no data (then nothing renders)
+// Tab buttons by index (a function ref, so tabs[i] is always tab i).
+const tabs: (HTMLButtonElement | null)[] = []
+const setTab = (i: number) => (el: unknown) => { tabs[i] = el instanceof HTMLButtonElement ? el : null }
+// The rail is vertical from md (the `md:` layout below), a horizontal stepper on phones.
+const vertical = useMedia('(min-width: 768px)')
 
 // Tabs pattern: arrows (either orientation, wrapping), Home and End move selection and focus.
 function onKey(e: KeyboardEvent) {
@@ -17,7 +22,7 @@ function onKey(e: KeyboardEvent) {
   if (i === null) return
   e.preventDefault()
   sel.value = i
-  tabs.value[i]?.focus()
+  tabs[i]?.focus()
 }
 </script>
 
@@ -25,12 +30,14 @@ function onKey(e: KeyboardEvent) {
   <!-- Timeline: period markers on a rail (vertical beside the card from md, a horizontal stepper above it on
        phones); the selected role's detail card swaps with a short slide-up cross-fade. -->
   <div
+    v-if="cur"
     v-reveal="'slide'"
     class="grid gap-4 md:grid-cols-[minmax(0,12.5rem)_minmax(0,1fr)] md:items-center md:gap-10"
   >
     <div
       role="tablist"
       aria-label="Roles"
+      :aria-orientation="vertical ? 'vertical' : 'horizontal'"
       class="relative flex gap-3 md:flex-col md:gap-8"
       @keydown="onKey"
     >
@@ -42,7 +49,7 @@ function onKey(e: KeyboardEvent) {
         v-for="(d, i) in data"
         :id="`exp-tab-${i}`"
         :key="d.id"
-        ref="tabs"
+        :ref="setTab(i)"
         role="tab"
         type="button"
         :aria-selected="sel === i"
@@ -73,7 +80,8 @@ function onKey(e: KeyboardEvent) {
       id="exp-panel"
       role="tabpanel"
       :aria-labelledby="`exp-tab-${sel}`"
-      class="relative min-w-0"
+      tabindex="0"
+      class="relative min-w-0 rounded-[1.75rem] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
     >
       <Transition
         name="swap"
@@ -85,17 +93,17 @@ function onKey(e: KeyboardEvent) {
         >
           <HeroCard
             v-pointer
-            :title="data[sel].title"
-            :eyebrow="data[sel].company"
-            :meta="formatPeriod(data[sel].startDate, data[sel].endDate, data[sel].isPresent)"
-            :image="data[sel].image"
+            :title="cur.title"
+            :eyebrow="cur.company"
+            :meta="formatPeriod(cur.startDate, cur.endDate, cur.isPresent)"
+            :image="cur.image"
             logo
-            :short-description="data[sel].shortDescription"
-            :description="data[sel].description"
-            :long-description="data[sel].longDescription"
-            :facts="[{ label: 'Location', value: data[sel].location }]"
-            :tags="toList(data[sel].technologies)"
-            :links="[{ label: 'Website', url: data[sel].websiteUrl }]"
+            :short-description="cur.shortDescription"
+            :description="cur.description"
+            :long-description="cur.longDescription"
+            :facts="[{ label: 'Location', value: cur.location }]"
+            :tags="toList(cur.technologies)"
+            :links="[{ label: 'Website', url: cur.websiteUrl }]"
           />
         </div>
       </Transition>

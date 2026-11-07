@@ -11,7 +11,10 @@ const dy = [0, 14, -8, 10, -12, 4, 12, -6, 8, -10, 2, 14]
 </script>
 
 <template>
-  <div class="relative mx-auto w-full max-w-4xl">
+  <div
+    v-if="skills.length"
+    class="relative mx-auto w-full max-w-4xl"
+  >
     <CardGarden
       seed="skills"
       variant="cluster"

@@ -31,11 +31,12 @@ export function coverflowFrame(offset: number): { rotate: number; scale: number;
 // Card deck: `top` is the visible card; `moving` is the card that flies out to side `dir` after "next"
 // and is tucked behind the stack on "settle".
 export interface Deck { top: number; moving: number | null; dir: -1 | 1 }
-export type DeckAction = { type: 'next'; dir?: -1 | 1 } | { type: 'prev' } | { type: 'settle' }
+export type DeckAction = { type: 'next'; dir?: -1 | 1 } | { type: 'prev' } | { type: 'to'; index: number } | { type: 'settle' }
 export function deckStep(s: Deck, a: DeckAction, n: number): Deck {
   if (a.type === 'settle') return { ...s, moving: null }
   if (n < 2) return s
   if (a.type === 'next') return { top: (s.top + 1) % n, moving: s.top, dir: a.dir ?? -1 }
+  if (a.type === 'to') return { ...s, top: Math.max(0, Math.min(n - 1, a.index)), moving: null }
   return { top: (s.top - 1 + n) % n, moving: null, dir: s.dir }
 }
 export const deckDepth = (i: number, top: number, n: number): number => (i - top + n) % n
@@ -64,19 +65,24 @@ export function revealNext(current: Reveal | undefined, visible: boolean, reduce
   return 'pending'
 }
 
-// Bento tile spans (Tailwind classes) for tile i of n on a 2-column phone grid and a 4x2 desktop grid (dense
-// flow): tile `large` (the first one with an image) is 2x2; the others share the remaining four cells, widening
-// when there are fewer than four. Phones: with an odd count the first tile spans both columns.
+// Bento tile spans (Tailwind classes) for tile i of n on a 2-column phone grid and a 4-column desktop grid
+// (dense flow). Up to 5 tiles: tile `large` (the first with an image) is 2x2 and the rest share the other four
+// cells of a 4x2 grid, widening when there are fewer than four. From 6 tiles there is no large tile: all are
+// single cells in bentoRows(n) rows, and the last ones widen to fill the last row.
+// Phones: with an odd count the first tile spans both columns so no row is left half empty.
 export function bentoSpan(i: number, n: number, large = 0): string {
   const phone = i === 0 && n % 2 === 1 ? 'col-span-2' : ''
-  if (i === large) return `${phone} md:col-span-2 md:row-span-2`.trim()
   const reset = phone ? `${phone} md:col-span-1` : ''
+  if (n > 5) return i >= n - (bentoRows(n) * 4 - n) ? `${phone} md:col-span-2`.trim() : reset
+  if (i === large) return `${phone} md:col-span-2 md:row-span-2`.trim()
   const rest = n - 1
   const k = i < large ? i : i - 1
   if (rest === 1) return 'md:col-span-2 md:row-span-2'
   if (rest === 2 || (rest === 3 && k === 2)) return `${phone} md:col-span-2`.trim()
   return reset
 }
+// Desktop rows: two up to 8 tiles (the one-screen budget), then more, shorter rows.
+export const bentoRows = (n: number): number => (n > 5 ? Math.max(2, Math.ceil(n / 4)) : 2)
 
 // One or two capital initials for a typographic tile ("Microsoft" -> "M", "GDG Europe" -> "GE").
 export const monogram = (name: string): string =>

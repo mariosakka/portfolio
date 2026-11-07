@@ -43,7 +43,17 @@ describe('CardGarden', () => {
   it('is an empty seam today: renders only its slot, with harmless defaults', () => {
     const w = mount(CardGarden, { props: { seed: 3 }, slots: { default: '<i>x</i>' } })
     expect(w.html()).toBe('<i>x</i>')
-    expect(w.props()).toEqual({ seed: 3, variant: 'default', density: 1, active: true })
+    expect(w.props()).toEqual({ seed: 3, variant: 'default', density: 1, active: true, reach: undefined })
     expect(mount(CardGarden, { props: { seed: 'a' } }).text()).toBe('')
+  })
+
+  it.each([[true, 56], [false, 32]])('passes the sprouts reach by breakpoint (wide %s: %spx), or the override', async (wide, px) => {
+    const saved = window.matchMedia
+    window.matchMedia = ((q: string) => ({ matches: q.includes('640px') && wide })) as unknown as typeof window.matchMedia
+    const w = mount(CardGarden, { props: { seed: 1 }, slots: { default: '<b>{{ params.reach }}</b>' } })
+    await w.vm.$nextTick()
+    expect(w.text()).toBe(String(px))
+    expect(mount(CardGarden, { props: { seed: 1, reach: 10 }, slots: { default: '<b>{{ params.reach }}</b>' } }).text()).toBe('10')
+    window.matchMedia = saved
   })
 })

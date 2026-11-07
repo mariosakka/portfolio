@@ -25,6 +25,9 @@ function go(i: number) {
   if (t && s) t.scrollTo?.({ left: target(s, t), behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
 }
 
+// At an end the arrow stays focusable (aria-disabled, not disabled) so keyboard focus is not dropped to <body>.
+const atEnd = (dir: 'prev' | 'next') => (dir === 'prev' ? current.value === 0 : current.value === props.items.length - 1)
+
 // Only on the track itself: arrows on a link or button inside keep their native behavior.
 function onKey(e: KeyboardEvent) {
   if (e.target !== e.currentTarget) return
@@ -92,17 +95,18 @@ onBeforeUnmount(() => {
     :aria-label="label"
     class="min-w-0 [container-type:inline-size]"
   >
-    <!-- The track scrolls, so it clips: its 40px block padding (12px on phones) is the unclipped room for card
+    <!-- The track scrolls, so it clips: its 56px block padding (32px on phones) is the unclipped room for card
          sprouts. Negative margins let that room overlap the filter and the controls (which sit above it, z-10)
-         so it costs almost no height; `isolate` keeps the slides' z-index inside the track. -->
+         so it costs almost no height; `isolate` keeps the slides' z-index inside the track. On phones the track
+         runs out over the 16px page gutter so the side room reaches the screen edge (4cqw + 16px). -->
     <div
       ref="track"
       data-track
       tabindex="0"
       role="group"
       :aria-label="`${label} slides`"
-      class="snap-track relative isolate -my-2 flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-[1.75rem] py-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:-my-8 sm:py-10"
-      :class="items.length > 1 ? 'px-[4cqw] sm:px-[15cqw]' : ''"
+      class="snap-track relative isolate -my-7 flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain py-8 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:-my-12 sm:rounded-[1.75rem] sm:py-14"
+      :class="items.length > 1 ? '-mx-4 px-[calc(4cqw+1rem)] sm:mx-0 sm:px-[15cqw]' : ''"
       @scroll.passive="onScroll"
       @keydown="onKey"
     >
@@ -167,9 +171,9 @@ onBeforeUnmount(() => {
           :key="dir"
           type="button"
           :aria-label="dir === 'prev' ? 'Previous slide' : 'Next slide'"
-          :disabled="dir === 'prev' ? current === 0 : current === items.length - 1"
-          class="flex h-11 w-11 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-accent/60 hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent disabled:pointer-events-none disabled:opacity-30"
-          @click="go(current + (dir === 'prev' ? -1 : 1))"
+          :aria-disabled="atEnd(dir) ? 'true' : undefined"
+          class="flex h-11 w-11 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-accent/60 hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent aria-disabled:cursor-default aria-disabled:opacity-30 aria-disabled:hover:border-line aria-disabled:hover:text-ink"
+          @click="atEnd(dir) || go(current + (dir === 'prev' ? -1 : 1))"
         >
           <svg
             aria-hidden="true"

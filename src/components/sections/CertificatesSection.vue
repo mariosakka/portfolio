@@ -6,7 +6,7 @@ import MediaFrame from '../MediaFrame.vue'
 import raw from '../../data/certificates.json'
 import type { Certificate } from '../../types/data'
 import { toList } from '../../lib/normalize'
-import { bentoSpan, monogram } from '../../lib/motion'
+import { bentoRows, bentoSpan, monogram } from '../../lib/motion'
 import { vPointer, vReveal } from '../../lib/useMotion'
 
 const data: Certificate[] = raw
@@ -20,10 +20,13 @@ const url = (c: Certificate) => (typeof c.credentialUrl === 'string' ? c.credent
 
 <template>
   <!-- Mosaic of every certificate at once; a tile opens the shared detail dialog. -->
+  <!-- Desktop rows share the height of two rows (the one-screen budget); from 9 tiles they get shorter. -->
   <ul
+    v-if="data.length"
     v-reveal="'stagger'"
     aria-label="Certificates"
-    class="grid grid-cols-2 gap-3 sm:gap-5 md:grid-flow-dense md:grid-cols-4 md:grid-rows-[repeat(2,clamp(10.5rem,28svh,15.5rem))]"
+    class="grid grid-cols-2 gap-3 sm:gap-5 md:grid-flow-dense md:grid-cols-4 md:[grid-template-rows:repeat(var(--rows),calc((clamp(10.5rem,28svh,15.5rem)*2-(var(--rows)-2)*1.25rem)/var(--rows)))]"
+    :style="{ '--rows': bentoRows(data.length) }"
   >
     <li
       v-for="(c, i) in data"

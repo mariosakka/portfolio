@@ -37,7 +37,7 @@ const sections: Section[] = [
     class="relative isolate"
   >
     <GardenHero />
-    <header class="mx-auto max-w-5xl px-4 pt-16 sm:px-10">
+    <header class="mx-auto max-w-5xl px-4 pt-16 sm:px-10 lg:px-14">
       <h1
         data-page-top
         class="font-serif text-4xl sm:text-5xl"

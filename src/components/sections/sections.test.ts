@@ -27,6 +27,8 @@ beforeEach(() => {
 afterEach(() => { w?.unmount(); document.body.innerHTML = ''; vi.useRealTimers() })
 const slides = (x: VueWrapper) => x.findAll('[aria-roledescription="slide"]')
 const readMore = (x: VueWrapper) => x.findAll('article button').filter((b) => b.text().startsWith('Read more'))
+const cats = ['All', ...new Set(projects.map((p) => p.category).filter(Boolean))]
+const inCat = (c: string) => projects.filter((p) => p.category === c)
 const all = [AboutSection, ExperienceSection, OrganizationsSection, EducationSection, CertificatesSection, ProjectsSection, SkillsSection, ContactSection]
 
 test.each(all.map((C) => [C.__name, C]))('%s: without an observer report nothing is hidden (no data-enter), and it declares an entrance', (_, C) => {
@@ -44,11 +46,11 @@ describe('projects: coverflow with a category filter', () => {
     expect(w.text()).toContain(`1 / ${projects.length}`)
     expect(w.findAll('[data-cf-pose] article')).toHaveLength(projects.length)
     const f = w.findAll('[data-filter] button')
-    expect(f.map((b) => b.text())).toEqual(['All', 'Web', 'Embedded', 'Games', 'App', 'Algorithms'])
+    expect(f.map((b) => b.text())).toEqual(cats)
     expect(f[0].attributes('aria-pressed')).toBe('true')
     await f[2].trigger('click')
     expect(f[2].attributes('aria-pressed')).toBe('true')
-    expect(slides(w).map((s) => s.find('h3').text())).toEqual(projects.filter((p) => p.category === 'Embedded').map((p) => p.title))
+    expect(slides(w).map((s) => s.find('h3').text())).toEqual(inCat(cats[2]).map((p) => p.title))
   })
 
   test('changing the filter resets to the first slide', async () => {
@@ -56,12 +58,12 @@ describe('projects: coverflow with a category filter', () => {
     await w.get('button[aria-label="Next slide"]').trigger('click')
     expect(w.text()).toContain(`2 / ${projects.length}`)
     await w.findAll('[data-filter] button')[1].trigger('click')
-    expect(w.text()).toContain(`1 / ${projects.filter((p) => p.category === 'Web').length}`)
+    expect(w.text()).toContain(`1 / ${inCat(cats[1]).length}`)
   })
 
   test('the track keeps padding above and below the cards so sprouts are not clipped', () => {
     w = mount(ProjectsSection)
-    expect(w.get('[data-track]').classes()).toEqual(expect.arrayContaining(['py-3', 'sm:py-10', 'isolate']))
+    expect(w.get('[data-track]').classes()).toEqual(expect.arrayContaining(['py-8', 'sm:py-14', 'isolate']))
   })
 })
 
@@ -77,6 +79,8 @@ describe('experience: timeline tabs with a detail card', () => {
     const panel = w.get('[role="tabpanel"]')
     expect(panel.attributes('aria-labelledby')).toBe(tabs[0].attributes('id'))
     expect(panel.get('h3').text()).toBe(experience[0].title)
+    expect(panel.attributes('tabindex')).toBe('0')
+    expect(w.get('[role="tablist"]').attributes('aria-orientation')).toBe('horizontal') // jsdom: no md match
     expect(w.text()).not.toContain('undefined')
   })
 
@@ -181,9 +185,35 @@ describe('education: card deck', () => {
     expect(top(w)).toBe(0)
     await drag(-120)
     expect(top(w)).toBe(1)
-    const e = new MouseEvent('click', { bubbles: true, cancelable: true })
+    const e = new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 })
     cards(w)[0].element.dispatchEvent(e)
     expect(e.defaultPrevented).toBe(true)
+  })
+
+  test('after a drag that ends without a click, a keyboard click on a link still works', async () => {
+    w = mount(EducationSection)
+    const card = () => cards(w!)[top(w!)]
+    const fire = (type: string, clientX: number) => card().element.dispatchEvent(new MouseEvent(type, { clientX, bubbles: true }))
+    fire('pointerdown', 200)
+    fire('pointermove', 260)
+    fire('pointerup', 230) // 30px: a drag, but no swipe
+    const key = new MouseEvent('click', { bubbles: true, cancelable: true, detail: 0 })
+    card().element.dispatchEvent(key)
+    expect(key.defaultPrevented).toBe(false)
+  })
+
+  test('Home and End jump to the first and last card; inert follows the top card', async () => {
+    w = mount(EducationSection)
+    const deck = w.get('[data-deck]')
+    const inert = () => cards(w!).map((c) => c.attributes('inert') !== undefined)
+    await deck.trigger('keydown', { key: 'End' })
+    expect(top(w)).toBe(education.length - 1)
+    expect(inert()).toEqual(education.map((_, i) => i !== education.length - 1))
+    await deck.trigger('keydown', { key: 'Home' })
+    expect(top(w)).toBe(0)
+    expect(inert()).toEqual(education.map((_, i) => i !== 0))
+    await w.get('button[aria-label="Next card"]').trigger('click')
+    expect(inert()).toEqual(education.map((_, i) => i !== 1 % education.length))
   })
 
   test('reduced motion settles at once', async () => {

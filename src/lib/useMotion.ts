@@ -1,4 +1,5 @@
-import type { Directive } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import type { Directive, Ref } from 'vue'
 import { revealNext } from './motion'
 import type { Reveal } from './motion'
 
@@ -8,6 +9,21 @@ import type { Reveal } from './motion'
 const query = (q: string) => typeof matchMedia === 'function' && matchMedia(q).matches
 export const prefersReducedMotion = () => query('(prefers-reduced-motion: reduce)')
 export const finePointer = () => query('(hover: hover) and (pointer: fine)')
+
+// Reactive media query for components (false until mounted and in jsdom without matchMedia).
+export function useMedia(q: string): Ref<boolean> {
+  const on = ref(false)
+  let mq: MediaQueryList | undefined
+  const sync = () => { on.value = !!mq?.matches }
+  onMounted(() => {
+    if (typeof matchMedia !== 'function') return
+    mq = matchMedia(q)
+    sync()
+    mq.addEventListener?.('change', sync)
+  })
+  onBeforeUnmount(() => mq?.removeEventListener?.('change', sync))
+  return on
+}
 
 export type RevealVariant = 'fade-up' | 'scale' | 'slide' | 'wipe' | 'mask' | 'stagger'
 
@@ -49,6 +65,7 @@ export const vPointer: Directive<HTMLElement, undefined> = {
     let raf = 0
     let x = 0
     let y = 0
+    let rect: DOMRect | undefined // read once per hover (pointerenter), not per move: no forced layout, no jitter
     const write = () => {
       raf = 0
       el.style.setProperty('--px', x.toFixed(3))
@@ -56,24 +73,29 @@ export const vPointer: Directive<HTMLElement, undefined> = {
     }
     const move = (e: PointerEvent) => {
       if (e.pointerType === 'touch' || e.pointerType === 'pen' || !finePointer() || prefersReducedMotion()) return
-      const r = el.getBoundingClientRect()
+      rect ??= el.getBoundingClientRect()
+      const r = rect
       if (!r.width || !r.height) return
       x = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1))
       y = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height) * 2 - 1))
       el.dataset.pointerOn = ''
       raf ||= requestAnimationFrame(write)
     }
+    const enter = () => { rect = undefined }
     const leave = () => {
+      rect = undefined
       cancelAnimationFrame(raf)
       raf = 0
       delete el.dataset.pointerOn
       el.style.removeProperty('--px')
       el.style.removeProperty('--py')
     }
+    el.addEventListener('pointerenter', enter)
     el.addEventListener('pointermove', move)
     el.addEventListener('pointerleave', leave)
     cleanups.set(el, () => {
       leave()
+      el.removeEventListener('pointerenter', enter)
       el.removeEventListener('pointermove', move)
       el.removeEventListener('pointerleave', leave)
     })

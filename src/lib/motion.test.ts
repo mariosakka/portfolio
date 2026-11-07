@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bentoSpan, coverflowFrame, deckDepth, deckStep, imageFit, monogram, revealNext, stepIndex, swipeDirection } from './motion'
+import { bentoRows, bentoSpan, coverflowFrame, deckDepth, deckStep, imageFit, monogram, revealNext, stepIndex, swipeDirection } from './motion'
 
 describe('imageFit', () => {
   it('honors an explicit mode', () => {
@@ -59,6 +59,11 @@ describe('deck', () => {
     expect(deckStep(s0, { type: 'next' }, 1)).toEqual(s0)
     expect(deckStep(s0, { type: 'prev' }, 0)).toEqual(s0)
   })
+  it('to jumps straight to a card (Home/End), clamped, without a fly-out', () => {
+    expect(deckStep({ top: 1, moving: 0, dir: 1 }, { type: 'to', index: 2 }, 3)).toEqual({ top: 2, moving: null, dir: 1 })
+    expect(deckStep(s0, { type: 'to', index: 9 }, 3).top).toBe(2)
+    expect(deckStep(s0, { type: 'to', index: -1 }, 3).top).toBe(0)
+  })
   it('depth counts cards below the top', () => {
     expect([0, 1, 2].map((i) => deckDepth(i, 1, 3))).toEqual([2, 0, 1])
   })
@@ -108,7 +113,17 @@ describe('bentoSpan and monogram', () => {
     expect([0, 1, 2, 3].map((i) => bentoSpan(i, 4))).toEqual(['md:col-span-2 md:row-span-2', '', '', 'md:col-span-2'])
     expect([0, 1, 2].map((i) => bentoSpan(i, 3))).toEqual(['col-span-2 md:col-span-2 md:row-span-2', 'md:col-span-2', 'md:col-span-2'])
     expect(bentoSpan(1, 2)).toBe('md:col-span-2 md:row-span-2')
-    expect(bentoSpan(6, 8)).toBe('')
+  })
+  it('from 6 tiles: no large tile, every row filled by widening the last tiles, more rows from 9', () => {
+    const row = (n: number) => Array.from({ length: n }, (_, i) => bentoSpan(i, n, 0))
+    const cells = (n: number) => row(n).reduce((sum, c) => sum + (c.includes('md:col-span-2') ? 2 : 1), 0)
+    for (const n of [6, 7, 8, 9, 10, 11, 12, 13]) {
+      expect(cells(n)).toBe(bentoRows(n) * 4)
+      expect(row(n).some((c) => c.includes('row-span'))).toBe(false)
+    }
+    expect([6, 8, 9, 13].map(bentoRows)).toEqual([2, 2, 3, 4])
+    expect(bentoRows(3)).toBe(2)
+    expect(row(7)[0]).toBe('col-span-2 md:col-span-1') // phones: odd count, first tile wide
   })
   it('the large tile can be any index; the phone-wide first tile is then a single cell from md', () => {
     expect([0, 1, 2, 3, 4].map((i) => bentoSpan(i, 5, 1))).toEqual(['col-span-2 md:col-span-1', 'md:col-span-2 md:row-span-2', '', '', ''])

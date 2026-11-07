@@ -22,50 +22,70 @@ function act(a: DeckAction) {
 }
 onBeforeUnmount(() => clearTimeout(settle))
 
+const keys: Record<string, () => DeckAction> = {
+  ArrowRight: () => ({ type: 'next' }),
+  ArrowLeft: () => ({ type: 'prev' }),
+  Home: () => ({ type: 'to', index: 0 }),
+  End: () => ({ type: 'to', index: n - 1 }),
+}
 function onKey(e: KeyboardEvent) {
-  if (e.target !== e.currentTarget || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return
+  const k = keys[e.key]
+  if (e.target !== e.currentTarget || !k) return
   e.preventDefault()
-  act(e.key === 'ArrowRight' ? { type: 'next' } : { type: 'prev' })
+  act(k())
 }
 
 // Drag the top card sideways (mouse or touch; vertical page scroll stays native via touch-action: pan-y).
 // Past the swipe threshold it flies out to that side; a drag never also counts as a click on a link in it.
+// The card follows the pointer at most once per frame (dx is kept outside Vue; one render per frame).
 const drag = ref(0)
 let startX = 0
+let dx = 0
 let down = false
 let moved = false
+let raf = 0
+const paint = () => { raf = 0; drag.value = dx }
 function onDown(e: PointerEvent) {
   if (e.button !== 0) return
   down = true
   moved = false
+  dx = 0
   startX = e.clientX
 }
 function onMove(e: PointerEvent) {
   if (!down) return
-  const dx = e.clientX - startX
+  dx = e.clientX - startX
   if (!moved && Math.abs(dx) > 8) {
     moved = true
     ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
   }
-  if (moved) drag.value = dx
+  if (moved) raf ||= requestAnimationFrame(paint)
+}
+function release() {
+  down = false
+  cancelAnimationFrame(raf)
+  raf = 0
+  drag.value = 0
+  // The click that follows this pointerup (same task) is swallowed below; any later click is a real one.
+  setTimeout(() => { moved = false }, 0)
 }
 function onUp(e: PointerEvent) {
   if (!down) return
-  down = false
-  const d = swipeDirection(drag.value, (e.currentTarget as HTMLElement).offsetWidth || 300)
-  drag.value = 0
+  const d = moved ? swipeDirection(dx, (e.currentTarget as HTMLElement).offsetWidth || 300) : 0
+  release()
   if (d) act({ type: 'next', dir: d })
 }
 function onCancel() {
-  down = false
-  drag.value = 0
+  if (down) release()
 }
+// Swallow only the pointer click ending a drag (detail > 0); keyboard activation (detail 0) always passes.
 function onClickCapture(e: MouseEvent) {
-  if (!moved) return
+  if (!moved || e.detail === 0) return
   moved = false
   e.preventDefault()
   e.stopPropagation()
 }
+onBeforeUnmount(() => cancelAnimationFrame(raf))
 
 function pose(i: number): Record<string, string> {
   const { top, moving, dir } = deck.value
@@ -79,7 +99,10 @@ function pose(i: number): Record<string, string> {
 <template>
   <!-- Deck: the cards lie stacked with an offset; Next (button, ArrowRight, or a swipe either way) flies the
        top card out to the side and tucks it under the stack, revealing the next one. -->
-  <div v-reveal="'scale'">
+  <div
+    v-if="n"
+    v-reveal="'scale'"
+  >
     <div
       role="group"
       aria-roledescription="card deck"

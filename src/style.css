@@ -172,8 +172,9 @@ html {
 [data-reveal='mask'][data-enter='pending'] > * {
   clip-path: inset(100% -120px -120px -120px);
 }
-[data-reveal='wipe'][data-enter='in'] > *,
-[data-reveal='mask'][data-enter='in'] > * {
+/* :where() keeps this at zero specificity so a tilting child ([data-pointer] below) keeps its own timing. */
+:where([data-reveal='wipe'][data-enter='in']) > *,
+:where([data-reveal='mask'][data-enter='in']) > * {
   clip-path: inset(-120px);
   transition: clip-path 0.9s cubic-bezier(0.6, 0, 0.2, 1), transform 0.35s var(--ease-out);
 }
@@ -191,16 +192,17 @@ html {
 }
 
 /* Pointer tilt / magnet (fine pointers only, set by v-pointer). */
+/* clip-path is listed too, for a card that is also a wipe child (Organizations). */
 [data-pointer] {
-  transition: transform 0.35s var(--ease-out);
+  transition: transform 0.35s var(--ease-out), clip-path 0.9s cubic-bezier(0.6, 0, 0.2, 1);
 }
 [data-pointer='tilt'][data-pointer-on] {
   transform: perspective(1100px) rotateX(calc(var(--py, 0) * -2.5deg)) rotateY(calc(var(--px, 0) * 3deg));
-  transition-duration: 0.12s;
+  transition-duration: 0.12s, 0.9s;
 }
 [data-pointer='magnet'][data-pointer-on] {
   transform: translate(calc(var(--px, 0) * 8px), calc(var(--py, 0) * 5px));
-  transition-duration: 0.12s;
+  transition-duration: 0.12s, 0.9s;
 }
 
 /* Coverflow pose (Carousel.vue writes the variables per slide from its scroll position). */
@@ -242,7 +244,8 @@ html {
   transform: scale(0.95) translateY(10px);
 }
 
-@media (prefers-reduced-motion: reduce) {
+/* Reduced motion and print: every final state, no motion. */
+@media print, (prefers-reduced-motion: reduce) {
   .swap-enter-active,
   .swap-leave-active,
   .modal-enter-active,

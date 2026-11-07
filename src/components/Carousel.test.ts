@@ -55,10 +55,23 @@ describe('Carousel (coverflow)', () => {
     make(['a', 'b'])
     expect(dots()).toHaveLength(2)
     expect(w!.text()).toContain('1 / 2')
-    expect(prev().attributes('disabled')).toBeDefined()
+    expect(prev().attributes('aria-disabled')).toBe('true')
+    expect(prev().attributes('disabled')).toBeUndefined() // stays focusable
     await next().trigger('click')
     expect(w!.get('[aria-live]').text()).toContain('Slide 2 of 2')
-    expect(next().attributes('disabled')).toBeDefined()
+    expect(next().attributes('aria-disabled')).toBe('true')
+    expect(prev().attributes('aria-disabled')).toBeUndefined()
+  })
+
+  it('an arrow at its end keeps focus and does nothing when pressed', async () => {
+    make(['a', 'b'])
+    await next().trigger('click')
+    scrollTo.mockClear()
+    ;(next().element as HTMLButtonElement).focus()
+    await next().trigger('click')
+    expect(document.activeElement).toBe(next().element)
+    expect(scrollTo).not.toHaveBeenCalled()
+    expect(w!.text()).toContain('2 / 2')
   })
 
   it('next and dots center the chosen slide on the track', async () => {
