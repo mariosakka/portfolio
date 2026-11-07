@@ -71,13 +71,13 @@ describe('HeroCard', () => {
     expect(w!.get('h3 [data-underline]').attributes('aria-hidden')).toBe('true')
   })
 
-  it('a split card without an image is a single column', () => {
-    make({ layout: 'split' })
+  it('a card without an image is a single column', () => {
+    make({})
     expect(w!.get('article').classes().some((c) => c.startsWith('md:grid-cols'))).toBe(false)
   })
 
-  it('split layout puts the image on the requested side', () => {
-    make({ image: '/a.webp', layout: 'split', imageSide: 'right' })
+  it('the split card puts the image on the requested side', () => {
+    make({ image: '/a.webp', imageSide: 'right' })
     expect(w!.get('figure').classes()).toContain('md:order-last')
   })
 

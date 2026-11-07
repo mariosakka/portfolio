@@ -18,9 +18,7 @@ const props = withDefaults(defineProps<{
   facts?: { label: string; value: string }[]
   tags?: string[]
   links?: CardLink[]
-  layout?: 'split' | 'stacked'
   imageSide?: 'left' | 'right'
-  compact?: boolean
   // Small square logo (company, school): a contained tile on the flat media surface.
   logo?: boolean
   fit?: Fit | 'auto'
@@ -36,9 +34,7 @@ const props = withDefaults(defineProps<{
   facts: () => [],
   tags: () => [],
   links: () => [],
-  layout: 'split',
   imageSide: 'left',
-  compact: false,
   logo: false,
   fit: 'auto',
   underline: false,
@@ -55,9 +51,9 @@ const shownLinks = computed(() => props.links
   .map((l) => ({ label: l.label, url: typeof l.url === 'string' ? l.url.trim() : '' }))
   .filter((l) => l.url))
 // About two rows of chips; the rest is a +k chip and the full list is in the Read more dialog.
-const chips = computed(() => fitTags(props.tags, props.compact ? 40 : 56))
-// Without an image there is nothing to split: the text takes the whole card.
-const split = computed(() => props.layout === 'split' && Boolean(props.image))
+const chips = computed(() => fitTags(props.tags, 56))
+// Split from md (image beside text); without an image the text takes the whole card.
+const split = computed(() => Boolean(props.image))
 const open = ref(false)
 </script>
 
@@ -71,7 +67,7 @@ const open = ref(false)
     ]"
   >
     <CardGarden :seed="title" />
-    <!-- Phones and stacked cards: the image band takes a share of the screen height; split: it fills the row. -->
+    <!-- Phones: the image band takes a share of the screen height; from md (split) it fills the row. -->
     <MediaFrame
       v-if="image"
       :src="image"
@@ -86,8 +82,7 @@ const open = ref(false)
     />
 
     <div
-      class="flex min-w-0 flex-col"
-      :class="compact ? 'gap-2.5 p-5 short:p-4' : 'gap-3 p-4 sm:p-7 lg:p-9 short:gap-2.5 sm:short:p-5 lg:short:p-7'"
+      class="flex min-w-0 flex-col gap-3 p-4 sm:p-7 lg:p-9 short:gap-2.5 sm:short:p-5 lg:short:p-7"
     >
       <p
         v-if="eyebrow || meta"
@@ -103,8 +98,7 @@ const open = ref(false)
         >{{ meta }}</span>
       </p>
       <h3
-        class="font-serif leading-[1.05] tracking-tight text-ink"
-        :class="compact ? 'text-2xl sm:text-[1.7rem] short:text-[1.4rem]' : 'text-[1.65rem] sm:text-4xl lg:text-[2.75rem] sm:short:text-3xl lg:short:text-[2.1rem] xshort:text-2xl'"
+        class="font-serif leading-[1.05] tracking-tight text-ink text-[1.65rem] sm:text-4xl lg:text-[2.75rem] sm:short:text-3xl lg:short:text-[2.1rem] xshort:text-2xl"
       >
         {{ title }}
         <span
@@ -116,8 +110,7 @@ const open = ref(false)
       </h3>
       <p
         v-if="summary"
-        class="max-w-prose text-ink/75"
-        :class="compact ? 'line-clamp-2 text-sm sm:text-base' : 'line-clamp-3 sm:text-lg short:line-clamp-2 short:text-base xshort:text-sm'"
+        class="max-w-prose text-ink/75 line-clamp-3 sm:text-lg short:line-clamp-2 short:text-base xshort:text-sm"
       >
         {{ summary }}
       </p>
