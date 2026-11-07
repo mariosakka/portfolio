@@ -56,7 +56,8 @@ const shownLinks = computed(() => props.links
   .filter((l) => l.url))
 // About two rows of chips; the rest is a +k chip and the full list is in the Read more dialog.
 const chips = computed(() => fitTags(props.tags, props.compact ? 40 : 56))
-const split = computed(() => props.layout === 'split')
+// Without an image there is nothing to split: the text takes the whole card.
+const split = computed(() => props.layout === 'split' && Boolean(props.image))
 const open = ref(false)
 </script>
 

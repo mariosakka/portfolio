@@ -10,6 +10,8 @@ import { bentoSpan, monogram } from '../../lib/motion'
 import { vPointer, vReveal } from '../../lib/useMotion'
 
 const data: Certificate[] = raw
+// The 2x2 tile shows the first certificate image; a certificate without one gets a small monogram tile.
+const large = Math.max(0, data.findIndex((c) => c.image))
 const open = ref<number | null>(null)
 const shown = computed(() => (open.value === null ? null : data[open.value]))
 const text = (c: Certificate) => [c.longDescription, c.description ?? '', c.shortDescription].find((s) => s.trim()) ?? ''
@@ -21,7 +23,7 @@ const url = (c: Certificate) => (typeof c.credentialUrl === 'string' ? c.credent
   <ul
     v-reveal="'stagger'"
     aria-label="Certificates"
-    class="grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-4 md:grid-rows-[repeat(2,clamp(10.5rem,28svh,15.5rem))]"
+    class="grid grid-cols-2 gap-3 sm:gap-5 md:grid-flow-dense md:grid-cols-4 md:grid-rows-[repeat(2,clamp(10.5rem,28svh,15.5rem))]"
   >
     <li
       v-for="(c, i) in data"
@@ -29,24 +31,27 @@ const url = (c: Certificate) => (typeof c.credentialUrl === 'string' ? c.credent
       data-stagger
       :style="{ '--i': i }"
       class="flex min-w-0"
-      :class="bentoSpan(i, data.length)"
+      :class="bentoSpan(i, data.length, large)"
     >
       <article
         v-pointer
-        class="group relative flex w-full min-w-0 flex-col gap-2 rounded-[1.5rem] border border-line bg-surface p-2 text-ink transition-colors hover:border-accent/40"
+        class="group relative flex w-full min-w-0 gap-2 rounded-[1.5rem] border border-line bg-surface p-2 text-ink transition-colors hover:border-accent/40"
+        :class="c.image ? 'flex-col' : 'flex-row items-center md:flex-col md:items-stretch'"
       >
         <CardGarden :seed="c.id" />
         <MediaFrame
           v-if="c.image"
           :src="c.image"
+          fit="contain"
           class="h-[clamp(4.5rem,12svh,9rem)] shrink-0 md:h-auto md:min-h-[4.5rem] md:flex-1"
         />
+        <!-- Certificates are documents: shown whole (contain), never cropped. -->
         <!-- No image: a typographic tile on the same flat surface (issuer monogram), never an empty frame. -->
         <div
           v-else
           data-monogram
           aria-hidden="true"
-          class="flex h-[clamp(4.5rem,12svh,9rem)] shrink-0 items-center justify-center rounded-[1.35rem] border border-line bg-night-900 font-serif text-5xl text-accent md:h-auto md:min-h-[4.5rem] md:flex-1 md:text-7xl"
+          class="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.1rem] border border-line bg-night-900 font-serif text-3xl text-accent md:h-auto md:min-h-[4.5rem] md:w-auto md:flex-1 md:rounded-[1.35rem] md:text-7xl"
         >
           {{ monogram(c.issuer || c.title) }}
         </div>

@@ -64,16 +64,18 @@ export function revealNext(current: Reveal | undefined, visible: boolean, reduce
   return 'pending'
 }
 
-// Bento tile spans (Tailwind classes) for tile i of n on a 2-column phone grid and a 4x2 desktop grid:
-// the first tile is large (2x2); the rest share the other four cells, widening when there are fewer than four.
-// Phones: with an odd count the first tile spans both columns so no row is left half empty.
-export function bentoSpan(i: number, n: number): string {
+// Bento tile spans (Tailwind classes) for tile i of n on a 2-column phone grid and a 4x2 desktop grid (dense
+// flow): tile `large` (the first one with an image) is 2x2; the others share the remaining four cells, widening
+// when there are fewer than four. Phones: with an odd count the first tile spans both columns.
+export function bentoSpan(i: number, n: number, large = 0): string {
   const phone = i === 0 && n % 2 === 1 ? 'col-span-2' : ''
-  if (i === 0) return `${phone} md:col-span-2 md:row-span-2`.trim()
+  if (i === large) return `${phone} md:col-span-2 md:row-span-2`.trim()
+  const reset = phone ? `${phone} md:col-span-1` : ''
   const rest = n - 1
+  const k = i < large ? i : i - 1
   if (rest === 1) return 'md:col-span-2 md:row-span-2'
-  if (rest === 2 || (rest === 3 && i === n - 1)) return 'md:col-span-2'
-  return ''
+  if (rest === 2 || (rest === 3 && k === 2)) return `${phone} md:col-span-2`.trim()
+  return reset
 }
 
 // One or two capital initials for a typographic tile ("Microsoft" -> "M", "GDG Europe" -> "GE").

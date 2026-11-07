@@ -110,6 +110,11 @@ describe('bentoSpan and monogram', () => {
     expect(bentoSpan(1, 2)).toBe('md:col-span-2 md:row-span-2')
     expect(bentoSpan(6, 8)).toBe('')
   })
+  it('the large tile can be any index; the phone-wide first tile is then a single cell from md', () => {
+    expect([0, 1, 2, 3, 4].map((i) => bentoSpan(i, 5, 1))).toEqual(['col-span-2 md:col-span-1', 'md:col-span-2 md:row-span-2', '', '', ''])
+    expect([0, 1, 2, 3].map((i) => bentoSpan(i, 4, 1))).toEqual(['', 'md:col-span-2 md:row-span-2', '', 'md:col-span-2'])
+    expect(bentoSpan(0, 3, 2)).toBe('col-span-2 md:col-span-2')
+  })
   it('monogram takes up to two initials of real words', () => {
     expect(monogram('Microsoft')).toBe('M')
     expect(monogram('GDG Europe')).toBe('GE')

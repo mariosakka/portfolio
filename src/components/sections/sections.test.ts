@@ -197,11 +197,12 @@ describe('education: card deck', () => {
 })
 
 describe('certificates: bento mosaic', () => {
-  test('every certificate at once, the first tile large on desktop', () => {
+  test('every certificate at once, the first one with an image large on desktop', () => {
     w = mount(CertificatesSection)
     const tiles = w.findAll('[aria-label="Certificates"] > li')
     expect(tiles).toHaveLength(certificates.length)
-    expect(tiles[0].classes()).toEqual(expect.arrayContaining(['md:col-span-2', 'md:row-span-2']))
+    const large = certificates.findIndex((c) => c.image)
+    expect(tiles[large].classes()).toEqual(expect.arrayContaining(['md:col-span-2', 'md:row-span-2']))
     // an image when there is one, otherwise a monogram tile: never an empty frame or a broken image
     expect(tiles.map((t) => (t.find('img').exists() ? t.get('img').attributes('src') : ''))).toEqual(certificates.map((c) => c.image))
     for (const [i, c] of certificates.entries()) expect(tiles[i].find('[data-monogram]').exists()).toBe(!c.image)

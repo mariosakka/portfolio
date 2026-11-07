@@ -62,7 +62,7 @@ const about: About = aboutJson
       <p
         data-stagger
         style="--i: 4"
-        class="text-sm opacity-80"
+        class="text-sm text-ink/80"
       >
         Languages: {{ about.languages.join(', ') }}
       </p>
