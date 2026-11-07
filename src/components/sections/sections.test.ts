@@ -13,6 +13,7 @@ import about from '../../data/about.json'
 import experience from '../../data/experience.json'
 import organizations from '../../data/organizations.json'
 import education from '../../data/education.json'
+import certificates from '../../data/certificates.json'
 
 let w: VueWrapper | undefined
 beforeEach(() => { HTMLElement.prototype.scrollTo = vi.fn() as unknown as HTMLElement['scrollTo'] })
@@ -79,11 +80,11 @@ test('education: hero cards with GPA, no undefined', () => {
   expect(w.text()).not.toContain('undefined')
 })
 
-test('certificates: a carousel of 4 cards, credential links only when present', () => {
+test('certificates: a carousel with one card per certificate, credential links only when present', () => {
   w = mount(CertificatesSection)
-  expect(slides(w)).toHaveLength(4)
+  expect(slides(w)).toHaveLength(certificates.length)
   expect(w.text()).not.toContain('undefined')
-  expect(w.findAll('a').filter((a) => a.text().startsWith('Credential'))).toHaveLength(2)
+  expect(w.findAll('a').filter((a) => a.text().startsWith('Credential'))).toHaveLength(certificates.filter((x) => x.credentialUrl.trim()).length)
 })
 
 test('contact: four links with hrefs', () => {
