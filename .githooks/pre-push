@@ -8,5 +8,7 @@ if ! command -v gitleaks >/dev/null; then
 fi
 gitleaks git --no-banner --redact
 python scripts/check_agent_instructions.py .
+base=$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || echo origin/main)
+node scripts/check-test-sync.mjs "$base"
 npm run lint
 npm test
