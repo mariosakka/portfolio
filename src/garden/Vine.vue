@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup>
-import { ref, provide } from 'vue'
+import { ref, computed, provide } from 'vue'
 import { GROWN_KEY, useGrow } from './useGrow.js'
 
 const props = defineProps({
@@ -14,16 +14,17 @@ const props = defineProps({
 })
 const el = ref(null)
 const own = useGrow(el)
-const isGrown = () => props.grown ?? own.value
+const isGrown = computed(() => props.grown ?? own.value)
+const isStatic = computed(() => props.isStatic)
 // Children read this via inject so one observer drives the whole vine.
-provide(GROWN_KEY, { get value() { return isGrown() } })
+provide(GROWN_KEY, { grown: isGrown, isStatic })
 </script>
 
 <template>
   <svg
     ref="el"
     class="garden-art vine"
-    :class="{ 'is-grown': isGrown(), 'is-static': isStatic }"
+    :class="{ 'is-grown': isGrown, 'is-static': isStatic }"
     :viewBox="viewBox"
     :style="{ '--duration': duration + 'ms', '--delay': delay + 'ms', width: size * 100 + '%' }"
     aria-hidden="true"

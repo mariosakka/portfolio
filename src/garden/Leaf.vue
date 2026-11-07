@@ -5,7 +5,7 @@ import { artProps, useGrown } from './useGrow.js'
 
 const props = defineProps(artProps)
 const el = ref(null)
-const grown = useGrown(props, el)
+const { grown, isStatic, swaying } = useGrown(props, el)
 const id = useId()
 </script>
 
@@ -13,7 +13,7 @@ const id = useId()
   <g
     ref="el"
     class="garden-art leaf"
-    :class="{ 'is-grown': grown, 'is-static': isStatic }"
+    :class="{ 'is-grown': grown, 'is-static': isStatic, 'is-swaying': swaying }"
     :transform="`translate(${x} ${y}) rotate(${rotate}) scale(${size})`"
     :style="{ '--delay': delay + 'ms' }"
   >

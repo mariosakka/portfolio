@@ -5,7 +5,7 @@ import { artProps, useGrown } from './useGrow.js'
 
 const props = defineProps(artProps)
 const el = ref(null)
-const grown = useGrown(props, el)
+const { grown, isStatic, swaying } = useGrown(props, el)
 const id = useId()
 const petals = [0, 72, 144, 216, 288]
 const stamens = [[0, -20], [14, -14], [20, 0], [14, 14], [-14, 14], [-20, 0], [-14, -14]]
@@ -16,7 +16,7 @@ const PETAL = 'M0 0 C-16 -18 -18 -52 0 -70 C18 -52 16 -18 0 0Z'
   <g
     ref="el"
     class="garden-art bloom"
-    :class="{ 'is-grown': grown, 'is-static': isStatic }"
+    :class="{ 'is-grown': grown, 'is-static': isStatic, 'is-swaying': swaying }"
     :transform="`translate(${x} ${y}) rotate(${rotate}) scale(${size})`"
     :style="{ '--delay': delay + 'ms' }"
   >

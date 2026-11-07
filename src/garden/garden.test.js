@@ -4,7 +4,7 @@ import { defineComponent, h, ref, nextTick } from 'vue'
 import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { useGrow, Vine, Bloom, Leaf } from './index.js'
+import { useGrow, Vine, Bloom, Leaf, Bud } from './index.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 
@@ -12,9 +12,10 @@ function mockMedia(reduce) {
   window.matchMedia = vi.fn().mockReturnValue({ matches: reduce })
 }
 let observer
+let created = 0
 function mockIO() {
   globalThis.IntersectionObserver = class {
-    constructor(cb) { this.cb = cb; observer = this }
+    constructor(cb) { this.cb = cb; observer = this; created++ }
     observe() {}
     disconnect() {}
     fire(isIntersecting) { this.cb([{ isIntersecting }]) }
@@ -29,7 +30,7 @@ function probe(opts) {
   return () => grown.value
 }
 
-afterEach(() => { delete globalThis.IntersectionObserver; observer = undefined })
+afterEach(() => { created = 0; delete globalThis.IntersectionObserver; observer = undefined })
 
 describe('useGrow', () => {
   it('is true immediately with reduced motion', () => {
@@ -74,6 +75,24 @@ describe('components', () => {
     expect(mount(Vine, { props: { path: 'M0 0', isStatic: true } }).classes()).toContain('is-static')
     mockMedia(true)
     expect(mount(Bloom, { attrs: {} }).classes()).toContain('is-grown')
+  })
+  it('static Vine makes Leaf/Bud children static without an observer firing', () => {
+    mockMedia(false); mockIO()
+    const w = mount(Vine, { props: { path: 'M0 0', isStatic: true }, slots: { default: () => [h(Leaf), h(Bud)] } })
+    expect(w.find('.leaf').classes()).toContain('is-static')
+    expect(w.find('.bud').classes()).toContain('is-static')
+  })
+  it('static Bloom inside a grown Vine has no sway class', () => {
+    mockMedia(false); mockIO()
+    const w = mount(Vine, { props: { path: 'M0 0', grown: true }, slots: { default: () => h(Bloom, { isStatic: true }) } })
+    expect(w.find('.bloom').classes()).toContain('is-static')
+    expect(w.find('.bloom').classes()).not.toContain('is-swaying')
+    expect(w.find('.vine').classes()).not.toContain('is-swaying')
+  })
+  it('children inside a Vine create no observer of their own', () => {
+    mockMedia(false); mockIO()
+    mount(Vine, { props: { path: 'M0 0' }, slots: { default: () => [h(Leaf), h(Bloom), h(Bud)] } })
+    expect(created).toBe(1)
   })
 })
 

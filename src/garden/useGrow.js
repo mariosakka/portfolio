@@ -20,11 +20,15 @@ export function useGrow(el, { once = true, threshold = 0.2 } = {}) {
   return grown
 }
 
-// Shared by art components: explicit `grown` prop wins, then a parent Vine, then own visibility.
+// Shared by art components: explicit props win, then a parent Vine (which owns the single
+// observer), then own visibility.
 export function useGrown(props, el) {
   const parent = inject(GROWN_KEY, null)
-  const own = useGrow(el)
-  return computed(() => props.grown ?? parent?.value ?? own.value)
+  const own = parent ? null : useGrow(el)
+  const grown = computed(() => props.grown ?? parent?.grown.value ?? own.value)
+  const isStatic = computed(() => props.isStatic || Boolean(parent?.isStatic.value))
+  const swaying = computed(() => grown.value && !isStatic.value)
+  return { grown, isStatic, swaying }
 }
 
 export const artProps = {

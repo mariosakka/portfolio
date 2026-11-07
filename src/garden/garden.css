@@ -30,11 +30,12 @@
   transform: scale(0) rotate(-50deg);
   transition: transform .9s cubic-bezier(.2, 1.2, .4, 1) calc(var(--delay) + var(--i) * 80ms), opacity .5s ease calc(var(--delay) + var(--i) * 80ms);
 }
-.is-grown .petal, .is-static .petal { opacity: 1; transform: scale(1) rotate(0); }
-.is-static .petal, .is-static .pop, .is-static .glow { transition: none; }
+.bloom.is-grown .petal, .bloom.is-static .petal,
+.cornflower.is-grown .petal, .cornflower.is-static .petal { opacity: 1; transform: scale(1) rotate(0); }
+.is-static.garden-art .petal, .is-static.garden-art .pop, .is-static.garden-art .glow { transition: none; }
 
 /* gentle sway once open (not in static mode) */
-.is-grown:not(.is-static) .sway {
+.is-swaying .sway {
   animation: garden-sway 7s ease-in-out calc(var(--delay) + 1.6s) infinite alternate;
 }
 @keyframes garden-sway {
@@ -43,7 +44,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .vine-stem { stroke-dashoffset: 0; transition: none; }
-  .petal, .pop, .glow { opacity: 1; transform: none; transition: none; }
+  .garden-art .vine-stem, .garden-art.vine-stem { stroke-dashoffset: 0; transition: none; }
+  .garden-art .petal, .garden-art .pop, .garden-art .glow { opacity: 1; transform: none; transition: none; }
   .sway { animation: none !important; }
 }
