@@ -92,8 +92,19 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Carousel track: swipeable, scrollbar hidden. */
+.snap-track {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+}
+.snap-track::-webkit-scrollbar {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  html {
+  html,
+  .snap-track {
     scroll-behavior: auto;
   }
 }
