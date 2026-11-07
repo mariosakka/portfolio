@@ -11,3 +11,6 @@ docs/reference/firestore-export/
 .superpowers/
 docs/superpowers/
 .claude/
+
+# Playwright MCP screenshots
+.playwright-mcp/
