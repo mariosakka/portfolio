@@ -24,6 +24,11 @@ describe('check-placeholders', () => {
       expect(r.stdout).toContain(p)
     expect(r.stdout).not.toContain('list[1]')
   })
+  it('treats whitespace-only longDescription and image as empty', () => {
+    const r = run([{ longDescription: '  ', image: ' \t' }])
+    expect(r.stdout).toContain('experience[0].longDescription')
+    expect(r.stdout).toContain('experience[0].image')
+  })
   it('is quiet for clean data', () => {
     const r = run([{ title: 'a lorem ipsum dolor', longDescription: 'text', image: '/img/a.webp' }])
     expect(r.status).toBe(0)

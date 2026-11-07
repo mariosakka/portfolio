@@ -1,6 +1,6 @@
 # Portfolio
 
-Mohamad-Mario Sakka's portfolio: static Vue 3 site on GitHub Pages.  See the [design](docs/superpowers/specs/2026-11-07-portfolio-vue-design.md).
+Mohamad-Mario Sakka's portfolio: static Vue 3 site on GitHub Pages. See the [design](docs/superpowers/specs/2026-11-07-portfolio-vue-design.md).
 
 ## Setup
 Prerequisites: Node 24+, git, [gitleaks](https://github.com/gitleaks/gitleaks), Python 3.
@@ -16,6 +16,7 @@ Prerequisites: Node 24+, git, [gitleaks](https://github.com/gitleaks/gitleaks), 
 | `npm run lint` | ESLint (flat config, eslint-plugin-vue) | `npm run lint` | `ci.yml` |
 | `npm test` | Vitest + @vue/test-utils (jsdom) | `npm test` | `ci.yml` |
 | `.githooks/pre-push` | secret scan + instruction-file check + lint + test | automatic on push | `ci.yml` (authoritative) |
+| shebang scripts (rule: must be mode 100755) | `git update-index --chmod=+x <file>` | `ci.yml` |
 | `scripts/check_agent_instructions.py` | CLAUDE.md length and links | `python scripts/check_agent_instructions.py .` | `ci.yml` |
 | `scripts/check-placeholders.mjs` | warn (never fail) on `aaa`/`aaaa`/`lorem` values and empty `longDescription`/`image` in `src/data/*.json` | `node scripts/check-placeholders.mjs [dir]` | `ci.yml`, `deploy.yml` (non-blocking) |
 | `scripts/build-data.mjs` | convert the Firestore export to `src/data/*.json` | `node scripts/build-data.mjs [exportDir]` | none |

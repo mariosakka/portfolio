@@ -10,7 +10,7 @@ const MUST_FILL = ['longDescription', 'image']
 function walk(v, path, out) {
   if (typeof v === 'string') {
     const key = path.match(/(\w+)$/)?.[1]
-    if (JUNK.test(v.trim()) || (v === '' && MUST_FILL.includes(key))) out.push(path)
+    if (JUNK.test(v.trim()) || (v.trim() === '' && MUST_FILL.includes(key))) out.push(path)
   } else if (Array.isArray(v)) v.forEach((x, i) => walk(x, `${path}[${i}]`, out))
   else if (v && typeof v === 'object')
     for (const [k, x] of Object.entries(v)) walk(x, `${path}.${k}`, out)
