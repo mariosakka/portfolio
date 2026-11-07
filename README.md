@@ -1,6 +1,6 @@
 # Portfolio
 
-Mohamad-Mario Sakka's portfolio: static Vue 3 site on GitHub Pages. See the [design](docs/superpowers/specs/2026-11-07-portfolio-vue-design.md).
+Mohamad-Mario Sakka's portfolio: static Vue 3 site on GitHub Pages. See the [design](docs/design/2026-11-07-portfolio-vue-design.md).
 
 ## Setup
 Prerequisites: Node 24+, git, [gitleaks](https://github.com/gitleaks/gitleaks), Python 3.

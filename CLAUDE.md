@@ -1,6 +1,6 @@
 # Portfolio
 
-Static Vue 3 + Vite portfolio, deployed to GitHub Pages. Design: [docs/superpowers/specs/2026-11-07-portfolio-vue-design.md](docs/superpowers/specs/2026-11-07-portfolio-vue-design.md).
+Static Vue 3 + Vite portfolio, deployed to GitHub Pages. Design: [docs/design/2026-11-07-portfolio-vue-design.md](docs/design/2026-11-07-portfolio-vue-design.md).
 
 ## Rules
 - MUST keep content in JSON under `src/data/`; no backend, no Firebase.
