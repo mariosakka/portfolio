@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Section budget: one screen below the sticky nav. SiteNav writes the measured nav height to --nav-h;
+   the fallback matches its usual height. svh (small viewport) so mobile toolbars never cover content. */
+:root {
+  --nav-h: 2.75rem;
+  --section-h: calc(100vh - var(--nav-h));
+}
+@supports (height: 100svh) {
+  :root {
+    --section-h: calc(100svh - var(--nav-h));
+  }
+}
+
 /* Flat page color on html too, so overscroll never shows white. */
 html {
   background-color: #060a18; /* keep in sync with night.950 in tailwind.config.ts */

@@ -19,16 +19,16 @@ const a3 = pointAt(model, f3)
 <template>
   <section
     :id="id"
-    class="mx-auto max-w-5xl scroll-mt-20 px-4 py-16 sm:px-8"
+    class="mx-auto flex min-h-[var(--section-h)] max-w-5xl scroll-mt-[var(--nav-h)] flex-col justify-center px-4 py-5 sm:px-8 sm:py-10 sm:short:py-6"
   >
-    <h2 class="mb-2 font-serif text-3xl text-ink sm:text-4xl">
+    <h2 class="mb-2 font-serif text-3xl text-ink outline-none sm:text-4xl xshort:text-[1.65rem]">
       {{ title }}
     </h2>
     <Vine
       :path="path"
       view-box="0 0 520 64"
       :duration="DURATION"
-      class="-mt-1 mb-4 !w-[32rem]"
+      class="-mt-1 mb-4 !w-[32rem] short:mb-3 short:!w-[24rem]"
     >
       <Leaf
         :x="a1.x"
