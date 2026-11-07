@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup>
 import { ref, useId } from 'vue'
 import { artProps, useGrown } from './useGrow.js'

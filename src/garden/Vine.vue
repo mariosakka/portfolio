@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script setup>
 import { ref, computed, provide } from 'vue'
 import { GROWN_KEY, useGrow } from './useGrow.js'
