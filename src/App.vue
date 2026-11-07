@@ -1,5 +1,6 @@
 <script setup>
 import SectionBlock from './components/SectionBlock.vue'
+import GardenHero from './components/GardenHero.vue'
 import SiteNav from './components/SiteNav.vue'
 import AboutSection from './components/sections/AboutSection.vue'
 import ExperienceSection from './components/sections/ExperienceSection.vue'
@@ -21,7 +22,11 @@ const sections = [
 </script>
 
 <template>
-  <div id="app-root">
+  <div
+    id="app-root"
+    class="relative isolate"
+  >
+    <GardenHero />
     <header class="mx-auto max-w-5xl px-4 pt-16 sm:px-8">
       <h1 class="font-serif text-4xl sm:text-5xl">
         Mohamad-Mario Sakka

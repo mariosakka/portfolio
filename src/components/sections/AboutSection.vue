@@ -12,7 +12,7 @@ import CommitBadge from '../CommitBadge.vue'
       :alt="about.fullName"
       class="w-56 rounded-2xl object-cover"
     >
-    <div class="space-y-4">
+    <div class="min-w-0 space-y-4">
       <h3 class="font-serif text-2xl">
         {{ about.fullName }}
       </h3>

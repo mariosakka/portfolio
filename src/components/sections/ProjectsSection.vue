@@ -11,6 +11,7 @@ const items = computed(() => data
   .filter((d) => active.value === 'All' || d.category === active.value)
   .map((d) => ({
     title: d.title,
+    bud: true,
     subtitle: first(d.shortDescription, d.role),
     image: d.image,
     tags: toList(d.technologies),
