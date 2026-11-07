@@ -38,7 +38,10 @@ const sections: Section[] = [
   >
     <GardenHero />
     <header class="mx-auto max-w-5xl px-4 pt-16 sm:px-8">
-      <h1 class="font-serif text-4xl sm:text-5xl">
+      <h1
+        data-page-top
+        class="font-serif text-4xl sm:text-5xl"
+      >
         Mohamad-Mario Sakka
       </h1>
     </header>

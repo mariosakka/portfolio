@@ -49,18 +49,26 @@ test('shows the version as a releases link, and the year', () => {
   expect(wrapper.findAll('a').map((a) => a.attributes('href'))).toContain('https://github.com/mariosakka/portfolio')
 })
 
-test.each([[false, 'smooth'], [true, 'auto']])('back to top (reduced motion %s) scrolls %s and focuses the h1', async (reduce, behavior) => {
-  document.body.innerHTML = '<h1>Name</h1>'
+test.each([[false, 'smooth'], [true, 'auto']])('back to top (reduced motion %s) scrolls %s and focuses [data-page-top]', async (reduce, behavior) => {
+  document.body.innerHTML = '<h1 data-page-top>Name</h1>'
   const { wrapper, scrollTo } = setup(reduce)
   await wrapper.find('button').trigger('click')
   expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior })
-  expect(document.activeElement).toBe(document.querySelector('h1'))
+  expect(document.activeElement).toBe(document.querySelector('[data-page-top]'))
 })
 
-test('App mounts the footer after main, fed by the same sections', () => {
-  vi.stubGlobal('__APP_VERSION__', '0.0.0')
+test('without a data-page-top element it still scrolls and does not throw', async () => {
+  const { wrapper, scrollTo } = setup()
+  await wrapper.find('button').trigger('click')
+  expect(scrollTo).toHaveBeenCalledOnce()
+})
+
+test('App mounts the footer after main, with the nav links and version', () => {
+  vi.stubGlobal('__APP_VERSION__', '9.9.9')
   const root = mount(App).find('#app-root')
-  const links = root.findAll('footer nav[aria-label="Footer"] a')
-  expect(links).toHaveLength(8)
-  expect(root.find('main + footer').exists()).toBe(true)
+  const navHrefs = root.findAll('nav[aria-label="Sections"] a').map((a) => a.attributes('href'))
+  const footerHrefs = root.findAll('footer nav[aria-label="Footer"] a').map((a) => a.attributes('href'))
+  expect(footerHrefs).toEqual(navHrefs)
+  expect(root.find('main + footer').text()).toContain('v9.9.9')
+  expect(root.find('h1[data-page-top]').exists()).toBe(true)
 })

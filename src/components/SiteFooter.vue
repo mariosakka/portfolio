@@ -19,9 +19,10 @@ const version = __APP_VERSION__
 function toTop() {
   const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
   window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
-  const h1 = document.querySelector('h1')
-  h1?.setAttribute('tabindex', '-1')
-  h1?.focus({ preventScroll: true })
+  // App.vue marks the page heading with data-page-top; without it we only scroll.
+  const top = document.querySelector<HTMLElement>('[data-page-top]')
+  top?.setAttribute('tabindex', '-1')
+  top?.focus({ preventScroll: true })
 }
 
 const link =
