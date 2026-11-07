@@ -68,7 +68,7 @@
 - [ ] **Step 1: Write failing tests** in `normalize.test.js`: `toList("React, Node.js, C\\, C++")` equals `["React","Node.js","C, C++"]`; `toList(["a"," b "])` equals `["a","b"]`; `toList(null)` equals `[]`; `formatPeriod("2025-09-29","",true)` equals `"Sep 2025 - Present"`; `formatPeriod("2018-09-03","2022-07-20",false)` equals `"Sep 2018 - Jul 2022"`; `formatPeriod("","",false)` equals `""`.
 - [ ] **Step 2: Run** `npm test` -> FAIL.
 - [ ] **Step 3: Implement** both functions in `src/lib/normalize.js`.
-- [ ] **Step 4: Write failing `data.test.js`**: each data file exists; arrays contain items with a non-empty `title`/`name`/`degree`/`company`-style primary field per spec; every list field is an array; no value contains `firebasestorage.googleapis.com`; `about.json` has `fullName`, `role`, `codeSample` (valid JSON string), `contact.methods` with types Email, GitHub, Phone, LinkedIn.
+- [ ] **Step 4: Write failing `data.test.js`**: each data file exists; arrays contain items with a non-empty `title`/`name`/`degree`/`company`-style primary field per spec; every list field is an array; no value contains `firebasestorage.googleapis.com`; `about.json` has `fullName`, `role`, `codeSample` (unused; code panel removed), `contact.methods` with types Email, GitHub, Phone, LinkedIn.
 - [ ] **Step 5: Implement `scripts/build-data.mjs`**: reads `docs/reference/firestore-export/*.json`, applies `toList` to list fields, strips Storage URLs (leaves `image` as `/img/<basename of imageFileName>.webp`), writes the six files with 2-space indent. Run it once and commit the output.
 - [ ] **Step 6: Run** tests -> PASS. **Commit** `feat: convert exported content to normalized JSON`
 

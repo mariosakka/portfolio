@@ -2,14 +2,15 @@
 import { Vine, Bloom, Cornflower, Bud, Leaf } from '../garden'
 
 const main = 'M-20 540 C40 470 120 450 110 380 S40 300 90 240 S170 190 150 120 S120 40 150 -10'
+// Above the sticky nav (z-10) so its blurred bg does not dim the art; shown only >=1400px where the margins hold no text.
 </script>
 
 <template>
   <div
     aria-hidden="true"
-    class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[40rem] overflow-x-clip"
+    class="pointer-events-none absolute inset-x-0 top-0 z-20 h-[40rem] overflow-x-clip"
   >
-    <div class="absolute left-0 top-0 hidden w-44 opacity-70 lg:block">
+    <div class="absolute left-0 top-0 hidden w-44 opacity-70 min-[1400px]:block">
       <Vine
         :path="main"
         view-box="-20 -10 280 560"
@@ -78,7 +79,7 @@ const main = 'M-20 540 C40 470 120 450 110 380 S40 300 90 240 S170 190 150 120 S
         />
       </Vine>
     </div>
-    <div class="absolute bottom-0 right-0 hidden w-32 opacity-70 xl:block">
+    <div class="absolute bottom-0 right-0 hidden w-32 opacity-70 min-[1400px]:block">
       <Vine
         path="M920 540 C860 500 870 450 820 430 S790 400 800 380"
         view-box="780 360 160 190"

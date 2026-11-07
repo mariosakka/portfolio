@@ -25,3 +25,16 @@ describe('garden placement', () => {
     expect(c.find('.bud').exists()).toBe(true)
   })
 })
+
+describe('garden breakpoints', () => {
+  it('shows the big vines only from 1400px and sits above the nav', () => {
+    window.matchMedia = vi.fn().mockReturnValue({ matches: true })
+    const w = mount(GardenHero)
+    expect(w.classes()).toContain('z-20')
+    w.findAll('svg.vine').forEach((v) => {
+      const cls = v.element.parentElement.className
+      expect(cls).toContain('hidden')
+      expect(cls).toContain('min-[1400px]:block')
+    })
+  })
+})
