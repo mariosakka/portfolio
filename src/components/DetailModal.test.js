@@ -4,7 +4,7 @@ import { nextTick } from 'vue'
 import DetailModal from './DetailModal.vue'
 
 const opts = (open) => ({ props: { open, title: 'Hello' }, slots: { default: '<p>body</p>' }, attachTo: document.body })
-afterEach(() => { document.body.innerHTML = ''; document.body.removeAttribute('style'); document.documentElement.removeAttribute('style'); vi.restoreAllMocks() })
+afterEach(() => { document.body.innerHTML = ''; document.body.removeAttribute('style'); document.documentElement.removeAttribute('style'); vi.restoreAllMocks(); delete window.scrollY })
 
 describe('DetailModal', () => {
   it('is a labelled modal dialog', () => {
@@ -122,6 +122,26 @@ describe('DetailModal', () => {
       expect(spy).toHaveBeenCalledTimes(1)
       a.unmount()
       b.unmount()
+    })
+    it('a modal mounted closed does not release another lock', async () => {
+      scrollAt(10)
+      const a = mount(DetailModal, opts(true))
+      const b = mount(DetailModal, opts(false))
+      expect(document.body.style.position).toBe('fixed')
+      b.unmount()
+      expect(document.body.style.position).toBe('fixed')
+      a.unmount()
+      expect(document.body.style.position).toBe('')
+    })
+    it('releases exactly once when unmounted while open', async () => {
+      const spy = scrollAt(10)
+      const a = mount(DetailModal, opts(true))
+      const b = mount(DetailModal, opts(true))
+      a.unmount()
+      expect(document.body.style.position).toBe('fixed')
+      b.unmount()
+      expect(document.body.style.position).toBe('')
+      expect(spy).toHaveBeenCalledTimes(1)
     })
   })
 })

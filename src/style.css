@@ -6,13 +6,7 @@ body {
   @apply bg-gradient-to-b from-night-950 to-night-800 font-sans text-ink;
   min-height: 100vh;
   min-height: 100dvh;
-  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
-}
-
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  -webkit-tap-highlight-color: rgba(79, 139, 255, 0.25);
+  padding-inline: env(safe-area-inset-left) calc(env(safe-area-inset-right) + var(--scrollbar-comp, 0px));
 }
 
 a,
@@ -20,23 +14,17 @@ button {
   touch-action: manipulation;
 }
 
-/* 16px minimum stops iOS zooming into focused fields. */
-input,
-select,
-textarea {
-  font-size: max(16px, 1em);
-}
-
 /* Full-bleed nav strip inside the safe-area padded body. */
 .nav-bleed {
-  margin-inline: calc(-1 * env(safe-area-inset-left)) calc(-1 * env(safe-area-inset-right));
-  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+  margin-inline: calc(-1 * env(safe-area-inset-left)) calc(-1 * env(safe-area-inset-right) - var(--scrollbar-comp, 0px));
+  padding-inline: env(safe-area-inset-left) calc(env(safe-area-inset-right) + var(--scrollbar-comp, 0px));
 }
 
 /* Scrollable but scrollbar-free; right edge fades to hint more links. */
 .nav-scroll {
   scrollbar-width: none;
   -ms-overflow-style: none;
+  padding-right: 1.5rem; /* last link ends clear of the fade */
   -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
   mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
 }
@@ -54,10 +42,12 @@ textarea {
   max-height: 90dvh;
   overflow-y: auto;
   overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
 }
 
 html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(79, 139, 255, 0.25);
   scroll-behavior: smooth;
 }
 

@@ -73,7 +73,7 @@ const shownLinks = computed(() => props.links
           :href="l.url"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex min-h-11 items-center text-[#4f8bff] underline"
+          class="inline-flex [@media(pointer:coarse)]:min-h-11 items-center text-[#4f8bff] underline"
         >{{ l.label }}</a>
       </template>
     </div>

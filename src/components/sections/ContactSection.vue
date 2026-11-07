@@ -25,7 +25,7 @@ const methods = contact.methods.filter((m) => m.value && prefix[m.type])
       >
         <a
           :href="prefix[m.type] + m.value"
-          class="inline-flex min-h-11 items-center text-[#4f8bff] underline"
+          class="inline-flex [@media(pointer:coarse)]:min-h-11 items-center text-[#4f8bff] underline"
         >{{ m.type }}</a>
       </li>
     </ul>

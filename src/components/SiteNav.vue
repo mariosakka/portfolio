@@ -37,7 +37,7 @@ onBeforeUnmount(() => observer?.disconnect())
         <a
           :href="`#${s.id}`"
           :aria-current="active === s.id ? 'true' : undefined"
-          class="flex min-h-11 items-center px-2 transition-colors hover:text-accent"
+          class="flex [@media(pointer:coarse)]:min-h-11 items-center px-2 transition-colors hover:text-accent"
           :class="active === s.id ? 'text-accent' : 'text-ink/70'"
         >{{ s.label }}</a>
       </li>

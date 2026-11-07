@@ -9,6 +9,7 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 let opener = null
+let locked = false // this instance owns one lock count
 const box = ref(null)
 const onKey = (e) => {
   if (e.key === 'Escape') return emit('close')
@@ -33,12 +34,12 @@ const onKey = (e) => {
 
 function lock() {
   opener = document.activeElement
-  lockScroll()
+  if (!locked) { locked = true; lockScroll() }
   document.addEventListener('keydown', onKey)
   nextTick(() => box.value?.focus())
 }
 function unlock() {
-  unlockScroll()
+  if (locked) { locked = false; unlockScroll() }
   document.removeEventListener('keydown', onKey)
   opener?.focus?.()
   opener = null
@@ -53,7 +54,7 @@ onBeforeUnmount(() => { if (props.open) unlock() })
     <div
       v-if="open"
       data-backdrop
-      class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3"
+      class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60"
       @click.self="emit('close')"
     >
       <div
