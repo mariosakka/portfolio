@@ -13,7 +13,7 @@ const methods = contact.methods.filter((m) => m.value && prefix[m.type])
 </script>
 
 <template>
-  <div class="text-[#e4edff]">
+  <div class="text-ink">
     <h3 class="font-serif text-2xl">
       {{ contact.title }}
     </h3>
@@ -27,7 +27,7 @@ const methods = contact.methods.filter((m) => m.value && prefix[m.type])
       >
         <a
           :href="prefix[m.type] + m.value"
-          class="inline-flex [@media(pointer:coarse)]:min-h-11 items-center text-[#4f8bff] underline"
+          class="inline-flex [@media(pointer:coarse)]:min-h-11 items-center text-accent underline"
         >{{ m.type }}</a>
       </li>
     </ul>

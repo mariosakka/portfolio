@@ -7,7 +7,7 @@ const about: About = aboutJson
 </script>
 
 <template>
-  <div class="grid gap-8 text-[#e4edff] md:grid-cols-[14rem_1fr]">
+  <div class="grid gap-8 text-ink md:grid-cols-[14rem_1fr]">
     <img
       v-if="about.photo"
       :src="about.photo"
@@ -31,7 +31,7 @@ const about: About = aboutJson
         <li
           v-for="s in about.skills"
           :key="s"
-          class="rounded-full border border-[rgba(127,176,255,.3)] px-2 py-0.5 text-xs"
+          class="rounded-full border border-line px-2 py-0.5 text-xs"
         >
           {{ s }}
         </li>

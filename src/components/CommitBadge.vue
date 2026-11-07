@@ -15,7 +15,7 @@ const commit = __LATEST_COMMIT__
 .commit-badge {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.75rem;
-  color: #7fb0ff;
+  color: #7b9bd9;
   margin: 0;
 }
 </style>

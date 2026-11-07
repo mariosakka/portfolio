@@ -60,7 +60,7 @@ onBeforeUnmount(() => { if (props.open) unlock() })
         role="dialog"
         aria-modal="true"
         :aria-label="title"
-        class="modal-box w-full max-w-2xl overflow-y-auto rounded-2xl outline-none border border-[rgba(127,176,255,.3)] bg-[#0b1f4a] p-5 text-[#e4edff]"
+        class="modal-box w-full max-w-2xl overflow-y-auto rounded-2xl outline-none border border-line bg-night-900 p-5 text-ink"
       >
         <div class="mb-3 flex items-start justify-between gap-3">
           <h2 class="font-serif text-2xl">
@@ -69,7 +69,7 @@ onBeforeUnmount(() => { if (props.open) unlock() })
           <button
             type="button"
             aria-label="Close"
-            class="-mr-3 -mt-3 flex h-11 w-11 shrink-0 items-center justify-center text-3xl leading-none text-[#4f8bff]"
+            class="-mr-3 -mt-3 flex h-11 w-11 shrink-0 items-center justify-center text-3xl leading-none text-accent"
             @click="emit('close')"
           >
             &times;
