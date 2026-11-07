@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gradient-to-b from-night-950 to-night-800 font-sans text-ink;
+  min-height: 100vh;
+}

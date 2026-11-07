@@ -8,3 +8,5 @@ if ! command -v gitleaks >/dev/null; then
 fi
 gitleaks git --no-banner --redact
 python scripts/check_agent_instructions.py .
+npm run lint
+npm test
