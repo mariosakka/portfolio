@@ -8,7 +8,7 @@
 
 **Tech Stack:** Vue 3, Vite, Tailwind CSS 3 (app only), Vitest + @vue/test-utils + jsdom, ESLint, sharp (image script), `@fontsource` fonts, GitHub Actions + Pages.
 
-**Spec:** `docs/superpowers/specs/2026-11-07-portfolio-vue-design.md`
+**Spec:** `docs/design/2026-11-07-portfolio-vue-design.md`
 
 ## Global Constraints
 

@@ -3,7 +3,11 @@ dist/
 .env
 .env.*
 !.env.example
-.superpowers/
 .DS_Store
 # Raw Firestore export: tokenized Firebase Storage URLs and personal contact data. Local reference only.
 docs/reference/firestore-export/
+
+# Agent/tooling working files: never commit
+.superpowers/
+docs/superpowers/
+.claude/
