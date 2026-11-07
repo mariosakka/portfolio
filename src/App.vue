@@ -3,6 +3,7 @@ import type { Component } from 'vue'
 import SectionBlock from './components/SectionBlock.vue'
 import GardenHero from './components/GardenHero.vue'
 import SiteNav from './components/SiteNav.vue'
+import SiteFooter from './components/SiteFooter.vue'
 import AboutSection from './components/sections/AboutSection.vue'
 import SkillsSection from './components/sections/SkillsSection.vue'
 import ExperienceSection from './components/sections/ExperienceSection.vue'
@@ -52,5 +53,6 @@ const sections: Section[] = [
         <component :is="s.body" />
       </SectionBlock>
     </main>
+    <SiteFooter :sections="sections" />
   </div>
 </template>

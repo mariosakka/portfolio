@@ -9,7 +9,7 @@ export default tseslint.config(
   tseslint.configs.recommended,
   pluginVue.configs['flat/recommended'],
   { files: ['**/*.vue'], languageOptions: { parserOptions: { parser: tseslint.parser } } },
-  { languageOptions: { globals: { ...globals.browser, ...globals.node, __LATEST_COMMIT__: 'readonly' } } },
+  { languageOptions: { globals: { ...globals.browser, ...globals.node, __LATEST_COMMIT__: 'readonly', __APP_VERSION__: 'readonly' } } },
   // garden components are intentionally single-word (they become an npm package)
   { files: ['src/garden/**/*.vue'], rules: { 'vue/multi-word-component-names': 'off' } },
 )
