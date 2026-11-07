@@ -38,23 +38,23 @@ defineEmits(['open'])
       class="flex flex-wrap gap-2 px-4 pb-3"
     >
       <li
-        v-for="t in tags"
-        :key="t"
+        v-for="(t, i) in tags"
+        :key="i"
         class="rounded-full border border-[rgba(127,176,255,.3)] px-2 py-0.5 text-xs"
       >
         {{ t }}
       </li>
     </ul>
     <div
-      v-if="links.some((l) => l.url)"
+      v-if="links.some((l) => l.url?.trim())"
       class="flex flex-wrap gap-3 px-4 pb-4 text-sm"
     >
       <template
-        v-for="l in links"
-        :key="l.label"
+        v-for="(l, i) in links"
+        :key="i"
       >
         <a
-          v-if="l.url"
+          v-if="l.url?.trim()"
           :href="l.url"
           target="_blank"
           rel="noopener noreferrer"

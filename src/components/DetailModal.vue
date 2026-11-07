@@ -1,5 +1,5 @@
 <script setup>
-import { watch, onBeforeUnmount } from 'vue'
+import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -8,12 +8,28 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 let opener = null
-const onKey = (e) => { if (e.key === 'Escape') emit('close') }
+const box = ref(null)
+const onKey = (e) => {
+  if (e.key === 'Escape') return emit('close')
+  if (e.key !== 'Tab' || !box.value) return
+  const f = [...box.value.querySelectorAll('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+  if (!f.length) return e.preventDefault()
+  const first = f[0]
+  const last = f[f.length - 1]
+  if (e.shiftKey && (document.activeElement === first || document.activeElement === box.value)) {
+    e.preventDefault()
+    last.focus()
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault()
+    first.focus()
+  }
+}
 
 function lock() {
   opener = document.activeElement
   document.body.style.overflow = 'hidden'
   document.addEventListener('keydown', onKey)
+  nextTick(() => box.value?.focus())
 }
 function unlock() {
   document.body.style.overflow = ''
@@ -35,10 +51,12 @@ onBeforeUnmount(() => { if (props.open) unlock() })
       @click.self="emit('close')"
     >
       <div
+        ref="box"
+        tabindex="-1"
         role="dialog"
         aria-modal="true"
         :aria-label="title"
-        class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[rgba(127,176,255,.3)] bg-[#0b1f4a] p-5 text-[#e4edff]"
+        class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl outline-none border border-[rgba(127,176,255,.3)] bg-[#0b1f4a] p-5 text-[#e4edff]"
       >
         <div class="mb-3 flex items-start justify-between gap-3">
           <h2 class="font-serif text-2xl">

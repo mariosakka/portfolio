@@ -7,6 +7,10 @@ describe('ItemCard', () => {
     const w = mount(ItemCard, { props: { title: 'T', links: [{ label: 'Live', url: '' }] } })
     expect(w.find('a').exists()).toBe(false)
   })
+  it('ignores whitespace-only urls', () => {
+    const w = mount(ItemCard, { props: { title: 'T', links: [{ label: 'Live', url: '   ' }] } })
+    expect(w.find('a').exists()).toBe(false)
+  })
   it('renders a real link and no chip list when tags empty', () => {
     const w = mount(ItemCard, { props: { title: 'T', tags: [], links: [{ label: 'Live', url: 'https://x.io' }] } })
     expect(w.find('a').attributes('href')).toBe('https://x.io')
