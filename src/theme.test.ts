@@ -40,12 +40,22 @@ test.each([
   expect(ratio(fg as RGB, back as RGB)).toBeGreaterThanOrEqual(4.5)
 })
 
-test('page background is one flat color on html and body, with no gradient fill', () => {
+test('page background is flat on html and body; stars live on a fixed, masked top-only sky layer', () => {
   const css = readFileSync('src/style.css', 'utf8')
   const block = (sel: string) => css.match(new RegExp(`^${sel} [{][^}]*[}]`, 'm'))![0]
   expect(block('html')).toContain(`background-color: ${colors.night[950]}`)
   expect(block('html')).toContain('color-scheme: dark')
   expect(block('body')).toContain('bg-night-950')
-  expect(block('body')).not.toMatch(/bg-gradient|from-night|to-night|linear-gradient/)
-  expect(block('body')).toContain('radial-gradient') // the starfield dots only
+  // no gradient and no star tile on the page background itself
+  expect(block('body')).not.toMatch(/gradient|background-image|background-size/)
+  expect(block('html')).not.toMatch(/gradient|background-image/)
+  const sky = block('body::before')
+  expect(sky).toContain('radial-gradient') // the star dots
+  expect(sky).toContain('position: fixed')
+  expect(sky).toContain('pointer-events: none')
+  expect(sky).toMatch(/mask-image:\s*linear-gradient\(to bottom, #000 [\d.]+%, #000 \d+%, transparent 100%\)/)
+  expect(sky).toMatch(/-webkit-mask-image/)
+  const heights = [...sky.matchAll(/height:\s*(\d+)(vh|svh)/g)].map((m) => Number(m[1]))
+  expect(heights.length).toBeGreaterThanOrEqual(2) // vh fallback + svh
+  expect(Math.max(...heights)).toBeLessThanOrEqual(60)
 })

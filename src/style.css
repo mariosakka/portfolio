@@ -10,7 +10,20 @@ html {
 
 body {
   @apply bg-night-950 font-sans text-ink;
-  /* Faint static starfield: one 640px tile of dots repeated, scrolls with the page, no JS. */
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-inline: env(safe-area-inset-left) calc(env(safe-area-inset-right) + var(--scrollbar-comp, 0px));
+}
+
+/* Night sky: fixed to the viewport top so it follows the viewer; content scrolls over it. Stars fade out by mid-screen. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 55vh;
+  height: 55svh;
+  z-index: 0; /* later positioned siblings (app root, nav, garden, modal) paint above */
+  pointer-events: none;
   background-image:
     radial-gradient(circle at 0px 589px, rgba(200, 218, 255, 0.27) 0, rgba(200, 218, 255, 0.27) 0.8px, transparent 1.4px),
     radial-gradient(circle at 467px 341px, rgba(200, 218, 255, 0.29) 0, rgba(200, 218, 255, 0.29) 0.8px, transparent 1.4px),
@@ -43,11 +56,16 @@ body {
     radial-gradient(circle at 565px 151px, rgba(200, 218, 255, 0.30) 0, rgba(200, 218, 255, 0.30) 0.8px, transparent 1.4px),
     radial-gradient(circle at 76px 313px, rgba(200, 218, 255, 0.18) 0, rgba(200, 218, 255, 0.18) 0.8px, transparent 1.4px),
     radial-gradient(circle at 408px 590px, rgba(200, 218, 255, 0.19) 0, rgba(200, 218, 255, 0.19) 0.8px, transparent 1.4px),
-    radial-gradient(circle at 120px 620px, rgba(200, 218, 255, 0.36) 0, rgba(200, 218, 255, 0.36) 0.8px, transparent 1.4px);
+    radial-gradient(circle at 120px 620px, rgba(200, 218, 255, 0.36) 0, rgba(200, 218, 255, 0.36) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 120px 40px, rgba(200, 218, 255, 0.34) 0, rgba(200, 218, 255, 0.34) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 330px 90px, rgba(200, 218, 255, 0.42) 0, rgba(200, 218, 255, 0.42) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 205px 130px, rgba(200, 218, 255, 0.28) 0, rgba(200, 218, 255, 0.28) 1.2px, transparent 1.8px),
+    radial-gradient(circle at 610px 70px, rgba(200, 218, 255, 0.30) 0, rgba(200, 218, 255, 0.30) 0.8px, transparent 1.4px),
+    radial-gradient(circle at 20px 150px, rgba(200, 218, 255, 0.26) 0, rgba(200, 218, 255, 0.26) 0.8px, transparent 1.4px);
   background-size: 640px 640px;
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding-inline: env(safe-area-inset-left) calc(env(safe-area-inset-right) + var(--scrollbar-comp, 0px));
+  background-repeat: repeat-x;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 35%, transparent 100%);
 }
 
 a,
