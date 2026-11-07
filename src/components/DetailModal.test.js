@@ -1,10 +1,10 @@
-import { describe, it, expect, afterEach } from 'vitest'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import DetailModal from './DetailModal.vue'
 
 const opts = (open) => ({ props: { open, title: 'Hello' }, slots: { default: '<p>body</p>' }, attachTo: document.body })
-afterEach(() => { document.body.innerHTML = ''; document.body.style.overflow = '' })
+afterEach(() => { document.body.innerHTML = ''; document.body.removeAttribute('style'); document.documentElement.removeAttribute('style'); vi.restoreAllMocks() })
 
 describe('DetailModal', () => {
   it('is a labelled modal dialog', () => {
@@ -87,5 +87,41 @@ describe('DetailModal', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', cancelable: true }))
     expect(document.activeElement).toBe(d.querySelector('button[aria-label="Close"]'))
     w.unmount()
+  })
+  describe('scroll lock', () => {
+    const scrollAt = (y) => {
+      Object.defineProperty(window, 'scrollY', { value: y, configurable: true })
+      return vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+    }
+    it('fixes the body at the scroll offset and restores scroll and prior inline styles', async () => {
+      const spy = scrollAt(240)
+      document.body.style.position = 'relative'
+      const w = mount(DetailModal, opts(false))
+      await w.setProps({ open: true })
+      expect(document.body.style.position).toBe('fixed')
+      expect(document.body.style.top).toBe('-240px')
+      expect(document.documentElement.style.overflow).toBe('hidden')
+      await w.setProps({ open: false })
+      expect(document.body.style.position).toBe('relative')
+      expect(document.body.style.top).toBe('')
+      expect(document.documentElement.style.overflow).toBe('')
+      expect(spy).toHaveBeenCalledWith({ top: 240, left: 0, behavior: 'instant' })
+      w.unmount()
+    })
+    it('does not leak with two modals open at once', async () => {
+      const spy = scrollAt(100)
+      const a = mount(DetailModal, opts(false))
+      const b = mount(DetailModal, opts(false))
+      await a.setProps({ open: true })
+      await b.setProps({ open: true })
+      await a.setProps({ open: false })
+      expect(document.body.style.position).toBe('fixed')
+      await b.setProps({ open: false })
+      expect(document.body.style.position).toBe('')
+      expect(document.body.style.overflow).toBe('')
+      expect(spy).toHaveBeenCalledTimes(1)
+      a.unmount()
+      b.unmount()
+    })
   })
 })

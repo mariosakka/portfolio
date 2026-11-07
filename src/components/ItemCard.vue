@@ -63,7 +63,7 @@ const shownLinks = computed(() => props.links
     </ul>
     <div
       v-if="shownLinks.length"
-      class="flex flex-wrap gap-3 px-4 pb-4 text-sm"
+      class="flex flex-wrap gap-x-4 px-4 pb-1 text-sm"
     >
       <template
         v-for="(l, i) in shownLinks"
@@ -73,7 +73,7 @@ const shownLinks = computed(() => props.links
           :href="l.url"
           target="_blank"
           rel="noopener noreferrer"
-          class="text-[#4f8bff] underline"
+          class="inline-flex min-h-11 items-center text-[#4f8bff] underline"
         >{{ l.label }}</a>
       </template>
     </div>

@@ -18,14 +18,14 @@ const methods = contact.methods.filter((m) => m.value && prefix[m.type])
     <p class="mt-2 opacity-80">
       {{ contact.subtitle }}
     </p>
-    <ul class="mt-6 flex flex-wrap gap-4">
+    <ul class="mt-4 flex flex-wrap gap-x-4">
       <li
         v-for="m in methods"
         :key="m.id"
       >
         <a
           :href="prefix[m.type] + m.value"
-          class="text-[#4f8bff] underline"
+          class="inline-flex min-h-11 items-center text-[#4f8bff] underline"
         >{{ m.type }}</a>
       </li>
     </ul>

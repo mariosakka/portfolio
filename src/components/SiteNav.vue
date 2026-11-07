@@ -26,10 +26,10 @@ onBeforeUnmount(() => observer?.disconnect())
 
 <template>
   <nav
-    class="sticky top-0 z-10 border-b border-accent/20 bg-night-950/90 backdrop-blur"
+    class="nav-bleed sticky top-0 z-10 border-b border-accent/20 bg-night-950/90 backdrop-blur"
     aria-label="Sections"
   >
-    <ul class="mx-auto flex max-w-5xl gap-6 overflow-x-auto whitespace-nowrap px-4 py-3 font-sans text-sm sm:px-8">
+    <ul class="nav-scroll mx-auto flex max-w-5xl gap-2 overflow-x-auto whitespace-nowrap px-2 font-sans text-sm sm:px-6">
       <li
         v-for="s in sections"
         :key="s.id"
@@ -37,7 +37,7 @@ onBeforeUnmount(() => observer?.disconnect())
         <a
           :href="`#${s.id}`"
           :aria-current="active === s.id ? 'true' : undefined"
-          class="transition-colors hover:text-accent"
+          class="flex min-h-11 items-center px-2 transition-colors hover:text-accent"
           :class="active === s.id ? 'text-accent' : 'text-ink/70'"
         >{{ s.label }}</a>
       </li>

@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
+import { lockScroll, unlockScroll } from '../lib/scrollLock'
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -32,12 +33,12 @@ const onKey = (e) => {
 
 function lock() {
   opener = document.activeElement
-  document.body.style.overflow = 'hidden'
+  lockScroll()
   document.addEventListener('keydown', onKey)
   nextTick(() => box.value?.focus())
 }
 function unlock() {
-  document.body.style.overflow = ''
+  unlockScroll()
   document.removeEventListener('keydown', onKey)
   opener?.focus?.()
   opener = null
@@ -52,7 +53,7 @@ onBeforeUnmount(() => { if (props.open) unlock() })
     <div
       v-if="open"
       data-backdrop
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3"
+      class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3"
       @click.self="emit('close')"
     >
       <div
@@ -61,7 +62,7 @@ onBeforeUnmount(() => { if (props.open) unlock() })
         role="dialog"
         aria-modal="true"
         :aria-label="title"
-        class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl outline-none border border-[rgba(127,176,255,.3)] bg-[#0b1f4a] p-5 text-[#e4edff]"
+        class="modal-box w-full max-w-2xl overflow-y-auto rounded-2xl outline-none border border-[rgba(127,176,255,.3)] bg-[#0b1f4a] p-5 text-[#e4edff]"
       >
         <div class="mb-3 flex items-start justify-between gap-3">
           <h2 class="font-serif text-2xl">
@@ -70,7 +71,7 @@ onBeforeUnmount(() => { if (props.open) unlock() })
           <button
             type="button"
             aria-label="Close"
-            class="text-[#4f8bff]"
+            class="-mr-3 -mt-3 flex h-11 w-11 shrink-0 items-center justify-center text-3xl leading-none text-[#4f8bff]"
             @click="emit('close')"
           >
             &times;
