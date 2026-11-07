@@ -6,6 +6,8 @@ import type { Pt, SproutDensity, SproutLayout, SproutVariant, SproutsProps } fro
 
 const DENSITIES: SproutDensity[] = [1, 2, 3]
 const SIZES: [number, number][] = [[24, 20], [60, 40], [160, 100], [320, 200], [640, 360], [1200, 900], [180, 640], [960, 140]]
+// Seeds 0..11 at the default reach, plus a few string seeds at unusual reaches.
+const SEEDS: [string | number, number | undefined][] = [...Array.from({ length: 12 }, (_, i): [number, undefined] => [i, undefined]), ['card-a', 32], ['photo', 8], ['wide', 64]]
 const LEAF_MODEL = parsePath(LEAF.d.replace(/Z$/, ''))
 
 /** How far a point lies inside the parent rect (negative = outside). */
@@ -42,8 +44,8 @@ describe('layoutSprouts containment', () => {
     for (const variant of [...SPROUT_VARIANTS, 'auto'] as const) {
       for (const density of DENSITIES) {
         for (const [w, hh] of SIZES) {
-          for (const [si, seed] of [0, 1, 2, 5, 'card-a', 'photo'].entries()) {
-            const L = layoutSprouts({ seed, variant, density, width: w, height: hh, reach: [56, 32, 64, 8, 40, 56][si] })
+          for (const [seed, rc] of SEEDS) {
+            const L = layoutSprouts({ seed, variant, density, width: w, height: hh, reach: rc })
             const reach = L.reach
             const id = `${variant}/${density}/${w}x${hh}/${seed}`
             let deepest = -Infinity

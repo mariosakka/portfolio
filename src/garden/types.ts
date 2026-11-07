@@ -285,7 +285,7 @@ export interface SproutsProps {
   active?: boolean
   /** With `trigger="manual"`: whole overlay progress 0..1. */
   progress?: number
-  /** Width in px of the ring around the parent the art may use (default 40). */
+  /** Width in px of the ring around the parent the art may use (default 56 from 640px wide, 32 on phones). */
   reach?: number
   /** Final grown state, no animation. */
   isStatic?: boolean
