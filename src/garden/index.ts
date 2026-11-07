@@ -1,7 +1,6 @@
 import './garden.css'
 
 export { default as Vine } from './Vine.vue'
-export { default as PageVine } from './PageVine.vue'
 export { default as Plant } from './Plant.vue'
 export { default as Spray } from './Spray.vue'
 export { default as Flower } from './Flower.vue'
@@ -17,9 +16,8 @@ export { useGrowthTimeline, reachDelay, phase, petalPhase, PHASES } from './time
 export { generateFlower, FLOWER_SPECIES, SPECIES_SCALE } from './flowers'
 export { growPlant, growStem } from './grow'
 export { parsePath, pathModel, pointAt, distanceToPath } from './anchor'
-export { makeVinePath, placeItems, scrollProgress, mulberry32 } from './layout'
+export { mulberry32 } from './rng'
 export type {
-  Anchor, ArtProps, Cubic, FlowerGeometry, FlowerProps, FlowerSpec, GardenContext, GrowOptions, GrowthPhase, PageVineProps, PathModel,
-  PathSample, PlaceOptions, Palette, PlantGeometry, PlantNode, PlantProps, PlantSpec, Pt, Species, SpeciesProps, TimelineOptions,
-  VineItem, VinePath, VinePathOptions, VineProps,
+  Anchor, ArtProps, Cubic, FlowerGeometry, FlowerProps, FlowerSpec, GardenContext, GrowOptions, GrowthPhase, PathModel,
+  Palette, PlantGeometry, PlantNode, PlantProps, PlantSpec, Pt, Species, SpeciesProps, TimelineOptions, VineProps,
 } from './types'

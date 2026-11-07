@@ -236,7 +236,7 @@ export interface PlantProps extends Omit<PlantSpec, 'seed'> {
   isStatic?: boolean
   /** Drive the whole plant manually (0..1) instead of the timeline. */
   progress?: number
-  /** Gentle idle sway once fully grown (default false; PageVine enables it only for plants near the viewport). */
+  /** Gentle idle sway once fully grown (default false; Sprouts enables it only for a few plants near the viewport). */
   sway?: boolean
 }
 
@@ -255,63 +255,4 @@ export interface SpeciesProps extends ArtProps {
   bud?: boolean
   duration?: number
   progress?: number
-}
-
-export interface VinePathOptions {
-  seed: number
-  /** Total height in px. */
-  height: number
-  /** Strip width in px (default 180). */
-  width?: number
-  /** Inner margin kept free of the stem on both sides (default 28% of width). */
-  pad?: number
-  /** Nominal px per S-curve (default 220). */
-  step?: number
-}
-
-export interface PathSample extends Anchor {
-  /** Arc-length fraction 0..1. */
-  f: number
-}
-
-export interface VinePath extends PathModel {
-  samples: PathSample[]
-  width: number
-  height: number
-}
-
-export interface VineItem {
-  id: string
-  kind: 'leaf' | 'plant'
-  /** Arc fraction of the anchor along the vine. */
-  f: number
-  anchor: Anchor
-  /** Leaves only. */
-  rotate: number
-  size: number
-  plant?: Omit<PlantSpec, 'anchor'>
-}
-
-export interface PlaceOptions {
-  seed: number
-  /** Flower frequency multiplier (default 1). */
-  density?: number
-  /** Hairline edge vine: tiny flowers on short stems, no leaves on stems. */
-  compact?: boolean
-}
-
-export interface PageVineProps {
-  seed?: number
-  /** Height in px; omitted or 0 measures the parent with a ResizeObserver. */
-  height?: number
-  /** Strip width in px (default 180). */
-  width?: number
-  /** Which screen edge the strip hugs (default `left`). */
-  side?: 'left' | 'right'
-  density?: number
-  /** Fraction of the parent height the vine covers (default 1). */
-  coverage?: number
-  compact?: boolean
-  /** Fully drawn, no scroll listener. */
-  isStatic?: boolean
 }

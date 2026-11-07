@@ -43,8 +43,6 @@ Flower, Bloom, Cornflower, Bell, ForgetMeNot, Daisy (thin wrappers over `Flower`
 
 Leaf / Bud: `x`, `y`, `rotate`, `size`, `delay`, `grown`, `isStatic`. Their base is the origin, so put them on an anchor.
 
-PageVine: a tall winding vine that draws as the page scrolls. Props: `seed`, `height` (px; 0 measures the parent with a ResizeObserver), `width` (strip, default 180), `side` (`left` or `right`), `density`, `coverage` (fraction of the parent height), `compact` (hairline edge vine with tiny flowers), `isStatic`. The path is procedural (`makeVinePath`); plants and leaves are placed along it by `placeItems`, all seeded. One passive scroll listener throttled with `requestAnimationFrame` writes a single CSS variable; each plant starts its own timeline when the drawn tip passes its anchor and stays open. `scrollProgress(scrollY, pageHeight, viewportHeight)` maps scroll to a clamped 0..1 with the tip at 60% of the viewport and the vine complete at the page bottom.
-
 `isStatic` renders everything fully grown with no animation. `prefers-reduced-motion: reduce` and a missing `IntersectionObserver` also render fully grown.
 
 ## useGrow(el, { once = true, threshold = 0.2 })
@@ -53,7 +51,7 @@ Returns a ref that becomes `true` when `el` enters the viewport (immediately `tr
 
 ## Types
 
-`index.ts` exports `Anchor`, `ArtProps`, `FlowerGeometry`, `FlowerSpec`, `GrowthPhase`, `PageVineProps`, `PathModel`, `PlantGeometry`, `PlantProps`, `PlantSpec`, `Species`, `SpeciesProps`, `TimelineOptions`, `VineItem`, `VinePath`, `VineProps` and more.
+`index.ts` exports `Anchor`, `ArtProps`, `FlowerGeometry`, `FlowerSpec`, `GrowthPhase`, `PathModel`, `PlantGeometry`, `PlantProps`, `PlantSpec`, `Species`, `SpeciesProps`, `TimelineOptions`, `VineProps` and more.
 
 ## Dev demo
 

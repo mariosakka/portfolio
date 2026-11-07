@@ -28,7 +28,7 @@ Decision per layer (details in the sections below):
 - Soft check: `node scripts/check-placeholders.ts` warns (never fails) on `aaa`/`lorem` values and empty fields; known cases are in [known-issues.md](known-issues.md).
 
 ### Accessibility
-- Automated (jsdom; `DetailModal.test.ts`, `Carousel.test.ts`, `HeroCard.test.ts`, `sections.test.ts`, `GardenHero.test.ts`): roles, aria attributes, focus move/trap, keyboard handling.
+- Automated (jsdom; `DetailModal.test.ts`, `Carousel.test.ts`, `HeroCard.test.ts`, `sections.test.ts`, `src/garden/garden.test.ts`): roles, aria attributes, focus move/trap, keyboard handling.
 - Manual: jsdom has no layout, contrast or screen reader. A real-browser a11y pass (keyboard tour, contrast, zoom) is part of the release check below. Owner: repo owner.
 
 ### Build smoke
@@ -44,7 +44,7 @@ Decision per layer (details in the sections below):
 - Gitleaks: CI (`gitleaks-action`, also the weekly full-history schedule) and the pre-push hook (`gitleaks git`). A missing scanner fails the hook with install instructions. No allowlist exists; add one only with owner, reason and expiry.
 
 ### End-to-end / visual (manual)
-- Manual release check, owner: repo owner. Before a release, build locally and take Playwright screenshots at 390, 1100 and 1440 px wide; check hero garden, nav, each section, the modal and keyboard tab order; in the Projects and Certificates carousels check arrows, dots, arrow keys and a swipe, and that the page never scrolls sideways. Automating this is not justified for a personal site (flaky pixel diffs).
+- Manual release check, owner: repo owner. Before a release, build locally and take Playwright screenshots at 390, 1100 and 1440 px wide; check the garden sprouts around cards, nav, each section, the modal and keyboard tab order; in the Projects and Certificates carousels check arrows, dots, arrow keys and a swipe, and that the page never scrolls sideways. Automating this is not justified for a personal site (flaky pixel diffs).
 - Viewport-fit matrix (manual release check, owner: repo owner): jsdom has no layout, so tests only assert the classes and the nav scroll logic with stubbed heights. Before a release run `docs/reference/measure-fit.mjs` against `npm run build && npx vite preview` from a temp folder outside the repo with Playwright installed there (instructions at the top of the file). It clicks every nav link at 1920x1080, 1440x900, 1366x768, 1280x720, 1024x768, 390x844, 375x667 and 360x740 and prints a table: whether each section's content fits between the nav and the bottom of the screen (px spare or over) and whether it is centered within 24px. Every cell must say yes; viewports under about 600px tall overflow by design.
 - Real iPhone check, owner: repo owner. Open the deployed site in Safari on a real iPhone and look at: (1) modal height: open a card with the toolbar expanded and collapsed, the whole dialog and its close button stay visible and long content scrolls inside it; (2) scroll lock: the page behind the open modal does not move, and closing it returns to the same scroll position; (3) notch and landscape: rotate to landscape, text, nav and modal are not under the notch or home bar; (4) nav scroll: the section strip swipes sideways with no scrollbar and fades at the right edge; (5) tap targets: nav links, project filters, carousel arrows and dots, card link buttons and Read more, contact links and the modal close button are easy to hit, with no double-tap zoom delay. Playwright WebKit screenshots (iPhone device descriptor) are only an approximation of iOS Safari, not a replacement for this check.
 
@@ -52,8 +52,8 @@ Decision per layer (details in the sections below):
 - N/A: static site on GitHub Pages, no backend or heavy computation. The one cheap guard is the 250 KB per-image test in `images.test.ts`. Revisit if Lighthouse scores regress.
 
 ### Domain-specific (garden animation)
-- Tests cover the reduced-motion path (`prefers-reduced-motion` renders fully grown, `is-static` mode) and visibility logic in `src/garden/garden.test.ts` and `GardenHero.test.ts`.
-- Also covered: seeded flower and plant generation, anchoring (flower base equals stem end, axis follows the tangent, leaf bases on the path), the 0..1 growth-phase mapping (pollen only after petals open) and scroll-to-progress mapping, all in `src/garden/garden.test.ts`. `garden-demo.html` (dev only) renders plants at any progress for manual frame checks.
+- Tests cover the reduced-motion path (`prefers-reduced-motion` renders fully grown, `is-static` mode) and visibility logic in `src/garden/garden.test.ts`.
+- Also covered: seeded flower and plant generation, anchoring (flower base equals stem end, axis follows the tangent, leaf bases on the path), and the 0..1 growth-phase mapping (pollen only after petals open), all in `src/garden/garden.test.ts`. `garden-demo.html` (dev only) renders plants at any progress for manual frame checks.
 - The real animation (timing, smoothness, real-browser reduced-motion setting) is a manual release check. See [known-issues.md](known-issues.md).
 
 ### Other foundation areas (N/A)

@@ -12,20 +12,12 @@
 .g-vine.g-is-static .g-vine-stem { stroke-dashoffset: 0; }
 .g-vine.g-is-static .g-vine-stem { transition: none; }
 
-/* Page vine: the stem follows --off, written from one scroll listener; it is never animated, so a plant
-   can only start once the drawn vine has really reached its anchor. */
-.g-page-vine { position: absolute; top: 0; display: block; overflow: visible; }
-.g-page-vine.g-is-left { left: 0; }
-.g-page-vine.g-is-right { right: 0; }
-.g-page-vine-stem { stroke-dashoffset: var(--off, 1); }
-.g-page-vine.g-is-static { --off: 0; }
-
 /* Flower parts animate from inline transform/opacity/dash values; origin is the receptacle. */
 .g-flower-art .g-petal, .g-flower-art .g-sepal, .g-flower-art .g-receptacle, .g-flower-art .g-disk { transform-origin: 0 0; }
 .g-flower-art .g-anther, .g-flower-art .g-pollen { transform-box: fill-box; transform-origin: center; }
 .g-plant-leaf > g, .g-leaf-body { transform-origin: 0 0; }
 
-/* Gentle sway only while .g-is-swaying (PageVine limits it to a few plants near the viewport). */
+/* Gentle sway only while .g-is-swaying (Sprouts limits it to a few plants near the viewport). */
 .g-is-swaying .g-sway { animation: garden-sway 7s ease-in-out var(--sd, 0s) infinite alternate; }
 @keyframes garden-sway {
   from { transform: rotate(-2.5deg); }
@@ -34,6 +26,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .g-vine-stem { stroke-dashoffset: 0; transition: none; }
-  .g-page-vine-stem { stroke-dashoffset: 0; }
   .g-sway { animation: none !important; }
 }
