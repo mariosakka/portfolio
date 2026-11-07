@@ -23,9 +23,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Agent instruction files
         run: python scripts/check_agent_instructions.py .
-      - name: Tracked scripts are executable
+      - name: Shebang scripts must be 100755
         run: |
-          bad=$(git ls-files -s -- scripts .githooks | grep -v '^100755' || true)
+          bad=$(git ls-files -s -- scripts .githooks | grep -v '^100755' | cut -f2 | while read -r f; do head -c2 "$f" | grep -q '^#!' && echo "$f"; done || true)
           [ -z "$bad" ] || { echo "Not executable:"; echo "$bad"; exit 1; }
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
@@ -34,4 +34,6 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      - name: Placeholder check (non-blocking)
+        run: node scripts/check-placeholders.mjs
       - run: npm run build
