@@ -14,3 +14,6 @@ docs/superpowers/
 
 # Playwright MCP screenshots
 .playwright-mcp/
+
+# Personal CV export (contains contact details): never commit
+/Profile.pdf

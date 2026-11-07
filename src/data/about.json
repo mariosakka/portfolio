@@ -8,10 +8,10 @@
   ],
   "fullName": "Mohamad-Mario Sakka",
   "location": "Bucharest, RO",
-  "role": "Full-Stack Developer",
+  "role": "Cloud Solution Architect @ Microsoft",
   "preferredName": "Mario",
   "repositoryPath": "mariosakka/mms-portfolio",
-  "description": "I'm a 3rd year computer engineering student at University Politehnica of Bucharest, with a strong desire to learn and work with the newest technologies.",
+  "description": "I'm a computer engineering graduate of University Politehnica of Bucharest, now doing an MSc in Artificial Intelligence there, with a strong desire to learn and work with the newest technologies. I have worked on projects alone and in teams, from web applications to firmware for microprocessors, and built my technical skills over four years of study and my soft skills through my activity at GDG on Campus UNSTPB. You can check out my GitHub profile (mariosakka), where I showcase my projects and solutions to university assignments.",
   "commitMessage": "just completed creating categories for projects",
   "codeSample": "{\n  \"name\": \"Mohamad-Mario Sakka\",\n  \"role\": \"Full-Stack Developer\",\n  \"location\": \"Bucharest, RO\",\n  \"languages\": [\n    \"Romanian\",\n    \"English\",\n    \"Arabic\"\n  ],\n  \"passion\": \"Web Technologies, App Development & AI\"\n}",
   "skills": [
@@ -26,7 +26,10 @@
     "AngularJS",
     "Google Cloud Platform",
     "GitHub",
-    "Python"
+    "Python",
+    "Magento",
+    "OpenCart",
+    "Microsoft Azure"
   ],
   "welcomeMessage": "// Welcome to my portfolio!",
   "contact": {
@@ -47,7 +50,7 @@
         "type": "Phone"
       },
       {
-        "value": "mohamad-mario-sakka-37388a29b",
+        "value": "mario-sakka",
         "id": 4,
         "type": "LinkedIn"
       }

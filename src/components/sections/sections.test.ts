@@ -12,6 +12,7 @@ import ContactSection from './ContactSection.vue'
 import about from '../../data/about.json'
 import experience from '../../data/experience.json'
 import organizations from '../../data/organizations.json'
+import education from '../../data/education.json'
 
 let w: VueWrapper | undefined
 beforeEach(() => { HTMLElement.prototype.scrollTo = vi.fn() as unknown as HTMLElement['scrollTo'] })
@@ -41,8 +42,8 @@ test('projects: changing the filter resets the carousel to the first slide', asy
 })
 
 test.each([
-  ['experience', ExperienceSection, 'Experience', 2],
-  ['education', EducationSection, 'Education', 2],
+  ['experience', ExperienceSection, 'Experience', experience.length],
+  ['education', EducationSection, 'Education', education.length],
 ])('%s: a carousel of hero cards with dots and arrows', (_, C, label, n) => {
   w = mount(C)
   expect(w.get('[role="region"]').attributes('aria-label')).toBe(label)
@@ -73,7 +74,7 @@ test('organizations: one hero card whose modal shows longDescription', async () 
 
 test('education: hero cards with GPA, no undefined', () => {
   w = mount(EducationSection)
-  expect(w.findAll('article')).toHaveLength(2)
+  expect(w.findAll('article')).toHaveLength(education.length)
   expect(w.text()).toContain('9.6/10')
   expect(w.text()).not.toContain('undefined')
 })
@@ -92,7 +93,7 @@ test('contact: four links with hrefs', () => {
     'mailto:mohamad.mario.sakka@gmail.com',
     'https://github.com/mariosakka',
     'tel:+40734523633',
-    'https://www.linkedin.com/in/mohamad-mario-sakka-37388a29b',
+    'https://www.linkedin.com/in/mario-sakka',
   ])
   expect(w.text()).toContain("Let's Connect!")
 })
@@ -105,9 +106,8 @@ test('about: name, languages, no skill chips', () => {
   for (const s of ['SpringBoot', 'Google Cloud Platform', 'AngularJS']) expect(w.text()).not.toContain(s)
 })
 
-test('skills: all 12 skills from about.json', () => {
+test('skills: every skill from about.json', () => {
   w = mount(SkillsSection)
   // the numeral before each name is aria-hidden decoration
   expect(w.findAll('[aria-label="Skills"] li > span:not([aria-hidden])').map((l) => l.text())).toEqual(about.skills)
-  expect(about.skills).toHaveLength(12)
 })
