@@ -20,7 +20,7 @@ Decision per layer (details in the sections below):
 
 ### Component
 - Run: `npm test` (Vue Test Utils + jsdom). Lives in `src/App.test.ts`, `src/components/**/*.test.ts`.
-- Protects: section rendering and order (including Skills after About), filtering, carousel (slides, dots, prev/next ends, arrow keys, settled native scroll), hero card links/fallbacks, nav, modal open/close and focus trap, commit badge.
+- Protects: section rendering and the owner's section order in nav and footer (`SiteNav.test.ts`), filtering, carousel (slides, dots, prev/next ends, arrow keys, settled native scroll), hero card links/fallbacks, nav, modal open/close and focus trap, commit badge.
 
 ### Data integrity
 - Run: `npm test`. Lives in `src/data/data.test.ts` and `src/data/images.test.ts`.

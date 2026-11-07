@@ -21,12 +21,12 @@ interface Section {
 
 const sections: Section[] = [
   { id: 'about', label: 'About', body: AboutSection },
-  { id: 'skills', label: 'Skills', body: SkillsSection },
   { id: 'experience', label: 'Experience', body: ExperienceSection },
-  { id: 'projects', label: 'Projects', body: ProjectsSection },
+  { id: 'organizations', label: 'Organizations', body: OrganizationsSection },
   { id: 'education', label: 'Education', body: EducationSection },
   { id: 'certificates', label: 'Certificates', body: CertificatesSection },
-  { id: 'organizations', label: 'Organizations', body: OrganizationsSection },
+  { id: 'projects', label: 'Projects', body: ProjectsSection },
+  { id: 'skills', label: 'Skills', body: SkillsSection },
   { id: 'contact', label: 'Contact', body: ContactSection },
 ]
 </script>

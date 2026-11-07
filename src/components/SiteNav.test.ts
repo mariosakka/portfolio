@@ -57,15 +57,18 @@ describe('SiteNav link click', () => {
   })
 })
 
-const order = ['about', 'skills', 'experience', 'projects', 'education', 'certificates', 'organizations', 'contact']
+// Owner's order (2026-11-07): Contact stays last, right before the footer.
+const order = ['about', 'experience', 'organizations', 'education', 'certificates', 'projects', 'skills', 'contact']
 
-test('App renders the eight sections in order, skills after about', () => {
+test('App renders the eight sections in the owner order, Contact last', () => {
   const ids = mount(App).findAll('section').map((s) => s.attributes('id'))
   expect(ids).toEqual(order)
 })
 
-test('App nav links every section in the same order', () => {
-  const links = mount(App).findAll('nav[aria-label="Sections"] a')
+test('App nav and footer link every section in the same order', () => {
+  const w = mount(App)
+  const links = w.findAll('nav[aria-label="Sections"] a')
   expect(links).toHaveLength(8)
   expect(links.map((l) => l.attributes('href'))).toEqual(order.map((id) => `#${id}`))
+  expect(w.findAll('nav[aria-label="Footer"] a').map((l) => l.attributes('href'))).toEqual(order.map((id) => `#${id}`))
 })
