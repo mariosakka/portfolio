@@ -3,7 +3,7 @@
 .vine { display: block; max-width: 100%; height: auto; }
 
 .vine-stem {
-  stroke-dasharray: 1;
+  stroke-dasharray: 1 2;
   stroke-dashoffset: 1;
   transition: stroke-dashoffset var(--duration) ease-in-out var(--delay);
 }
@@ -20,23 +20,22 @@
 .leaf.is-grown .pop, .bud.is-grown .pop,
 .leaf.is-static .pop, .bud.is-static .pop { opacity: 1; transform: scale(1); }
 
-/* blooms and cornflowers: petals scale from 0 and rotate outward */
-.bloom .glow, .cornflower .glow { opacity: 0; transition: opacity 1.2s ease calc(var(--delay) + .4s); }
-.bloom.is-grown .glow, .cornflower.is-grown .glow,
-.bloom.is-static .glow, .cornflower.is-static .glow { opacity: 1; }
+/* the page vine stem follows --off, set from one scroll listener */
+.page-vine { position: absolute; top: 0; display: block; overflow: visible; }
+.page-vine.is-left { left: 0; }
+.page-vine.is-right { right: 0; }
+.page-vine-stem { stroke-dashoffset: var(--off, 1); transition: stroke-dashoffset .35s linear; }
+.page-vine.is-static { --off: 0; }
+.page-vine.is-static .page-vine-stem { transition: none; }
 
-.petal {
-  opacity: 0;
-  transform: scale(0) rotate(-50deg);
-  transition: transform .9s cubic-bezier(.2, 1.2, .4, 1) calc(var(--delay) + var(--i) * 80ms), opacity .5s ease calc(var(--delay) + var(--i) * 80ms);
-}
-.bloom.is-grown .petal, .bloom.is-static .petal,
-.cornflower.is-grown .petal, .cornflower.is-static .petal { opacity: 1; transform: scale(1) rotate(0); }
-.is-static.garden-art .petal, .is-static.garden-art .pop, .is-static.garden-art .glow { transition: none; }
+/* flower parts animate from inline transform/opacity/dash values; origin is the receptacle */
+.flower-art .petal, .flower-art .sepal, .flower-art .receptacle, .flower-art .disk { transform-origin: 0 0; }
+.flower-art .anther, .flower-art .pollen { transform-box: fill-box; transform-origin: center; }
+.plant-leaf > g { transform-origin: 0 0; }
 
 /* gentle sway once open (not in static mode) */
 .is-swaying .sway {
-  animation: garden-sway 7s ease-in-out calc(var(--delay) + 1.6s) infinite alternate;
+  animation: garden-sway 7s ease-in-out var(--sd, 0s) infinite alternate;
 }
 @keyframes garden-sway {
   from { transform: rotate(-2.5deg); }
@@ -45,6 +44,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .garden-art .vine-stem, .garden-art.vine-stem { stroke-dashoffset: 0; transition: none; }
-  .garden-art .petal, .garden-art .pop, .garden-art .glow { opacity: 1; transform: none; transition: none; }
+  .garden-art .pop { opacity: 1; transform: none; transition: none; }
+  .page-vine-stem { stroke-dashoffset: 0; transition: none; }
   .sway { animation: none !important; }
 }

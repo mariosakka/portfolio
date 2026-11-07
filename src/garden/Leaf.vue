@@ -27,11 +27,11 @@ const id = useId()
       >
         <stop
           offset="0"
-          stop-color="#2a8fa8"
+          stop-color="#26788d"
         />
         <stop
           offset="1"
-          stop-color="#0f4a68"
+          stop-color="#0e3e56"
         />
       </linearGradient>
     </defs>
@@ -39,21 +39,21 @@ const id = useId()
       <path
         d="M0 0 C18 -22 52 -26 78 -4 C52 16 18 14 0 0Z"
         :fill="`url(#${id}-l)`"
-        stroke="#5fd0e8"
+        stroke="#4fa6ba"
         stroke-opacity=".5"
         stroke-width=".8"
       />
       <path
         d="M2 -1 C25 -6 50 -6 74 -4"
         fill="none"
-        stroke="#8fe3f2"
+        stroke="#79bccb"
         stroke-opacity=".7"
         stroke-width="1"
       />
       <path
         d="M18 -4 L30 -15 M18 -4 L30 7 M36 -5 L48 -15 M36 -5 L48 5 M54 -5 L63 -12 M54 -5 L63 2"
         fill="none"
-        stroke="#8fe3f2"
+        stroke="#79bccb"
         stroke-opacity=".45"
         stroke-width=".8"
       />

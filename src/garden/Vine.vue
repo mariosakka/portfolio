@@ -35,7 +35,7 @@ provide(GROWN_KEY, { grown: isGrown, isStatic })
       :d="path"
       pathLength="1"
       fill="none"
-      stroke="#2a8fa8"
+      stroke="#26788d"
       stroke-width="4"
       stroke-linecap="round"
     />
@@ -44,7 +44,7 @@ provide(GROWN_KEY, { grown: isGrown, isStatic })
       :d="path"
       pathLength="1"
       fill="none"
-      stroke="#8fe3f2"
+      stroke="#79bccb"
       stroke-opacity=".35"
       stroke-width="1"
       stroke-linecap="round"
