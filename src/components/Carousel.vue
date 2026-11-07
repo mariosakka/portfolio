@@ -1,79 +1,87 @@
 <script setup lang="ts" generic="T">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { coverflowFrame, stepIndex } from '../lib/motion'
+import { prefersReducedMotion } from '../lib/useMotion'
 
+// Coverflow: native scroll-snap track (swipe, wheel, keyboard scroll all stay native), every slide snaps to
+// the center. One rAF-throttled scroll handler turns each slide's distance from the center into CSS
+// variables (rotate, scale, shift, opacity) that its pose wrapper reads; Vue never re-renders per frame.
 defineOptions({ name: 'SnapCarousel' })
-const props = withDefaults(defineProps<{
-  items: T[]
-  label: string
-  // Slide width; under 100% so the next slide peeks in. A lone slide is always full width.
-  slideClass?: string
-}>(), { slideClass: 'basis-[92%] sm:basis-[88%] md:basis-[84%]' })
+const props = defineProps<{ items: T[]; label: string }>()
 defineSlots<{ slide(p: { item: T; index: number }): unknown }>()
 
 const track = ref<HTMLElement | null>(null)
-const current = ref(0) // index of the current stop
-const count = ref(props.items.length) // number of stops
-
-// Stepping works on STOPS, not slides: a stop is a scroll position the track can actually reach.
-// Slide i is its own stop while its start is short of the max scroll; every slide that can only be
-// reached by scrolling to the end shares one final stop at the max scroll. With one slide in view
-// that is one stop per slide; with two in view (Certificates) the last two share the end stop.
-// Dots, the counter and Prev/Next all count stops, so Next visits each reachable position once.
-// Without layout (jsdom, or before first paint) there is one stop per slide.
-function stops(): number[] {
-  const t = track.value
-  const slides = t ? [...t.children] as HTMLElement[] : []
-  if (!t || !t.scrollWidth) return slides.map((s) => s.offsetLeft)
-  const max = t.scrollWidth - t.clientWidth
-  if (max <= 2) return [0]
-  return [...slides.map((s) => s.offsetLeft).filter((x) => x < max - 2), max]
-}
-function measure() {
-  const s = stops()
-  count.value = s.length
-  current.value = Math.min(current.value, Math.max(0, s.length - 1))
-}
-
-const reduced = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+const current = ref(0)
+const slides = (): HTMLElement[] => (track.value ? [...track.value.children] as HTMLElement[] : [])
+// Scroll position that centers slide i (offsetLeft is relative to the positioned track).
+const target = (s: HTMLElement, t: HTMLElement) => s.offsetLeft + s.offsetWidth / 2 - t.clientWidth / 2
 
 function go(i: number) {
-  const s = stops()
-  if (!s.length) return
-  count.value = s.length
-  current.value = Math.max(0, Math.min(s.length - 1, i))
-  track.value?.scrollTo?.({ left: s[current.value], behavior: reduced() ? 'auto' : 'smooth' })
+  const n = props.items.length
+  if (!n) return
+  current.value = Math.max(0, Math.min(n - 1, i))
+  const t = track.value
+  const s = slides()[current.value]
+  if (t && s) t.scrollTo?.({ left: target(s, t), behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
 }
 
-// Only on the track itself: arrows on a link, button or dot inside keep their native behavior.
+// Only on the track itself: arrows on a link or button inside keep their native behavior.
 function onKey(e: KeyboardEvent) {
-  if (e.target !== e.currentTarget || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return
+  if (e.target !== e.currentTarget) return
+  const i = stepIndex(e.key, current.value, props.items.length, false)
+  if (i === null) return
   e.preventDefault()
-  go(current.value + (e.key === 'ArrowRight' ? 1 : -1))
+  go(i)
 }
 
-// Swipes and native scrolling: once scrolling settles, the stop nearest the scroll position is current.
-// Read from layout, not IntersectionObserver: IO entries can arrive after the settle timer (seen in Chromium).
-// Waiting for the settle keeps smooth scrolls from flickering the dots.
+// A tap on a side slide brings it to the center instead of following a link in it.
+function onSlideClick(e: MouseEvent, i: number) {
+  if (i === current.value) return
+  e.preventDefault()
+  e.stopPropagation()
+  go(i)
+}
+
+let raf = 0
+function paint() {
+  raf = 0
+  const t = track.value
+  if (!t || prefersReducedMotion()) return
+  const mid = t.scrollLeft + t.clientWidth / 2
+  for (const s of slides()) {
+    if (!s.offsetWidth) continue
+    const f = coverflowFrame((s.offsetLeft + s.offsetWidth / 2 - mid) / s.offsetWidth)
+    s.style.setProperty('--cf-r', `${f.rotate.toFixed(2)}deg`)
+    s.style.setProperty('--cf-s', f.scale.toFixed(3))
+    s.style.setProperty('--cf-x', f.shift.toFixed(3))
+    s.style.setProperty('--cf-o', String(f.opacity))
+    s.style.zIndex = String(f.z)
+  }
+}
+const schedule = () => { raf ||= requestAnimationFrame(paint) }
+
+// Swipes and native scrolling: once scrolling settles, the slide nearest the center is current.
 let settle: ReturnType<typeof setTimeout> | undefined
 function sync() {
   const t = track.value
-  const s = stops()
-  if (!t || !s.length) return
-  count.value = s.length
-  const d = s.map((x) => Math.abs(x - t.scrollLeft))
+  const all = slides()
+  if (!t || !all.length || !t.clientWidth) return
+  const d = all.map((s) => Math.abs(target(s, t) - t.scrollLeft))
   current.value = d.indexOf(Math.min(...d))
 }
 function onScroll() {
+  schedule()
   clearTimeout(settle)
   settle = setTimeout(sync, 100)
 }
 onMounted(() => {
-  measure()
-  window.addEventListener('resize', measure)
+  schedule()
+  window.addEventListener('resize', schedule)
 })
 onBeforeUnmount(() => {
   clearTimeout(settle)
-  window.removeEventListener('resize', measure)
+  cancelAnimationFrame(raf)
+  window.removeEventListener('resize', schedule)
 })
 </script>
 
@@ -82,15 +90,19 @@ onBeforeUnmount(() => {
     role="region"
     aria-roledescription="carousel"
     :aria-label="label"
-    class="min-w-0"
+    class="min-w-0 [container-type:inline-size]"
   >
+    <!-- The track scrolls, so it clips: its 40px block padding (12px on phones) is the unclipped room for card
+         sprouts. Negative margins let that room overlap the filter and the controls (which sit above it, z-10)
+         so it costs almost no height; `isolate` keeps the slides' z-index inside the track. -->
     <div
       ref="track"
       data-track
       tabindex="0"
       role="group"
       :aria-label="`${label} slides`"
-      class="snap-track relative flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain rounded-[1.75rem] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent sm:gap-6"
+      class="snap-track relative isolate -my-2 flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-[1.75rem] py-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:-my-8 sm:py-10"
+      :class="items.length > 1 ? 'px-[4cqw] sm:px-[15cqw]' : ''"
       @scroll.passive="onScroll"
       @keydown="onKey"
     >
@@ -100,43 +112,52 @@ onBeforeUnmount(() => {
         role="group"
         aria-roledescription="slide"
         :aria-label="`${i + 1} of ${items.length}`"
-        class="flex min-w-0 shrink-0 snap-start"
-        :class="items.length === 1 ? 'basis-full' : slideClass"
+        :aria-current="i === current ? 'true' : undefined"
+        data-slide
+        class="relative flex min-w-0 shrink-0 snap-center"
+        :class="items.length === 1 ? 'basis-full' : 'basis-[92cqw] sm:basis-[70cqw]'"
+        @click.capture="onSlideClick($event, i)"
       >
-        <slot
-          name="slide"
-          :item="item"
-          :index="i"
-        />
+        <div
+          data-cf-pose
+          class="flex w-full"
+          :class="i === current ? '' : 'cursor-pointer'"
+        >
+          <slot
+            name="slide"
+            :item="item"
+            :index="i"
+          />
+        </div>
       </div>
     </div>
     <div
-      v-if="count > 1"
-      class="mt-4 flex items-center gap-x-6 short:mt-3"
+      v-if="items.length > 1"
+      class="relative z-10 mt-2 flex items-center gap-x-6 sm:mt-1"
     >
       <p
         class="font-serif text-lg tabular-nums text-ink/70"
         aria-live="polite"
       >
-        <span class="sr-only">Slide {{ current + 1 }} of {{ count }}</span>
-        <span aria-hidden="true"><span class="text-ink">{{ current + 1 }}</span> / {{ count }}</span>
+        <span class="sr-only">Slide {{ current + 1 }} of {{ items.length }}</span>
+        <span aria-hidden="true"><span class="text-ink">{{ current + 1 }}</span> / {{ items.length }}</span>
       </p>
       <div
         data-dots
-        class="hidden flex-1 flex-wrap items-center sm:flex"
+        class="hidden flex-1 flex-wrap items-center justify-center sm:flex"
       >
         <button
-          v-for="i in count"
+          v-for="(_, i) in items"
           :key="i"
           type="button"
-          :aria-label="`Go to slide ${i}`"
-          :aria-current="current === i - 1 ? 'true' : undefined"
+          :aria-label="`Go to slide ${i + 1}`"
+          :aria-current="current === i ? 'true' : undefined"
           class="group flex h-11 w-7 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
-          @click="go(i - 1)"
+          @click="go(i)"
         >
           <span
-            class="block h-1.5 rounded-full transition-all motion-reduce:transition-none"
-            :class="current === i - 1 ? 'w-5 bg-accent' : 'w-1.5 bg-ink/30 group-hover:bg-ink/60'"
+            class="block h-1.5 w-1.5 rounded-full transition-transform duration-300 motion-reduce:transition-none"
+            :class="current === i ? 'scale-x-[3] bg-accent' : 'bg-ink/30 group-hover:bg-ink/60'"
           />
         </button>
       </div>
@@ -146,7 +167,7 @@ onBeforeUnmount(() => {
           :key="dir"
           type="button"
           :aria-label="dir === 'prev' ? 'Previous slide' : 'Next slide'"
-          :disabled="dir === 'prev' ? current === 0 : current === count - 1"
+          :disabled="dir === 'prev' ? current === 0 : current === items.length - 1"
           class="flex h-11 w-11 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-accent/60 hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent disabled:pointer-events-none disabled:opacity-30"
           @click="go(current + (dir === 'prev' ? -1 : 1))"
         >

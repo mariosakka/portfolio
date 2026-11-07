@@ -37,7 +37,7 @@ const sections: Section[] = [
     class="relative isolate"
   >
     <GardenHero />
-    <header class="mx-auto max-w-5xl px-4 pt-16 sm:px-8">
+    <header class="mx-auto max-w-5xl px-4 pt-16 sm:px-10">
       <h1
         data-page-top
         class="font-serif text-4xl sm:text-5xl"
@@ -46,7 +46,7 @@ const sections: Section[] = [
       </h1>
     </header>
     <SiteNav :sections="sections" />
-    <main>
+    <main class="overflow-x-clip">
       <SectionBlock
         v-for="s in sections"
         :id="s.id"
