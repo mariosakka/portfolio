@@ -53,6 +53,7 @@ Decision per layer (details in the sections below):
 
 ### Domain-specific (garden animation)
 - Tests cover the reduced-motion path (`prefers-reduced-motion` renders fully grown, `is-static` mode) and visibility logic in `src/garden/garden.test.ts`.
+- `src/garden/sprouts.test.ts` covers `Sprouts`: geometric containment (no sampled vine, stem, leaf or flower point deeper than 8px inside the parent, nor outside the reach ring, over all variants, densities and many seeds and sizes from 24x20 to 1200x900), determinism per seed, `auto` variety, flower, bud and leaf counts per density, staggered timing, the visible/active/manual/static/reduced-motion state machine (no pollen at progress 0), the global cap on growing plants and its queue, and unmount cleanup of observers, frames, queue slots and listeners. `garden-demo.html` shows every variant on mock cards for a manual visual check.
 - Also covered: seeded flower and plant generation, anchoring (flower base equals stem end, axis follows the tangent, leaf bases on the path), and the 0..1 growth-phase mapping (pollen only after petals open), all in `src/garden/garden.test.ts`. `garden-demo.html` (dev only) renders plants at any progress for manual frame checks.
 - The real animation (timing, smoothness, real-browser reduced-motion setting) is a manual release check. See [known-issues.md](known-issues.md).
 
