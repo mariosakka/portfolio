@@ -15,6 +15,7 @@ import education from '../../data/education.json'
 import certificates from '../../data/certificates.json'
 import organizations from '../../data/organizations.json'
 import projects from '../../data/projects.json'
+import { formatPeriod } from '../../lib/normalize'
 
 let w: VueWrapper | undefined
 let reduced = false
@@ -40,22 +41,22 @@ describe('projects: coverflow with a category filter', () => {
     w = mount(ProjectsSection)
     expect(w.get('[role="region"]').attributes('aria-roledescription')).toBe('carousel')
     expect(slides(w)).toHaveLength(projects.length)
-    expect(w.text()).toContain('1 / 9')
-    expect(w.findAll('[data-cf-pose] article')).toHaveLength(9)
+    expect(w.text()).toContain(`1 / ${projects.length}`)
+    expect(w.findAll('[data-cf-pose] article')).toHaveLength(projects.length)
     const f = w.findAll('[data-filter] button')
     expect(f.map((b) => b.text())).toEqual(['All', 'Web', 'Embedded', 'Games', 'App', 'Algorithms'])
     expect(f[0].attributes('aria-pressed')).toBe('true')
     await f[2].trigger('click')
     expect(f[2].attributes('aria-pressed')).toBe('true')
-    expect(slides(w).map((s) => s.find('h3').text())).toEqual(['DIY Laptop Cooling Pad', 'Monitor.IoT'])
+    expect(slides(w).map((s) => s.find('h3').text())).toEqual(projects.filter((p) => p.category === 'Embedded').map((p) => p.title))
   })
 
   test('changing the filter resets to the first slide', async () => {
     w = mount(ProjectsSection)
     await w.get('button[aria-label="Next slide"]').trigger('click')
-    expect(w.text()).toContain('2 / 9')
+    expect(w.text()).toContain(`2 / ${projects.length}`)
     await w.findAll('[data-filter] button')[1].trigger('click')
-    expect(w.text()).toContain('1 / 3')
+    expect(w.text()).toContain(`1 / ${projects.filter((p) => p.category === 'Web').length}`)
   })
 
   test('the track keeps padding above and below the cards so sprouts are not clipped', () => {
@@ -70,9 +71,9 @@ describe('experience: timeline tabs with a detail card', () => {
     expect(w.get('[role="tablist"]').attributes('aria-label')).toBe('Roles')
     const tabs = w.findAll('[role="tab"]')
     expect(tabs).toHaveLength(experience.length)
-    expect(tabs.map((t) => t.attributes('aria-selected'))).toEqual(['true', 'false'])
-    expect(tabs.map((t) => t.attributes('tabindex'))).toEqual(['0', '-1'])
-    expect(w.text()).toContain('Present')
+    expect(tabs.map((t) => t.attributes('aria-selected'))).toEqual(experience.map((_, i) => String(i === 0)))
+    expect(tabs.map((t) => t.attributes('tabindex'))).toEqual(experience.map((_, i) => (i === 0 ? '0' : '-1')))
+    for (const e of experience) expect(w.text()).toContain(formatPeriod(e.startDate, e.endDate, e.isPresent))
     const panel = w.get('[role="tabpanel"]')
     expect(panel.attributes('aria-labelledby')).toBe(tabs[0].attributes('id'))
     expect(panel.get('h3').text()).toBe(experience[0].title)
@@ -84,13 +85,28 @@ describe('experience: timeline tabs with a detail card', () => {
     const tabs = () => w!.findAll('[role="tab"]')
     await tabs()[1].trigger('click')
     expect(w.get('[role="tabpanel"] h3').text()).toBe(experience[1].title)
-    await tabs()[1].trigger('keydown', { key: 'ArrowDown' }) // wraps to the first
+    const last = experience.length - 1
+    await tabs()[1].trigger('keydown', { key: 'End' })
+    await tabs()[last].trigger('keydown', { key: 'ArrowDown' }) // wraps to the first
     expect(tabs()[0].attributes('aria-selected')).toBe('true')
     expect(document.activeElement).toBe(tabs()[0].element)
-    await tabs()[0].trigger('keydown', { key: 'ArrowLeft' })
-    expect(tabs()[1].attributes('aria-selected')).toBe('true')
-    await tabs()[1].trigger('keydown', { key: 'Home' })
+    await tabs()[0].trigger('keydown', { key: 'ArrowLeft' }) // wraps to the last
+    expect(tabs()[last].attributes('aria-selected')).toBe('true')
+    await tabs()[last].trigger('keydown', { key: 'Home' })
     expect(w.get('[role="tabpanel"]').attributes('aria-labelledby')).toBe('exp-tab-0')
+  })
+
+  test('a role without image or descriptions shows no empty media, summary or undefined', async () => {
+    w = mount(ExperienceSection, { attachTo: document.body })
+    for (const [i, e] of experience.entries()) {
+      await w.findAll('[role="tab"]')[i].trigger('click')
+      const panel = w.get('[role="tabpanel"]')
+      expect(panel.find('img').exists()).toBe(Boolean(e.image))
+      expect(panel.findAll('p').every((p) => p.text().trim() !== '')).toBe(true)
+      const more = panel.findAll('button').some((b) => b.text().startsWith('Read more'))
+      expect(more).toBe(Boolean(e.longDescription || e.description || e.shortDescription || e.technologies.length))
+      expect(panel.text()).not.toContain('undefined')
+    }
   })
 
   test('Read more opens the modal with longDescription', async () => {
@@ -112,11 +128,22 @@ describe('education: card deck', () => {
     expect(deck.attributes('aria-roledescription')).toBe('card deck')
     expect(deck.attributes('aria-label')).toBe('Education')
     expect(cards(w)).toHaveLength(education.length)
-    expect(w.findAll('article')).toHaveLength(2)
-    expect(w.text()).toContain('9.6/10')
+    expect(w.findAll('article')).toHaveLength(education.length)
+    for (const d of education.filter((e) => e.gpa)) expect(w.text()).toContain(d.gpa)
     expect(w.text()).not.toContain('undefined')
-    expect(cards(w).map((c) => c.attributes('inert') !== undefined)).toEqual([false, true])
-    expect(w.get('[aria-live]').text()).toContain(`Card 1 of 2: ${education[0].degree}`)
+    expect(cards(w).map((c) => c.attributes('inert') !== undefined)).toEqual(education.map((_, i) => i !== 0))
+    expect(w.get('[aria-live]').text()).toContain(`Card 1 of ${education.length}: ${education[0].degree}`)
+  })
+
+  test('empty facts and subjects leave no empty labels', () => {
+    w = mount(EducationSection)
+    for (const [i, d] of education.entries()) {
+      const card = w.findAll('[data-deck-card]')[i]
+      expect(card.findAll('dt').map((t) => t.text())).toEqual(
+        [['Field', d.fieldOfStudy], ['GPA', d.gpa], ['Department', d.department]].filter(([, v], k, a) => v.trim() && a.findIndex(([, x]) => x === v) === k).map(([l]) => l),
+      )
+      expect(card.findAll('dd').every((t) => t.text().trim() !== '')).toBe(true)
+    }
   })
 
   test('Next flies the top card out, then tucks it behind; Previous and arrow keys work too', async () => {
@@ -126,15 +153,17 @@ describe('education: card deck', () => {
     expect(top(w)).toBe(1)
     expect((cards(w)[0].element as HTMLElement).style.transform).toContain('translateX(-112%)') // flying out
     await vi.advanceTimersByTimeAsync(450)
-    expect((cards(w)[0].element as HTMLElement).style.transform).toContain('translate(16px, 16px)') // tucked under
-    expect(w.get('[aria-live]').text()).toContain('Card 2 of 2')
+    expect((cards(w)[0].element as HTMLElement).style.transform).toContain(`translate(${(education.length - 1) * 16}px`) // tucked under the stack
+    expect(w.get('[aria-live]').text()).toContain(`Card 2 of ${education.length}`)
     const deck = w.get('[data-deck]')
     await deck.trigger('keydown', { key: 'ArrowRight' })
-    expect(top(w)).toBe(0)
+    expect(top(w)).toBe(2 % education.length)
     await deck.trigger('keydown', { key: 'ArrowLeft' })
     expect(top(w)).toBe(1)
     await w.get('button[aria-label="Previous card"]').trigger('click')
     expect(top(w)).toBe(0)
+    await w.get('button[aria-label="Previous card"]').trigger('click') // wraps to the last card
+    expect(top(w)).toBe(education.length - 1)
   })
 
   test('a drag past the threshold swipes to the next card and swallows the click; a short drag does not', async () => {
@@ -176,7 +205,7 @@ describe('certificates: bento mosaic', () => {
     expect(tiles.map((t) => t.find('img').attributes('src'))).toEqual(certificates.map((c) => c.image))
     expect(tiles.every((t) => t.find('article').classes().includes('relative'))).toBe(true)
     expect(w.text()).not.toContain('undefined')
-    expect(w.findAll('a').filter((a) => a.attributes('aria-label')?.startsWith('Credential ('))).toHaveLength(2)
+    expect(w.findAll('a').filter((a) => a.attributes('aria-label')?.startsWith('Credential ('))).toHaveLength(certificates.filter((c) => c.credentialUrl.trim()).length)
   })
 
   test('a tile opens the detail dialog with its text, skills and credential link', async () => {
@@ -196,7 +225,7 @@ describe('certificates: bento mosaic', () => {
 
 test('organizations: one spotlight card with the drawn underline and a modal with longDescription', async () => {
   w = mount(OrganizationsSection, { attachTo: document.body })
-  expect(w.findAll('article')).toHaveLength(1)
+  expect(w.findAll('article')).toHaveLength(organizations.length)
   expect(w.find('h3 [data-underline]').exists()).toBe(true)
   expect(w.get('[data-reveal]').attributes('data-reveal')).toBe('wipe')
   await readMore(w)[0].trigger('click')
@@ -210,7 +239,7 @@ test('contact: four links with hrefs, the email is the main call to action with 
     'mailto:mohamad.mario.sakka@gmail.com',
     'https://github.com/mariosakka',
     'tel:+40734523633',
-    'https://www.linkedin.com/in/mohamad-mario-sakka-37388a29b',
+    'https://www.linkedin.com/in/mario-sakka',
   ])
   expect(w.get('[data-cta]').attributes('data-pointer')).toBe('magnet')
   expect(w.text()).toContain("Let's Connect!")
@@ -227,11 +256,10 @@ test('about: name, languages, masked photo, staggered text, no skill chips', () 
   for (const s of ['SpringBoot', 'Google Cloud Platform', 'AngularJS']) expect(w.text()).not.toContain(s)
 })
 
-test('skills: all 12 skills from about.json in a staggered cluster', () => {
+test('skills: every skill from about.json in a staggered cluster', () => {
   w = mount(SkillsSection)
   expect(w.findAll('[aria-label="Skills"] [data-skill]').map((l) => l.text())).toEqual(about.skills)
-  expect(about.skills).toHaveLength(12)
   const items = w.findAll('[aria-label="Skills"] > li')
   expect(items.every((li) => li.attributes('data-stagger') === '')).toBe(true)
-  expect(new Set(items.map((li) => li.attributes('style'))).size).toBeGreaterThan(6) // offsets vary
+  expect(new Set(items.map((li) => li.attributes('style'))).size).toBe(items.length) // offsets and order vary
 })

@@ -33,7 +33,7 @@ test('elsewhere links have exact hrefs and the phone is absent', () => {
   const hrefs = wrapper.findAll('a').map((a) => a.attributes('href'))
   expect(hrefs).toContain('mailto:mohamad.mario.sakka@gmail.com')
   expect(hrefs).toContain('https://github.com/mariosakka')
-  expect(hrefs).toContain('https://www.linkedin.com/in/mohamad-mario-sakka-37388a29b')
+  expect(hrefs).toContain('https://www.linkedin.com/in/mario-sakka')
   expect(hrefs.some((h) => h?.startsWith('tel:'))).toBe(false)
   expect(wrapper.html()).not.toContain('40734523633')
 })

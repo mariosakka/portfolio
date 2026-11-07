@@ -1,5 +1,21 @@
 [
   {
+    "id": "microsoft-cloud-solution-architect",
+    "company": "Microsoft",
+    "image": "",
+    "startDate": "2026-10-01",
+    "endDate": "",
+    "isPresent": true,
+    "websiteUrl": "https://www.microsoft.com",
+    "longDescription": "",
+    "shortDescription": "",
+    "location": "Bucharest, RO",
+    "technologies": [
+      "Microsoft Azure"
+    ],
+    "title": "Cloud Solution Architect"
+  },
+  {
     "id": "O62Y06Oh4OXGhJXAXJi8",
     "company": "Colete Online",
     "image": "/img/job-image_1768659089882.webp",
@@ -8,7 +24,7 @@
     "longDescription": "",
     "location": "Bucharest, RO",
     "shortDescription": "Developed a Magento 2 integration for online stores",
-    "isPresent": true,
+    "isPresent": false,
     "technologies": [
       "PHP",
       "TypeScript",
@@ -16,7 +32,7 @@
       "Magento 2"
     ],
     "title": "Junior Software Engineer",
-    "endDate": ""
+    "endDate": "2026-09-30"
   },
   {
     "id": "prL9RWGFHnvHJNFq8w1D",

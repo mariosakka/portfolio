@@ -1,5 +1,24 @@
 [
   {
+    "id": "msc-artificial-intelligence-upb",
+    "socialMedia": [],
+    "image": "/img/education-image_1750892593431.webp",
+    "gpa": "",
+    "longDescription": "",
+    "subjects": [],
+    "description": "",
+    "department": "",
+    "degree": "Master of Science",
+    "shortDescription": "Expected graduation: July 2028",
+    "isPresent": true,
+    "startDate": "2026-09-01",
+    "institution": "POLITEHNICA University of Bucharest",
+    "fieldOfStudy": "Artificial Intelligence",
+    "endDate": "",
+    "location": "Bucharest, RO",
+    "websiteUrl": "https://upb.ro"
+  },
+  {
     "id": "CA9kTuKmRQlnbcbLAiHL",
     "socialMedia": [],
     "image": "/img/education-image_1750892593431.webp",
@@ -24,11 +43,11 @@
     "department": "Faculty of Engineering in Foreign Languages",
     "degree": "Bachelor's in Information Engineering in English",
     "shortDescription": "",
-    "isPresent": true,
+    "isPresent": false,
     "startDate": "2022-10-03",
     "institution": "POLITEHNICA University of Bucharest",
     "fieldOfStudy": "Computer Science",
-    "endDate": "",
+    "endDate": "2026-07-31",
     "location": "Bucharest, RO",
     "websiteUrl": "https://upb.ro"
   },
