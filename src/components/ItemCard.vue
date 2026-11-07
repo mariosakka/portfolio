@@ -1,5 +1,7 @@
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   image: { type: String, default: '' },
   title: { type: String, required: true },
   subtitle: { type: String, default: '' },
@@ -8,6 +10,9 @@ defineProps({
   links: { type: Array, default: () => [] },
 })
 defineEmits(['open'])
+const shownLinks = computed(() => props.links
+  .map((l) => ({ label: l.label, url: typeof l.url === 'string' ? l.url.trim() : '' }))
+  .filter((l) => l.url))
 </script>
 
 <template>
@@ -46,15 +51,14 @@ defineEmits(['open'])
       </li>
     </ul>
     <div
-      v-if="links.some((l) => l.url?.trim())"
+      v-if="shownLinks.length"
       class="flex flex-wrap gap-3 px-4 pb-4 text-sm"
     >
       <template
-        v-for="(l, i) in links"
+        v-for="(l, i) in shownLinks"
         :key="i"
       >
         <a
-          v-if="l.url?.trim()"
           :href="l.url"
           target="_blank"
           rel="noopener noreferrer"
