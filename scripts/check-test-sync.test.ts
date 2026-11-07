@@ -77,6 +77,21 @@ describe('JS -> TS conversion', () => {
   })
 })
 
+describe('conversion rule is limited to a .js/.mjs -> .ts swap of the same file', () => {
+  it('deleting foo.vue and adding foo.ts is still a deletion', () => {
+    const changes = [c('D', 'src/foo.vue'), c('A', 'src/foo.ts'), c('M', 'src/foo.test.ts')]
+    expect(evaluate({ changes, existingTests: ['src/foo.test.ts'] }).ok).toBe(false)
+  })
+  it('deleting foo.ts and adding foo.test.ts is still a deletion', () => {
+    const changes = [c('D', 'src/foo.ts'), c('A', 'src/foo.test.ts')]
+    expect(evaluate({ changes, existingTests: ['src/foo.test.ts'] }).ok).toBe(false)
+  })
+  it('a different directory does not count', () => {
+    const changes = [c('D', 'src/a/foo.js'), c('A', 'src/b/foo.ts'), c('A', 'src/b/foo.test.ts')]
+    expect(evaluate({ changes, existingTests: ['src/a/foo.test.ts'] }).ok).toBe(false)
+  })
+})
+
 describe('test pairing by full path', () => {
   it('does not pair index.js across directories', () => {
     const changes = [c('D', 'src/a/index.js')]

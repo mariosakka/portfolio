@@ -10,9 +10,11 @@
 
 **Spec:** `docs/design/2026-11-07-portfolio-vue-design.md`
 
+> Historical document: file extensions below are .js; the code was converted to TypeScript on 2026-11-07.
+
 ## Global Constraints
 
-- Plain JavaScript, no TypeScript. Vue 3 `<script setup>`. Node 24.
+- TypeScript (strict), adopted at the owner's request on 2026-11-07 (originally plain JavaScript). Vue 3 `<script setup lang="ts">`. Node 24.
 - Vite `base: '/'`. Domain `mohamad-mario-sakka.com` lives only in `public/CNAME`.
 - Live Firestore field names (listed in the spec) are kept; list fields are arrays only.
 - No Firebase, no backend, no runtime network calls, no fonts from Google at runtime (bundle via `@fontsource`).

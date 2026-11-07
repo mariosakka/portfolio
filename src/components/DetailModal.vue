@@ -30,7 +30,7 @@ const onKey = (e: KeyboardEvent) => {
 }
 
 function lock() {
-  opener = document.activeElement as HTMLElement | null // Element -> HTMLElement: only used for .focus(), kept optional below
+  opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
   if (!locked) { locked = true; lockScroll() }
   document.addEventListener('keydown', onKey)
   nextTick(() => box.value?.focus())

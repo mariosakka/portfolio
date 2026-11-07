@@ -3,8 +3,8 @@
 // Usage: node scripts/check-test-sync.ts [baseRef=origin/main]
 // Rules: src/ code (not src/data/*.json, *.test.ts, src/assets, src/style.css) added/modified needs a *.test.ts
 //   added/modified in the same range; a deleted source must not leave a test with the same path stem;
-//   a test deleted without its source needs a reason. A file deleted and re-added under the same stem with
-//   another extension (e.g. foo.js -> foo.ts) is a conversion, not a deletion. Legacy *.test.js still
+//   a test deleted without its source needs a reason. A .js/.mjs file deleted while the same-named .ts
+//   is added (foo.js -> foo.ts, foo.test.js -> foo.test.ts) is a conversion, not a deletion. Legacy *.test.js still
 //   counts as a test so the JS->TS conversion diff classifies correctly.
 // Bypass: a "Tests-Not-Applicable: <reason>" line (same line, non-empty) in the LAST paragraph (trailer block)
 //   of any commit message in the range, or env TEST_SYNC_BYPASS=<reason>. Commits by the exact identity
@@ -33,13 +33,15 @@ export function evaluate({ changes, bypass = null, existingTests = [] }: { chang
   if (srcTouched.length && !touched.some((x) => isTest(x.path))) {
     problems.push(`source changed without a test change: ${srcTouched.map((x) => x.path).join(', ')}`)
   }
-  const addedStems = new Set(changes.filter((x) => x.status === 'A').map((x) => stem(x.path)))
-  const deletedSrc = changes.filter((x) => x.status === 'D' && isSource(x.path) && !addedStems.has(stem(x.path)))
+  const added = new Set(changes.filter((x) => x.status === 'A').map((x) => x.path))
+  // Only a .js/.mjs -> .ts swap of the same file (same directory and name, test or not) is a conversion.
+  const converted = (p: string): boolean => /\.m?js$/.test(p) && added.has(p.replace(/\.m?js$/, '.ts'))
+  const deletedSrc = changes.filter((x) => x.status === 'D' && isSource(x.path) && !converted(x.path))
   for (const s of deletedSrc) {
     const t = existingTests.find((p) => stem(p) === stem(s.path))
     if (t) problems.push(`${s.path} was deleted but ${t} still exists`)
   }
-  for (const t of changes.filter((x) => x.status === 'D' && isTest(x.path) && !addedStems.has(stem(x.path)))) {
+  for (const t of changes.filter((x) => x.status === 'D' && isTest(x.path) && !converted(x.path))) {
     if (!deletedSrc.some((s) => stem(s.path) === stem(t.path))) problems.push(`test deleted without its source: ${t.path} (add a Tests-Not-Applicable trailer with a reason)`)
   }
   return { ok: problems.length === 0, problems }

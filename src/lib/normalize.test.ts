@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { toList, formatPeriod } from './normalize.js'
+import { toList, formatPeriod } from './normalize'
 
 describe('toList', () => {
   it('splits on unescaped commas and honors escaped commas', () => {
