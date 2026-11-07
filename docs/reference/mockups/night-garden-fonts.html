@@ -1,0 +1,101 @@
+<style>@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Instrument+Sans:wght@400;500;600&display=swap");</style>
+<h2>Night garden, Claude-style fonts</h2>
+<p class="subtitle">Newsreader (serif headlines) and Instrument Sans (body). Free stand-ins for the serif and sans pairing on claude.ai.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Preview: Home hero (Night garden)</div>
+  <div class="mockup-body" style="padding:0">
+  <div style="position:relative;overflow:hidden;background:linear-gradient(180deg,#040818 0%,#08153a 70%,#0b1f4a 100%);color:#e4edff;font-family:'Newsreader',Georgia,serif;min-height:520px">
+    <svg viewBox="0 0 900 520" preserveAspectRatio="xMinYMid slice" style="position:absolute;inset:0;width:100%;height:100%" fill="none">
+      <defs>
+        <radialGradient id="pet" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="#1e3fa8"/><stop offset=".55" stop-color="#4f8bff"/><stop offset="1" stop-color="#bcd8ff"/></radialGradient>
+        <radialGradient id="pet2" cx="50%" cy="100%" r="100%"><stop offset="0" stop-color="#14307f"/><stop offset=".6" stop-color="#2f66d8"/><stop offset="1" stop-color="#7fb0ff"/></radialGradient>
+        <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a8fa8"/><stop offset="1" stop-color="#0f4a68"/></linearGradient>
+        <radialGradient id="glow"><stop offset="0" stop-color="#6aa8ff" stop-opacity=".5"/><stop offset="1" stop-color="#6aa8ff" stop-opacity="0"/></radialGradient>
+
+        <path id="petal" d="M0 0 C-16 -18 -18 -52 0 -70 C18 -52 16 -18 0 0Z"/>
+        <g id="petalv" stroke="#e9f2ff" stroke-opacity=".55" stroke-width=".8" stroke-linecap="round">
+          <path d="M0 -4 L0 -62"/><path d="M0 -20 L-7 -42 M0 -20 L7 -42 M0 -36 L-5 -52 M0 -36 L5 -52"/>
+        </g>
+        <g id="bloom">
+          <circle r="95" fill="url(#glow)"/>
+          <g fill="url(#pet2)" stroke="#9cc4ff" stroke-opacity=".5" stroke-width=".8" transform="rotate(36)">
+            <use href="#petal"/><use href="#petal" transform="rotate(72)"/><use href="#petal" transform="rotate(144)"/><use href="#petal" transform="rotate(216)"/><use href="#petal" transform="rotate(288)"/>
+          </g>
+          <g fill="url(#pet)" stroke="#d6e8ff" stroke-opacity=".7" stroke-width=".9">
+            <g><use href="#petal"/><use href="#petalv"/></g>
+            <g transform="rotate(72)"><use href="#petal"/><use href="#petalv"/></g>
+            <g transform="rotate(144)"><use href="#petal"/><use href="#petalv"/></g>
+            <g transform="rotate(216)"><use href="#petal"/><use href="#petalv"/></g>
+            <g transform="rotate(288)"><use href="#petal"/><use href="#petalv"/></g>
+          </g>
+          <circle r="11" fill="#0d1f5c"/>
+          <g stroke="#fde9a8" stroke-width="1.2" stroke-linecap="round">
+            <path d="M0 0 L0 -20"/><path d="M0 0 L14 -14"/><path d="M0 0 L20 0"/><path d="M0 0 L14 14"/><path d="M0 0 L-14 14"/><path d="M0 0 L-20 0"/><path d="M0 0 L-14 -14"/>
+          </g>
+          <g fill="#ffd96b"><circle cy="-21" r="2.6"/><circle cx="14" cy="-14" r="2.6"/><circle cx="21" r="2.6"/><circle cx="14" cy="14" r="2.6"/><circle cx="-14" cy="14" r="2.6"/><circle cx="-21" r="2.6"/><circle cx="-14" cy="-14" r="2.6"/></g>
+        </g>
+        <g id="leafs">
+          <path d="M0 0 C18 -22 52 -26 78 -4 C52 16 18 14 0 0Z" fill="url(#leaf)" stroke="#5fd0e8" stroke-opacity=".5" stroke-width=".8"/>
+          <path d="M2 -1 C25 -6 50 -6 74 -4" stroke="#8fe3f2" stroke-opacity=".7" stroke-width="1"/>
+          <path d="M18 -4 L30 -15 M18 -4 L30 7 M36 -5 L48 -15 M36 -5 L48 5 M54 -5 L63 -12 M54 -5 L63 2" stroke="#8fe3f2" stroke-opacity=".45" stroke-width=".8"/>
+        </g>
+        <g id="bud">
+          <path d="M0 0 C-12 -14 -10 -34 0 -46 C10 -34 12 -14 0 0Z" fill="url(#pet)" stroke="#d6e8ff" stroke-opacity=".6" stroke-width=".8"/>
+          <path d="M0 -4 L0 -38" stroke="#e9f2ff" stroke-opacity=".4" stroke-width=".8"/>
+          <path d="M0 2 C-10 -4 -12 -14 -8 -22 C-4 -14 0 -8 0 2Z M0 2 C10 -4 12 -14 8 -22 C4 -14 0 -8 0 2Z" fill="#1f7a8f" stroke="#5fd0e8" stroke-opacity=".5" stroke-width=".7"/>
+        </g>
+        <g id="corn" stroke="#a9ccff" stroke-width=".9" stroke-linecap="round">
+          <circle r="40" fill="url(#glow)" stroke="none"/>
+          <g fill="#3b78f0" fill-opacity=".8">
+            <path id="cp" d="M0 -4 C-3 -12 -3 -22 0 -28 C3 -22 3 -12 0 -4Z"/>
+            <use href="#cp" transform="rotate(30)"/><use href="#cp" transform="rotate(60)"/><use href="#cp" transform="rotate(90)"/><use href="#cp" transform="rotate(120)"/><use href="#cp" transform="rotate(150)"/><use href="#cp" transform="rotate(180)"/><use href="#cp" transform="rotate(210)"/><use href="#cp" transform="rotate(240)"/><use href="#cp" transform="rotate(270)"/><use href="#cp" transform="rotate(300)"/><use href="#cp" transform="rotate(330)"/>
+          </g>
+          <circle r="5" fill="#16307a"/>
+        </g>
+      </defs>
+
+      <!-- stars -->
+      <g fill="#fff"><circle cx="520" cy="60" r="1.4"/><circle cx="640" cy="130" r="1"/><circle cx="780" cy="50" r="1.5"/><circle cx="850" cy="190" r="1"/><circle cx="700" cy="260" r="1.2"/><circle cx="580" cy="210" r="1"/><circle cx="470" cy="150" r="1"/><circle cx="820" cy="330" r="1"/></g>
+
+      <!-- main vine -->
+      <path d="M-20 540 C40 470 120 450 110 380 S40 300 90 240 S170 190 150 120 S120 40 150 -10" stroke="#2a8fa8" stroke-width="4" stroke-linecap="round"/>
+      <path d="M-20 540 C40 470 120 450 110 380 S40 300 90 240 S170 190 150 120 S120 40 150 -10" stroke="#8fe3f2" stroke-opacity=".35" stroke-width="1" stroke-linecap="round"/>
+      <!-- tendrils -->
+      <path d="M110 380 C150 372 170 392 158 408 C148 420 134 410 142 400" stroke="#3aa7c2" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M90 240 C50 236 34 214 46 200 C58 190 70 200 62 210" stroke="#3aa7c2" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M150 120 C190 110 206 130 196 146 C186 156 174 146 182 138" stroke="#3aa7c2" stroke-width="1.8" stroke-linecap="round"/>
+      <!-- leaves -->
+      <use href="#leafs" transform="translate(112 378) rotate(-25) scale(1.1)"/>
+      <use href="#leafs" transform="translate(66 300) rotate(200) scale(1)"/>
+      <use href="#leafs" transform="translate(98 238) rotate(-35) scale(.95)"/>
+      <use href="#leafs" transform="translate(148 125) rotate(-150) scale(.9)"/>
+      <use href="#leafs" transform="translate(40 470) rotate(-20) scale(1.15)"/>
+      <!-- flowers -->
+      <use href="#bloom" transform="translate(200 330) scale(1.15) rotate(8)"/>
+      <use href="#bloom" transform="translate(40 190) scale(.8) rotate(-20)"/>
+      <use href="#bloom" transform="translate(230 90) scale(.7) rotate(25)"/>
+      <use href="#corn" transform="translate(190 470) scale(1.3)"/>
+      <use href="#corn" transform="translate(120 40) scale(.9)"/>
+      <!-- buds on short stems -->
+      <path d="M128 440 C150 420 156 400 168 392" stroke="#2a8fa8" stroke-width="2"/>
+      <use href="#bud" transform="translate(168 392) rotate(40)"/>
+      <path d="M150 -2 C170 20 176 40 190 52" stroke="#2a8fa8" stroke-width="2"/>
+      <use href="#bud" transform="translate(190 52) rotate(35) scale(.8)"/>
+
+      <!-- right-bottom small vine -->
+      <path d="M920 540 C860 500 870 450 820 430 S790 400 800 380" stroke="#2a8fa8" stroke-width="3" stroke-linecap="round"/>
+      <use href="#leafs" transform="translate(850 462) rotate(-160) scale(.9)"/>
+      <use href="#bloom" transform="translate(800 380) scale(.6) rotate(15)"/>
+    </svg>
+
+    <div style="position:relative;padding:60px 60px 60px 360px;max-width:900px">
+      <div style="display:flex;gap:28px;font:12px 'Instrument Sans',system-ui,sans-serif;letter-spacing:.15em;color:#8fb0ea;justify-content:flex-end;margin-bottom:70px"><span>WORK</span><span>ABOUT</span><span>CONTACT</span></div>
+      <div style="font:12px 'Instrument Sans',system-ui,sans-serif;letter-spacing:.25em;color:#7fb0ff">MARIO SAKKA</div>
+      <div style="font-size:52px;line-height:1.08;margin:14px 0 14px">Growing things<br><em style="color:#9cc4ff">for the web.</em></div>
+      <div style="font:15px 'Instrument Sans',system-ui,sans-serif;color:#9db4e0;max-width:360px;line-height:1.6">Full-stack developer in Bucharest. Web technologies, app development and AI.</div>
+      <div style="margin-top:26px;display:flex;gap:12px;font:14px 'Instrument Sans',system-ui,sans-serif"><span style="background:#4f8bff;color:#04102e;border-radius:999px;padding:10px 22px;font-weight:600">View projects</span><span style="border:1px solid rgba(127,176,255,.4);border-radius:999px;padding:10px 22px">Get in touch</span></div>
+    </div>
+  </div>
+  </div>
+</div>

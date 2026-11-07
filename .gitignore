@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.superpowers/
+.DS_Store
+# Raw Firestore export: tokenized Firebase Storage URLs and personal contact data. Local reference only.
+docs/reference/firestore-export/
