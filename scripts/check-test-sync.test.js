@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { evaluate } from './check-test-sync.mjs'
+import { evaluate, resolveBase, findBypass, isBot } from './check-test-sync.mjs'
 
 const c = (status, path) => ({ status, path })
 
@@ -29,5 +29,47 @@ describe('check-test-sync evaluate', () => {
     expect(evaluate({ changes: [c('D', 'src/lib/commit.test.js')] }).ok).toBe(false)
     expect(evaluate({ changes: [c('D', 'src/lib/commit.test.js'), c('D', 'src/lib/commit.js')] }).ok).toBe(true)
     expect(evaluate({ changes: [c('D', 'src/lib/commit.test.js')], bypass: 'obsolete' }).ok).toBe(true)
+  })
+})
+
+describe('base resolution', () => {
+  const rootCommit = () => 'ROOT'
+  it('uses the ref when it resolves', () => {
+    expect(resolveBase('abc', { resolves: () => true, rootCommit })).toBe('abc')
+  })
+  it('fails loudly when the ref does not resolve', () => {
+    expect(() => resolveBase('nope', { resolves: () => false, rootCommit })).toThrow(/nope.*fetch/s)
+  })
+  it('falls back to the root commit only with allowRoot', () => {
+    expect(resolveBase('nope', { resolves: () => false, rootCommit, allowRoot: true })).toBe('ROOT')
+  })
+})
+
+describe('bypass trailer', () => {
+  it('honors a valid trailer in the last paragraph', () => {
+    expect(findBypass(['feat: x\n\nbody\n\nTests-Not-Applicable: copy only\nCo-Authored-By: A <a@b.c>\n'])).toBe('copy only')
+  })
+  it('ignores an empty trailer followed by Co-Authored-By', () => {
+    expect(findBypass(['feat: x\n\nTests-Not-Applicable:\nCo-Authored-By: A <a@b.c>\n'])).toBeNull()
+    expect(findBypass(['feat: x\n\nTests-Not-Applicable:   \nCo-Authored-By: A <a@b.c>\n'])).toBeNull()
+  })
+  it('ignores the trailer outside the last paragraph', () => {
+    expect(findBypass(['feat: x\n\nTests-Not-Applicable: why\n\nmore text\n'])).toBeNull()
+  })
+})
+
+describe('bot detection', () => {
+  it('accepts only the exact dependabot identity', () => {
+    expect(isBot('dependabot[bot]', '49699333+dependabot[bot]@users.noreply.github.com')).toBe(true)
+    expect(isBot('dependabot-fan', 'x@example.com')).toBe(false)
+    expect(isBot('dependabot[bot]', 'evil@example.com')).toBe(false)
+  })
+})
+
+describe('test pairing by full path', () => {
+  it('does not pair index.js across directories', () => {
+    const changes = [c('D', 'src/a/index.js')]
+    expect(evaluate({ changes, existingTests: ['src/b/index.test.js'] }).ok).toBe(true)
+    expect(evaluate({ changes, existingTests: ['src/a/index.test.js'] }).ok).toBe(false)
   })
 })
