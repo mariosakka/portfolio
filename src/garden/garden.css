@@ -1,0 +1,50 @@
+/* Hidden-until-grown states apply only when neither .is-grown nor .is-static is set. */
+.garden-art { --delay: 0ms; --duration: 2400ms; }
+.vine { display: block; max-width: 100%; height: auto; }
+
+.vine-stem {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset var(--duration) ease-in-out var(--delay);
+}
+.vine.is-grown .vine-stem,
+.vine.is-static .vine-stem { stroke-dashoffset: 0; }
+.vine.is-static .vine-stem { transition: none; }
+
+/* leaves, buds: pop in along the stem */
+.leaf .pop, .bud .pop {
+  opacity: 0;
+  transform: scale(0);
+  transition: transform .7s cubic-bezier(.3, 1.4, .5, 1) var(--delay), opacity .5s ease var(--delay);
+}
+.leaf.is-grown .pop, .bud.is-grown .pop,
+.leaf.is-static .pop, .bud.is-static .pop { opacity: 1; transform: scale(1); }
+
+/* blooms and cornflowers: petals scale from 0 and rotate outward */
+.bloom .glow, .cornflower .glow { opacity: 0; transition: opacity 1.2s ease calc(var(--delay) + .4s); }
+.bloom.is-grown .glow, .cornflower.is-grown .glow,
+.bloom.is-static .glow, .cornflower.is-static .glow { opacity: 1; }
+
+.petal {
+  opacity: 0;
+  transform: scale(0) rotate(-50deg);
+  transition: transform .9s cubic-bezier(.2, 1.2, .4, 1) calc(var(--delay) + var(--i) * 80ms), opacity .5s ease calc(var(--delay) + var(--i) * 80ms);
+}
+.bloom.is-grown .petal, .bloom.is-static .petal,
+.cornflower.is-grown .petal, .cornflower.is-static .petal { opacity: 1; transform: scale(1) rotate(0); }
+.is-static.garden-art .petal, .is-static.garden-art .pop, .is-static.garden-art .glow { transition: none; }
+
+/* gentle sway once open (not in static mode) */
+.is-swaying .sway {
+  animation: garden-sway 7s ease-in-out calc(var(--delay) + 1.6s) infinite alternate;
+}
+@keyframes garden-sway {
+  from { transform: rotate(-2.5deg); }
+  to { transform: rotate(2.5deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .garden-art .vine-stem, .garden-art.vine-stem { stroke-dashoffset: 0; transition: none; }
+  .garden-art .petal, .garden-art .pop, .garden-art .glow { opacity: 1; transform: none; transition: none; }
+  .sway { animation: none !important; }
+}
