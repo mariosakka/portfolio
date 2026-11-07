@@ -62,9 +62,8 @@ test('contact: four links with hrefs', () => {
   expect(w.text()).toContain("Let's Connect!")
 })
 
-test('about: code panel, skills, commit badge slot', () => {
+test('about: skills, commit badge slot', () => {
   w = mount(AboutSection)
-  expect(w.find('pre code').text()).toContain('"name"')
   expect(w.text()).toContain('Mohamad-Mario Sakka')
   expect(w.text()).toContain('Java')
   expect(w.text()).toContain('Arabic')

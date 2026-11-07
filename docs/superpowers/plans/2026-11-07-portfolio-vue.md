@@ -112,14 +112,14 @@
 ### Task 6: Content sections
 
 **Files:**
-- Create: `src/components/sections/{About,Experience,Projects,Education,Certificates,Organizations,Contact}Section.vue`, `src/components/CodePanel.vue`, `src/components/sections/sections.test.js`
+- Create: `src/components/sections/{About,Experience,Projects,Education,Certificates,Organizations,Contact}Section.vue`, `src/components/sections/sections.test.js`
 - Modify: `src/App.vue`
 
 **Interfaces:**
 - Consumes: Task 2 JSON, Task 5 components, `formatPeriod`.
-- Produces: each section component takes no props and reads its JSON. `ProjectsSection` shows a category filter built from the distinct `category` values plus `All`, ordered by first appearance; it hides categories with no items. Contact lists methods as links: Email `mailto:`, Phone `tel:`, GitHub `https://github.com/<value>`, LinkedIn `https://www.linkedin.com/in/<value>`. `CodePanel :code="string"` renders the `codeSample` in a `<pre><code>`.
+- Produces: each section component takes no props and reads its JSON. `ProjectsSection` shows a category filter built from the distinct `category` values plus `All`, ordered by first appearance; it hides categories with no items. Contact lists methods as links: Email `mailto:`, Phone `tel:`, GitHub `https://github.com/<value>`, LinkedIn `https://www.linkedin.com/in/<value>`. (The code-sample panel was removed from About at the owner's request.)
 
-- [ ] **Step 1: Write failing tests**: Projects renders 9 cards under `All` and only that category's cards after clicking a filter; the filter list contains exactly `All, Web, Embedded, Games, App, Algorithms`; Experience item with `isPresent` shows `Present`; Contact renders four links with the `href`s above; About renders the `CodePanel` containing `"name"`.
+- [ ] **Step 1: Write failing tests**: Projects renders 9 cards under `All` and only that category's cards after clicking a filter; the filter list contains exactly `All, Web, Embedded, Games, App, Algorithms`; Experience item with `isPresent` shows `Present`; Contact renders four links with the `href`s above.
 - [ ] **Step 2-4:** FAIL, implement, PASS (open modal with `longDescription` from each card). **Step 5: Commit** `feat: content sections`
 
 ### Task 7: Build-time latest commit

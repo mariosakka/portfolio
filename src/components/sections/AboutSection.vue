@@ -1,6 +1,5 @@
 <script setup>
 import about from '../../data/about.json'
-import CodePanel from '../CodePanel.vue'
 import CommitBadge from '../CommitBadge.vue'
 </script>
 
@@ -37,7 +36,6 @@ import CommitBadge from '../CommitBadge.vue'
       <p class="text-sm opacity-80">
         Languages: {{ about.languages.join(', ') }}
       </p>
-      <CodePanel :code="about.codeSample" />
       <CommitBadge />
     </div>
   </div>

@@ -17,7 +17,7 @@ A second, later project (separate repo, **out of scope here**) will extract the 
 - Visual direction **"Night garden"**: deep navy gradient (#040818 to #0b1f4a), luminous blue detailed flowers and teal vines at the edges, starfield dots. Headlines in a serif (Newsreader), body/nav in a sans (Instrument Sans), as free stand-ins for claude.ai's typography. Fonts bundled in the repo, not loaded from Google at runtime. Mockup reference: `.superpowers/brainstorm/.../night-garden-fonts.html` (kept in the owner's scratch folder; the SVG flower definitions in it are the starting art).
 - Flowers/vines **animate**: vines draw themselves along their path, leaves and tendrils appear as the stem passes, buds open into blooms, idle sway. Hero animates on load; other sections animate when scrolled into view; vines can trace along section headings. `prefers-reduced-motion` shows everything already grown.
 - Sections in order: About, Experience, Projects, Education, Certificates, Organizations, Contact. Sticky nav scrolls to sections.
-- Keep two extras from the old site: the **code-sample panel** (About shows the `codeSample` JSON in a code-editor-style box) and the **latest-commit widget** (shows the newest commit message of the portfolio repo). The commit is fetched **at build time** (GitHub API in the build step, no runtime calls, no rate limits) and baked into the page.
+- Keep one extra from the old site: the **latest-commit widget** (shows the newest commit message of the portfolio repo). The commit is fetched **at build time** (GitHub API in the build step, no runtime calls, no rate limits) and baked into the page.
 - Projects are filterable/grouped by `category` (values seen: Web, Embedded, Games, App, Algorithms).
 - Animated components (`Vine`, `Bloom`, grow-on-scroll) live in their own folder with no dependency on the rest of the app, so they can be moved to the npm package later.
 
@@ -47,7 +47,7 @@ A second, later project (separate repo, **out of scope here**) will extract the 
 - Vue (3) instead of React; JSON files with the old schemas; GitHub Pages; Namecheap domain `mohamad-mario-sakka.com`.
 - Fresh visual direction: Night garden, more detailed flowers, Claude-style serif+sans typography.
 - Animated flowers prototyped inside the portfolio first, then extracted to an npm package in a separate repo later.
-- Keep code-sample panel and commit widget (commit fetched at build time).
+- Keep the commit widget (commit fetched at build time). The code-sample panel was removed from About at the owner's request.
 
 ## Builder's calls (the owner has not decided these; flag for review)
 
@@ -64,7 +64,7 @@ A second, later project (separate repo, **out of scope here**) will extract the 
 
 ### Live field names (use these)
 
-- `about-me` (single object): `fullName`, `preferredName`, `role`, `location`, `languages[]`, `skills[]`, `description`, `welcomeMessage`, `photo`/`photoFileName`, `codeSample` (JSON string shown in the code panel), `repositoryPath`, `commitMessage` (stale; replaced by build-time commit), `contact{title, subtitle, methods[{id,type,value}]}` with types Email, GitHub, Phone, LinkedIn.
+- `about-me` (single object): `fullName`, `preferredName`, `role`, `location`, `languages[]`, `skills[]`, `description`, `welcomeMessage`, `photo`/`photoFileName`, `codeSample` (unused; the code panel was removed), `repositoryPath`, `commitMessage` (stale; replaced by build-time commit), `contact{title, subtitle, methods[{id,type,value}]}` with types Email, GitHub, Phone, LinkedIn.
 - `projects` (9): `title`, `role`, `teamType`, `category`, `shortDescription`, `description`, `longDescription`, `technologies[]`, `githubUrl`, `liveUrl`, `socialMedia[]`, `image`/`imageFileName`.
 - `experience` (2): `title`, `company`, `location`, `startDate`, `endDate`, `isPresent`, `shortDescription`, `longDescription`, `technologies[]`, `websiteUrl`, `image`.
 - `education` (2): `degree`, `fieldOfStudy`, `department`, `institution`, `location`, `startDate`, `endDate`, `isPresent`, `gpa`, `subjects`, `description`, `shortDescription`, `longDescription`, `websiteUrl`, `socialMedia[]`, `image`.

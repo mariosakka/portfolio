@@ -29,7 +29,6 @@ describe('about.json', () => {
   it('has required fields', () => {
     expect(about.fullName).toBeTruthy()
     expect(about.role).toBeTruthy()
-    expect(() => JSON.parse(about.codeSample)).not.toThrow()
     expect(about.contact.methods.map((m) => m.type).sort()).toEqual(['Email', 'GitHub', 'LinkedIn', 'Phone'])
     expect(Array.isArray(about.skills) && Array.isArray(about.languages)).toBe(true)
     expect(JSON.stringify(about)).not.toContain('firebasestorage.googleapis.com')
