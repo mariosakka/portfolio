@@ -15,7 +15,7 @@ const about: About = aboutJson
        drifts a little with scroll; the text lines stagger in. -->
   <div
     v-reveal="'stagger'"
-    class="grid grid-cols-[6.5rem_1fr] items-center gap-x-5 gap-y-5 text-ink md:grid-cols-[16rem_1fr] md:gap-x-12 md:gap-y-5"
+    class="grid grid-cols-[6.5rem_1fr] items-center gap-x-5 gap-y-3 text-ink xshort:grid-cols-[5rem_1fr] sm:gap-y-5 md:grid-cols-[16rem_1fr] md:gap-x-12 md:gap-y-5"
   >
     <div
       v-if="about.photo"
@@ -39,7 +39,7 @@ const about: About = aboutJson
       <h3
         data-stagger
         style="--i: 1"
-        class="font-serif text-3xl leading-tight sm:text-4xl"
+        class="font-serif text-3xl leading-tight xshort:text-2xl sm:text-4xl"
       >
         {{ about.fullName }}
       </h3>
@@ -51,11 +51,11 @@ const about: About = aboutJson
         {{ [about.role, about.location].filter(Boolean).join(' - ') }}
       </p>
     </div>
-    <div class="col-span-2 min-w-0 space-y-5 md:col-span-1 md:col-start-2 md:self-start">
+    <div class="col-span-2 min-w-0 space-y-3 sm:space-y-5 md:col-span-1 md:col-start-2 md:self-start">
       <p
         data-stagger
         style="--i: 3"
-        class="max-w-prose whitespace-pre-line text-lg text-ink/85"
+        class="max-w-prose whitespace-pre-line text-ink/85 sm:text-lg xshort:text-[0.95rem] xshort:leading-snug"
       >
         {{ about.description }}
       </p>
