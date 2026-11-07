@@ -1,32 +1,140 @@
 <script setup lang="ts">
-import Carousel from '../Carousel.vue'
-import HeroCard from '../HeroCard.vue'
+import { computed, ref } from 'vue'
+import CardGarden from '../CardGarden.vue'
+import DetailModal from '../DetailModal.vue'
+import MediaFrame from '../MediaFrame.vue'
 import raw from '../../data/certificates.json'
 import type { Certificate } from '../../types/data'
 import { toList } from '../../lib/normalize'
+import { bentoRows, bentoSpan, monogram } from '../../lib/motion'
+import { useMedia, vPointer, vReveal } from '../../lib/useMotion'
 
 const data: Certificate[] = raw
+// Tiles sit 20px (12px on phones) apart: a ring of 40px (24px) keeps most of a tile's art off its neighbours' text.
+const wide = useMedia('(min-width: 640px)')
+const tileReach = computed(() => (wide.value ? 40 : 24))
+// The 2x2 tile shows the first certificate image; a certificate without one gets a small monogram tile.
+const large = Math.max(0, data.findIndex((c) => c.image))
+const open = ref<number | null>(null)
+const shown = computed(() => (open.value === null ? null : data[open.value]))
+const text = (c: Certificate) => [c.longDescription, c.description ?? '', c.shortDescription].find((s) => s.trim()) ?? ''
+const url = (c: Certificate) => (typeof c.credentialUrl === 'string' ? c.credentialUrl.trim() : '')
 </script>
 
 <template>
-  <Carousel
-    :items="data"
-    label="Certificates"
-    slide-class="basis-[92%] sm:basis-[88%] md:basis-[46%]"
+  <!-- Mosaic of every certificate at once; a tile opens the shared detail dialog. -->
+  <!-- Desktop rows share the height of two rows (the one-screen budget); from 9 tiles they get shorter. -->
+  <ul
+    v-if="data.length"
+    v-reveal="'stagger'"
+    aria-label="Certificates"
+    class="grid grid-cols-2 gap-3 sm:gap-5 md:grid-flow-dense md:grid-cols-4 md:[grid-template-rows:repeat(var(--rows),calc((clamp(10.5rem,28svh,15.5rem)*2-(var(--rows)-2)*1.25rem)/var(--rows)))]"
+    :style="{ '--rows': bentoRows(data.length) }"
   >
-    <template #slide="{ item }">
-      <HeroCard
-        layout="stacked"
-        compact
-        :title="item.title"
-        :eyebrow="item.issuer"
-        :image="item.image"
-        :short-description="item.shortDescription"
-        :description="item.description"
-        :long-description="item.longDescription"
-        :tags="toList(item.skills)"
-        :links="[{ label: 'Credential', url: item.credentialUrl }]"
-      />
+    <li
+      v-for="(c, i) in data"
+      :key="c.id"
+      data-stagger
+      :style="{ '--i': i }"
+      class="flex min-w-0"
+      :class="bentoSpan(i, data.length, large)"
+    >
+      <article
+        v-pointer
+        class="group relative flex w-full min-w-0 gap-2 rounded-[1.5rem] border border-line bg-surface p-2 text-ink transition-colors hover:border-accent/40"
+        :class="c.image ? 'flex-col' : 'flex-row items-center md:flex-col md:items-stretch'"
+      >
+        <CardGarden
+          :seed="c.id"
+          :density="i === large ? 3 : 1"
+          :reach="tileReach"
+        />
+        <MediaFrame
+          v-if="c.image"
+          :src="c.image"
+          fit="contain"
+          class="h-[clamp(4.5rem,12svh,9rem)] shrink-0 md:h-auto md:min-h-[4.5rem] md:flex-1"
+        />
+        <!-- Certificates are documents: shown whole (contain), never cropped. -->
+        <!-- No image: a typographic tile on the same flat surface (issuer monogram), never an empty frame. -->
+        <div
+          v-else
+          data-monogram
+          aria-hidden="true"
+          class="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.1rem] border border-line bg-night-900 font-serif text-3xl text-accent md:h-auto md:min-h-[4.5rem] md:w-auto md:flex-1 md:rounded-[1.35rem] md:text-7xl"
+        >
+          {{ monogram(c.issuer || c.title) }}
+        </div>
+        <div class="min-w-0 px-2 pb-1.5">
+          <p class="truncate text-[0.65rem] uppercase tracking-[0.14em] text-accent">
+            {{ c.issuer }}
+          </p>
+          <h3 class="line-clamp-2 font-serif text-base leading-tight sm:text-lg">
+            <!-- The title button covers the whole tile (after:inset-0); the credential link sits above it. -->
+            <button
+              type="button"
+              aria-haspopup="dialog"
+              class="text-left after:absolute after:inset-0 after:rounded-[1.5rem] focus-visible:outline-none focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-accent"
+              @click="open = i"
+            >
+              {{ c.title }}
+            </button>
+          </h3>
+        </div>
+        <a
+          v-if="url(c)"
+          :href="url(c)"
+          target="_blank"
+          rel="noopener noreferrer"
+          :aria-label="`Credential (${c.title}, opens in a new tab)`"
+          class="absolute right-3.5 top-3.5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-line bg-night-950/85 text-ink transition-colors hover:border-accent/60 hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 16 16"
+            class="h-4 w-4"
+          ><path
+            d="M5 11 11 5M6 5h5v5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          /></svg>
+        </a>
+      </article>
+    </li>
+  </ul>
+  <DetailModal
+    :open="shown !== null"
+    :title="shown?.title ?? ''"
+    @close="open = null"
+  >
+    <template v-if="shown">
+      <p class="mb-3 text-xs uppercase tracking-[0.16em] text-accent">
+        {{ shown.issuer }}
+      </p>
+      <p class="mb-3 whitespace-pre-line">
+        {{ text(shown) }}
+      </p>
+      <ul
+        v-if="toList(shown.skills).length"
+        class="mt-4 flex flex-wrap gap-1.5"
+      >
+        <li
+          v-for="(t, k) in toList(shown.skills)"
+          :key="k"
+          class="rounded-full border border-line px-2.5 py-0.5 text-xs text-ink/80"
+        >
+          {{ t }}
+        </li>
+      </ul>
+      <a
+        v-if="url(shown)"
+        :href="url(shown)"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mt-5 inline-flex h-11 items-center rounded-full border border-accent/40 bg-accent/15 px-4 text-sm text-ink hover:bg-accent/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      >Credential<span class="sr-only"> ({{ shown.title }}, opens in a new tab)</span></a>
     </template>
-  </Carousel>
+  </DetailModal>
 </template>

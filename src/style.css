@@ -138,3 +138,131 @@ html {
     scroll-behavior: auto;
   }
 }
+
+/* Motion vocabulary (src/lib/useMotion.ts, design doc "Transition vocabulary"). Only transform, opacity and
+   clip-path move. Content is visible by default: it is hidden only while data-enter="pending", which JS sets
+   after the observer saw it off screen. Final clip-paths reach 120px past the box so card sprouts are not cut. */
+:root {
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+[data-enter='in'],
+[data-enter='in'] [data-stagger] {
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out), clip-path 0.9s cubic-bezier(0.6, 0, 0.2, 1);
+}
+[data-enter='in'] [data-stagger] {
+  transition-delay: calc(var(--i, 0) * 55ms + 100ms);
+}
+[data-reveal='fade-up'][data-enter='pending'] {
+  opacity: 0;
+  transform: translateY(28px);
+}
+[data-reveal='scale'][data-enter='pending'] {
+  opacity: 0;
+  transform: scale(0.94);
+}
+[data-reveal='slide'][data-enter='pending'] {
+  opacity: 0;
+  transform: translateX(-48px);
+}
+/* Clip variants clip the children, never the observed element: a fully clipped target would not report
+   as intersecting in Chromium, so it would stay hidden. */
+[data-reveal='wipe'][data-enter='pending'] > * {
+  clip-path: inset(-120px 100% -120px -120px);
+}
+[data-reveal='mask'][data-enter='pending'] > * {
+  clip-path: inset(100% -120px -120px -120px);
+}
+/* :where() keeps this at zero specificity so a tilting child ([data-pointer] below) keeps its own timing. */
+:where([data-reveal='wipe'][data-enter='in']) > *,
+:where([data-reveal='mask'][data-enter='in']) > * {
+  clip-path: inset(-120px);
+  transition: clip-path 0.9s cubic-bezier(0.6, 0, 0.2, 1), transform 0.35s var(--ease-out);
+}
+[data-enter='pending'] [data-stagger] {
+  opacity: 0;
+  transform: translateY(16px) scale(0.94);
+}
+/* Underline drawn under a spotlight title once its section entered. */
+[data-underline] {
+  transform-origin: left;
+  transition: transform 1s var(--ease-out) 0.35s;
+}
+[data-enter='pending'] [data-underline] {
+  transform: scaleX(0);
+}
+
+/* Pointer tilt / magnet (fine pointers only, set by v-pointer). */
+/* clip-path is listed too, for a card that is also a wipe child (Organizations). */
+[data-pointer] {
+  transition: transform 0.35s var(--ease-out), clip-path 0.9s cubic-bezier(0.6, 0, 0.2, 1);
+}
+[data-pointer='tilt'][data-pointer-on] {
+  transform: perspective(1100px) rotateX(calc(var(--py, 0) * -2.5deg)) rotateY(calc(var(--px, 0) * 3deg));
+  transition-duration: 0.12s, 0.9s;
+}
+[data-pointer='magnet'][data-pointer-on] {
+  transform: translate(calc(var(--px, 0) * 8px), calc(var(--py, 0) * 5px));
+  transition-duration: 0.12s, 0.9s;
+}
+
+/* Coverflow pose (Carousel.vue writes the variables per slide from its scroll position). */
+[data-cf-pose] {
+  transform: translateX(calc(var(--cf-x, 0) * 100%)) perspective(1400px) rotateY(var(--cf-r, 0deg)) scale(var(--cf-s, 1));
+  opacity: var(--cf-o, 1);
+}
+
+/* Large-image parallax (v-parallax): the image is a little larger than its frame and drifts. */
+[data-parallax] {
+  transform: translateY(calc(var(--parallax, 0) * -14px)) scale(1.07);
+}
+
+/* Experience detail swap (Vue <Transition name="swap" mode="out-in">): slide up and cross-fade. */
+.swap-enter-active,
+.swap-leave-active {
+  transition: opacity 0.22s ease, transform 0.26s var(--ease-out);
+}
+.swap-enter-from {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.swap-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Detail dialog: the box grows in from slightly smaller (tiles "expand" into it). */
+.modal-enter-active,
+.modal-leave-active,
+.modal-enter-active .modal-box {
+  transition: opacity 0.24s ease, transform 0.24s var(--ease-out);
+}
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+.modal-enter-from .modal-box {
+  transform: scale(0.95) translateY(10px);
+}
+
+/* Reduced motion and print: every final state, no motion. */
+@media print, (prefers-reduced-motion: reduce) {
+  .swap-enter-active,
+  .swap-leave-active,
+  .modal-enter-active,
+  .modal-leave-active,
+  .modal-enter-active .modal-box {
+    transition: none;
+  }
+  [data-enter],
+  [data-enter] > *,
+  [data-enter] [data-stagger],
+  [data-underline],
+  [data-pointer],
+  [data-parallax],
+  [data-cf-pose] {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    transition: none !important;
+  }
+}

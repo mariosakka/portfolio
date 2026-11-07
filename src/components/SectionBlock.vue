@@ -19,7 +19,7 @@ const a3 = pointAt(model, f3)
 <template>
   <section
     :id="id"
-    class="mx-auto flex min-h-[var(--section-h)] max-w-5xl scroll-mt-[var(--nav-h)] flex-col justify-center px-4 py-5 sm:px-8 sm:py-10 sm:short:py-6"
+    class="mx-auto flex min-h-[var(--section-h)] max-w-5xl scroll-mt-[var(--nav-h)] flex-col justify-center px-4 py-5 sm:px-10 sm:py-10 lg:px-14 sm:short:py-6"
   >
     <h2 class="mb-2 font-serif text-3xl text-ink outline-none sm:text-4xl xshort:text-[1.65rem]">
       {{ title }}

@@ -1,6 +1,6 @@
 // One seeded flower generator. Species are presets over the same FlowerSpec.
 import { mulberry32 } from './rng'
-import type { FlowerGeometry, FlowerSpec, PetalGeom, SepalGeom, Species, StamenGeom } from './types'
+import type { FlowerGeometry, FlowerSpec, Palette, PetalGeom, SepalGeom, Species, StamenGeom } from './types'
 
 const r2 = (n: number): number => Math.round(n * 100) / 100
 const wrap = (a: number): number => ((((a + 180) % 360) + 360) % 360) - 180
@@ -53,6 +53,17 @@ export const FLOWER_SPECIES: Record<Species, FlowerSpec> = {
     },
   },
 }
+
+const STAMEN = { filament: '#e0cc98', anther: '#d6b85f', pollen: '#e8d48a', sepal: '#1d6577' } as const
+
+/** Extra muted hues in the blue, violet and pale family, applied over any species (`PlantSpec.palette`). */
+export const EXTRA_PALETTES: Palette[] = [
+  { outer: ['#2e3a7a', '#5865b4', '#959fd6'], inner: ['#38458a', '#6774c2', '#b0b8e4'], edge: '#a3acdc', vein: '#d0d5f0', glow: '#6c78c8', center: '#1e2550', ...STAMEN },
+  { outer: ['#3d3570', '#6a5ea8', '#a99fd2'], inner: ['#4a4084', '#7a6fbc', '#c2bbe2'], edge: '#b4abd8', vein: '#dcd7ef', glow: '#7d71bf', center: '#251f4a', ...STAMEN },
+  { outer: ['#4b6488', '#7f98bb', '#c3d1e4'], inner: ['#5a7398', '#93abca', '#d8e2ef'], edge: '#c0cee2', vein: '#e8eef6', glow: '#8aa3c6', center: '#c9b26a', ...STAMEN },
+  { outer: ['#24245e', '#43449a', '#7a7cc0'], inner: ['#2e2f72', '#5355ae', '#9799d4'], edge: '#8f92cc', vein: '#bfc1e6', glow: '#5d60b4', center: '#171842', ...STAMEN },
+  { outer: ['#1f4766', '#3f7699', '#86aec6'], inner: ['#275576', '#4f88aa', '#a3c4d6'], edge: '#93b6cc', vein: '#cfe0ea', glow: '#5a92b4', center: '#132c42', ...STAMEN },
+]
 
 /** Display scale of each species when it is placed on a plant (1 = natural size on the page). */
 export const SPECIES_SCALE: Record<Species, number> = { bloom: 0.5, cornflower: 1, bell: 0.85, forgetmenot: 1.4, daisy: 1 }

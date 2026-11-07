@@ -31,7 +31,7 @@ const link =
 
 <template>
   <footer class="mt-24 border-t border-line pb-[env(safe-area-inset-bottom)] font-sans text-sm text-ink/70">
-    <div class="mx-auto max-w-5xl px-4 pt-14 sm:px-8">
+    <div class="mx-auto max-w-5xl px-4 pt-14 sm:px-10 lg:px-14">
       <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.6fr)_1fr_1fr]">
         <div class="min-w-0 sm:col-span-2 lg:col-span-1">
           <p class="font-serif text-3xl leading-tight text-ink sm:text-4xl">

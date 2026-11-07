@@ -5,7 +5,8 @@ import { defineComponent, h, ref, nextTick } from 'vue'
 import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { useGrow, Vine, Bloom, Cornflower, Leaf, Bud, Bell, ForgetMeNot, Daisy, Spray, Plant, PageVine, scrollProgress, makeVinePath, placeItems, pointAt, parsePath, distanceToPath, generateFlower, growPlant, phase, petalPhase, PHASES, useGrowthTimeline, FLOWER_SPECIES } from './index'
+import SectionBlock from '../components/SectionBlock.vue'
+import { useGrow, Vine, Bloom, Cornflower, Leaf, Bud, Bell, ForgetMeNot, Daisy, Spray, Plant, pointAt, parsePath, distanceToPath, generateFlower, growPlant, phase, petalPhase, PHASES, useGrowthTimeline, FLOWER_SPECIES } from './index'
 import type { Cubic, GrowOptions, PlantSpec, Species } from './index'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -104,53 +105,11 @@ describe('components', () => {
   })
 })
 
-describe('scrollProgress', () => {
-  it('maps scroll to a clamped 0..1 fraction with the tip ahead of the viewport centre', () => {
-    expect(scrollProgress(-1000, 6000, 1000)).toBe(0)
-    const top = scrollProgress(0, 6000, 1000)
-    expect(top).toBeGreaterThan(0.1) // tip at 60% of the viewport, not at the top edge
-    expect(top).toBeLessThan(0.12)
-    expect(scrollProgress(5000, 6000, 1000)).toBe(1) // bottom of page
-    expect(scrollProgress(99999, 6000, 1000)).toBe(1)
-    expect(scrollProgress(0, 300, 1000)).toBe(1) // page shorter than the viewport
-    expect(scrollProgress(0, 0, 1000)).toBe(1)
-    let prev = 0
-    for (let y = 0; y <= 5000; y += 250) {
-      const p = scrollProgress(y, 6000, 1000)
-      expect(p).toBeGreaterThanOrEqual(prev)
-      prev = p
-    }
-  })
-})
-
-describe('makeVinePath', () => {
-  it('is deterministic per seed and differs between seeds', () => {
-    expect(makeVinePath({ seed: 3, height: 4000 }).d).toBe(makeVinePath({ seed: 3, height: 4000 }).d)
-    expect(makeVinePath({ seed: 3, height: 4000 }).d).not.toBe(makeVinePath({ seed: 4, height: 4000 }).d)
-  })
-  it('stays inside the margin strip and spans the height with increasing arc fractions', () => {
-    for (const width of [32, 180]) {
-      const v = makeVinePath({ seed: 9, height: 5800, width })
-      for (const s of v.samples) {
-        expect(s.x).toBeGreaterThanOrEqual(0)
-        expect(s.x).toBeLessThanOrEqual(width)
-      }
-      for (const n of v.d.matchAll(/-?\d+(?:\.\d+)?/g)) expect(Number.isFinite(Number(n[0]))).toBe(true)
-      expect(v.samples[v.samples.length - 1]?.y).toBeCloseTo(5800, 0)
-      expect(v.samples[v.samples.length - 1]?.f).toBe(1)
-      expect(v.samples[0]?.f).toBe(0)
-      v.samples.forEach((s, i) => { if (i) expect(s.f).toBeGreaterThanOrEqual(v.samples[i - 1]?.f ?? 0) })
-    }
-  })
-  it('keeps the prefix stable when the page grows', () => {
-    const a = makeVinePath({ seed: 5, height: 2000 })
-    const b = makeVinePath({ seed: 5, height: 4000 })
-    expect(b.d.startsWith(a.d.slice(0, a.d.lastIndexOf('C')))).toBe(true)
-  })
-})
+// A long downward S-curve standing in for any vine path.
+const VINE = parsePath('M90 0 C90 150 40 250 60 400 S130 700 90 1000 S40 1300 80 1600')
 
 describe('path anchoring', () => {
-  const vine = makeVinePath({ seed: 2, height: 3000 })
+  const vine = VINE
   it('pointAt returns points on the curve, with ordered y and a tangent', () => {
     let prevY = -1
     for (let f = 0; f <= 1; f += 0.05) {
@@ -162,7 +121,7 @@ describe('path anchoring', () => {
       expect(a.angle).toBeLessThan(180)
     }
     expect(pointAt(vine, 0).y).toBe(0)
-    expect(pointAt(vine, 1).y).toBeCloseTo(3000, 0)
+    expect(pointAt(vine, 1).y).toBeCloseTo(1600, 0)
   })
   it('parsePath handles M/C/Q/L and rejects unsupported commands', () => {
     const m = parsePath('M0 0 L10 0 Q20 0 20 10 C20 20 30 30 40 30 S50 20 60 30')
@@ -204,7 +163,7 @@ describe('generateFlower', () => {
 })
 
 describe('growPlant', () => {
-  const vine = makeVinePath({ seed: 2, height: 3000 })
+  const vine = VINE
   const spec = (species: Species, seed: number, f = 0.4): PlantSpec => ({ species, seed, anchor: pointAt(vine, f), side: seed % 2 ? 1 : -1, reach: 60, branches: 2, leaves: 3 })
   const all = (['bloom', 'cornflower', 'bell', 'forgetmenot', 'daisy'] as Species[]).flatMap((sp) => [1, 2, 3].map((n) => spec(sp, n)))
   const far = { x: 1e9, y: 1e9 }
@@ -256,41 +215,8 @@ describe('growPlant', () => {
     expect(Math.sin(((up?.tip.angle ?? 0) * Math.PI) / 180)).toBeLessThan(-0.5)
     expect(Math.sin(((bell?.tip.angle ?? 0) * Math.PI) / 180)).toBeGreaterThan(0.5)
   })
-  it('leaf bases lie on their stem and the vine leaves on the vine', () => {
+  it('leaf bases lie on their stem', () => {
     for (const s of all) for (const n of growPlant(s).nodes) for (const l of n.leaves) expect(distanceToPath(n.stem, l, 400)).toBeLessThan(0.1)
-    const leaves = placeItems(vine, { seed: 2 }).filter((i) => i.kind === 'leaf')
-    expect(leaves.length).toBeGreaterThan(10)
-    for (const it of leaves) expect(distanceToPath(vine, it.anchor, 400)).toBeLessThan(0.1)
-  })
-})
-
-describe('placeItems', () => {
-  const vine = makeVinePath({ seed: 2, height: 5800 })
-  it('is stable for a seed, covers the whole height and mixes species', () => {
-    const a = placeItems(vine, { seed: 2 })
-    expect(placeItems(vine, { seed: 2 })).toEqual(a)
-    expect(Math.max(...a.map((i) => i.anchor.y))).toBeGreaterThan(5000)
-    const species = new Set(a.flatMap((i) => (i.plant ? [i.plant.species] : [])))
-    expect(species.size).toBeGreaterThanOrEqual(4)
-    a.forEach((i, n) => { if (n) expect(i.f).toBeGreaterThanOrEqual(a[n - 1]?.f ?? 0) })
-  })
-  it('keeps every plant inside the strip, also when compact', () => {
-    for (const compact of [false, true]) {
-      const width = compact ? 32 : 180
-      const v = makeVinePath({ seed: 2, height: 4000, width })
-      const items = placeItems(v, { seed: 2, compact })
-      expect(items.some((i) => i.plant)).toBe(true)
-      for (const it of items) {
-        if (!it.plant) continue
-        const b = growPlant({ ...it.plant, anchor: it.anchor }).bounds
-        expect(b.x0, it.id).toBeGreaterThanOrEqual(-0.01)
-        expect(b.x1, it.id).toBeLessThanOrEqual(width + 0.01)
-      }
-    }
-  })
-  it('is sparser with a lower density', () => {
-    const n = (d: number): number => placeItems(vine, { seed: 2, density: d }).filter((i) => i.plant).length
-    expect(n(0.4)).toBeLessThan(n(1))
   })
 })
 
@@ -415,11 +341,12 @@ function nodeGeometry(node: Element): { p0: number[]; p2: number[]; p3: number[]
 const wrap180 = (a: number): number => ((((a + 180) % 360) + 360) % 360) - 180
 
 describe('rendered anchoring (DOM)', () => {
-  it('Plant and PageVine render each flower at its stem end, axis along the end tangent plus an integer tilt', () => {
+  it('Plant renders each flower at its stem end, axis along the end tangent plus an integer tilt', () => {
     mockMedia(true); mockIO()
     const roots = [
       mount(Plant, { props: { species: 'bell', anchor: { x: 40, y: 100, angle: 90 }, branches: 2, seed: 4 } }),
-      mount(PageVine, { props: { height: 3000, seed: 3 } }),
+      mount(Plant, { props: { species: 'bloom', anchor: { x: 40, y: 100, angle: 0 }, branches: 3, seed: 7 } }),
+      mount(Plant, { props: { species: 'daisy', anchor: { x: 0, y: 0, angle: 180 }, branches: 2, seed: 2, side: -1 } }),
     ]
     let checked = 0
     for (const w of roots) {
@@ -438,83 +365,22 @@ describe('rendered anchoring (DOM)', () => {
   })
 })
 
-describe('PageVine', () => {
-  const art = (w: ReturnType<typeof mount>) => w.findAll('g.g-art')
-  const off = (w: ReturnType<typeof mount>): number => {
-    const m = /--off: ([\d.]+)/.exec(w.find('svg').attributes('style') ?? '')
-    return m ? Number(m[1]) : w.find('svg').classes().includes('g-is-static') ? 0 : 1 // static: the stylesheet sets --off: 0
-  }
-  it('renders fully drawn and fully grown with reduced motion', () => {
-    mockMedia(true); mockIO()
-    const w = mount(PageVine, { props: { height: 3000, seed: 1 } })
-    expect(w.find('svg').attributes('aria-hidden')).toBe('true')
-    expect(off(w)).toBe(0)
-    expect(art(w).length).toBeGreaterThan(10)
-    art(w).forEach((g) => { expect(g.classes()).toContain('g-is-static') })
-    expect(w.findAll('.g-pollen').every((e) => /opacity: 1/.test(e.attributes('style') ?? ''))).toBe(true)
-    expect(w.findAll('.g-plant-stem').every((p) => p.attributes('stroke-dashoffset') === '0')).toBe(true)
-    expect(w.findAll('.g-is-swaying')).toHaveLength(0) // reduced motion: no sway
-    expect(instances).toHaveLength(0) // no per-flower observers
-  })
-  it('draws with scroll but never retracts, and never grows art beyond the drawn vine (also after a jump)', async () => {
-    mockMedia(false); mockIO()
-    let queue: (() => void)[] = []
-    vi.stubGlobal('requestAnimationFrame', (cb: () => void) => { queue.push(cb); return 1 })
-    const set = (y: number) => {
-      Object.defineProperty(window, 'scrollY', { value: y, configurable: true })
-      window.dispatchEvent(new Event('scroll'))
-      const run = queue
-      queue = []
-      run.forEach((f) => f())
-    }
-    set(0)
-    const w = mount(PageVine, { props: { height: 6000, seed: 1 } })
-    await nextTick()
-    const items = placeItems(makeVinePath({ seed: 1, height: 6000 }), { seed: 1 })
-    const drawn = (): number => 1 - off(w)
-    const grownCount = (): number => w.findAll('g.g-art.g-leaf.g-is-grown, g.g-art.g-plant.g-is-grown').length
-    // Every grown item's anchor lies within the drawn length, and every reached item is grown.
-    const consistent = (): void => { expect(grownCount()).toBe(items.filter((i) => i.f <= drawn() + 1e-9).length) }
-    expect(drawn()).toBeLessThan(0.5)
-    consistent()
-    set(4200) // about 70% of the page
-    await nextTick()
-    const mid = drawn()
-    expect(mid).toBeGreaterThan(0.6)
-    consistent()
-    const midGrown = grownCount()
-    expect(midGrown).toBeGreaterThan(5)
-    set(0) // back to the top: nothing retracts
-    await nextTick()
-    expect(drawn()).toBe(mid)
-    expect(grownCount()).toBe(midGrown)
-    consistent()
-    set(6000) // nav jump to the bottom: the vine catches up in the same frame
-    await nextTick()
-    expect(drawn()).toBe(1)
-    expect(grownCount()).toBe(items.length)
-    Object.defineProperty(window, 'scrollY', { value: 0, configurable: true })
-  })
-  it('caps simultaneously swaying plants', async () => {
+describe('Plant sway', () => {
+  it('is opt-in', () => {
     mockMedia(false); mockIO()
     const w = mount(Plant, { props: { species: 'bloom', anchor: { x: 20, y: 20, angle: 90 }, progress: 1, grown: true } })
-    expect(w.findAll('.g-is-swaying')).toHaveLength(0) // sway is opt-in
+    expect(w.findAll('.g-is-swaying')).toHaveLength(0)
     const s = mount(Plant, { props: { species: 'bloom', anchor: { x: 20, y: 20, angle: 90 }, progress: 1, grown: true, sway: true } })
     expect(s.findAll('.g-is-swaying')).toHaveLength(1)
   })
-  it('places the same art on every render of a seed', () => {
+})
+
+describe('heading vine (SectionBlock)', () => {
+  it('keeps the heading text identical with garden art', () => {
     mockMedia(true)
-    const sig = (seed: number): (string | undefined)[] => mount(PageVine, { props: { height: 4000, seed } }).findAll('.g-plant-stem, .g-plant-leaf').map((g) => g.attributes('d') ?? g.attributes('transform'))
-    expect(sig(7)).toEqual(sig(7))
-    expect(sig(7)).not.toEqual(sig(8))
-  })
-  it('every main plant stem starts exactly on the vine', () => {
-    mockMedia(true)
-    const vine = makeVinePath({ seed: 3, height: 3000 })
-    const w = mount(PageVine, { props: { height: 3000, seed: 3 } })
-    const mains = w.findAll('.g-plant').map((p) => /^M(\S+) (\S+)/.exec(p.find('.g-plant-stem').attributes('d') ?? ''))
-    expect(mains.length).toBeGreaterThan(5)
-    for (const m of mains) expect(distanceToPath(vine, { x: Number(m?.[1]), y: Number(m?.[2]) }, 400)).toBeLessThan(0.1)
+    const s = mount(SectionBlock, { props: { id: 'x', title: 'Hello' } })
+    expect(s.text()).toBe('Hello')
+    expect(s.find('svg.g-vine').attributes('aria-hidden')).toBe('true')
   })
 })
 
@@ -522,7 +388,7 @@ describe('garden folder rules', () => {
   const files = readdirSync(here).filter((f) => /\.(vue|ts|css)$/.test(f) && !f.endsWith('.test.ts'))
   it('has no imports from outside src/garden except vue', () => {
     expect(files.length).toBeGreaterThan(0)
-    expect(files).toEqual(expect.arrayContaining(['index.ts', 'useGrow.ts', 'types.ts', 'Vine.vue', 'garden.css', 'layout.ts', 'anchor.ts', 'flowers.ts', 'grow.ts', 'timeline.ts', 'PageVine.vue', 'Plant.vue', 'FlowerArt.vue', 'Spray.vue', 'Bell.vue', 'ForgetMeNot.vue']))
+    expect(files).toEqual(expect.arrayContaining(['index.ts', 'useGrow.ts', 'types.ts', 'Vine.vue', 'garden.css', 'rng.ts', 'anchor.ts', 'flowers.ts', 'grow.ts', 'timeline.ts', 'Plant.vue', 'Sprouts.vue', 'sproutLayout.ts', 'registry.ts', 'FlowerArt.vue', 'Spray.vue', 'Bell.vue', 'ForgetMeNot.vue']))
     for (const f of files) {
       const src = readFileSync(join(here, f), 'utf8')
       for (const m of src.matchAll(/(?:from|import)\s*\(?\s*['"]([^'"]+)['"]/g)) {

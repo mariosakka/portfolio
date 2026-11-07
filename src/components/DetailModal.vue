@@ -48,35 +48,37 @@ onBeforeUnmount(() => { if (props.open) unlock() })
 
 <template>
   <Teleport to="body">
-    <div
-      v-if="open"
-      data-backdrop
-      class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-      @click.self="emit('close')"
-    >
+    <Transition name="modal">
       <div
-        ref="box"
-        tabindex="-1"
-        role="dialog"
-        aria-modal="true"
-        :aria-label="title"
-        class="modal-box w-full max-w-2xl overflow-y-auto rounded-2xl outline-none border border-line bg-night-900 p-5 text-ink"
+        v-if="open"
+        data-backdrop
+        class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+        @click.self="emit('close')"
       >
-        <div class="mb-3 flex items-start justify-between gap-3">
-          <h2 class="font-serif text-2xl">
-            {{ title }}
-          </h2>
-          <button
-            type="button"
-            aria-label="Close"
-            class="-mr-3 -mt-3 flex h-11 w-11 shrink-0 items-center justify-center text-3xl leading-none text-accent"
-            @click="emit('close')"
-          >
-            &times;
-          </button>
+        <div
+          ref="box"
+          tabindex="-1"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="title"
+          class="modal-box w-full max-w-2xl overflow-y-auto rounded-2xl outline-none border border-line bg-night-900 p-5 text-ink"
+        >
+          <div class="mb-3 flex items-start justify-between gap-3">
+            <h2 class="font-serif text-2xl">
+              {{ title }}
+            </h2>
+            <button
+              type="button"
+              aria-label="Close"
+              class="-mr-3 -mt-3 flex h-11 w-11 shrink-0 items-center justify-center text-3xl leading-none text-accent"
+              @click="emit('close')"
+            >
+              &times;
+            </button>
+          </div>
+          <slot />
         </div>
-        <slot />
       </div>
-    </div>
+    </Transition>
   </Teleport>
 </template>

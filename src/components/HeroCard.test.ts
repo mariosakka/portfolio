@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import type { VueWrapper } from '@vue/test-utils'
 import HeroCard from './HeroCard.vue'
@@ -46,35 +46,38 @@ describe('HeroCard', () => {
     expect(w!.findAll('dt').map((d) => d.text())).toEqual(['Field', 'Loc'])
   })
 
-  it('logo images are a square tile scaled to the image band, other images fill the frame uncropped', () => {
+  it('shows the image cleanly on the flat media surface: no canvas wash, no blur, no image-derived backdrop', () => {
     make({ image: '/a.webp', logo: true })
     expect(w!.findAll('img')).toHaveLength(1)
-    expect(w!.get('img').classes()).toEqual(expect.arrayContaining(['aspect-square', 'h-[62%]', 'max-h-36']))
+    expect(w!.find('canvas').exists()).toBe(false)
+    expect(w!.html()).not.toMatch(/blur|drop-shadow|filter/)
+    expect(w!.get('figure').classes()).toEqual(expect.arrayContaining(['bg-night-900', 'border', 'border-line']))
+    expect(w!.get('img').attributes('data-fit')).toBe('contain')
+  })
+
+  it('is position: relative, does not clip (room for card sprouts) and holds a CardGarden seeded by the title', () => {
+    make({ image: '/a.webp' })
+    const article = w!.get('article')
+    expect(article.classes()).toContain('relative')
+    expect(article.classes().some((c) => c.startsWith('overflow-'))).toBe(false)
+    expect(w!.findComponent({ name: 'CardGarden' }).props('seed')).toBe('T')
+  })
+
+  it('draws an accent underline under a spotlight title only when asked', () => {
+    make({})
+    expect(w!.find('[data-underline]').exists()).toBe(false)
     w!.unmount()
-    make({ image: '/a.webp' })
-    expect(w!.get('img').classes()).toContain('object-contain')
+    make({ underline: true })
+    expect(w!.get('h3 [data-underline]').attributes('aria-hidden')).toBe('true')
   })
 
-  it('paints the backdrop wash once from the loaded image into a tiny canvas, with no blur filter', async () => {
-    const ctx = { globalCompositeOperation: 'source-over', drawImage: vi.fn(() => ops.push(ctx.globalCompositeOperation)) }
-    const ops: string[] = []
-    const drawImage = ctx.drawImage
-    const spy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(ctx as unknown as CanvasRenderingContext2D)
-    make({ image: '/a.webp' })
-    const canvas = w!.get('canvas')
-    expect([canvas.attributes('width'), canvas.attributes('height')]).toEqual(['48', '30'])
-    expect(w!.html()).not.toMatch(/blur-|drop-shadow/)
-    await w!.get('img').trigger('load')
-    expect(drawImage.mock.calls).toEqual([
-      [w!.get('img').element, 0, 0, 6, 4],
-      [canvas.element, 0, 0, 6, 4, 0, 0, 48, 30],
-    ])
-    expect(ops).toEqual(['source-over', 'copy'])
-    spy.mockRestore()
+  it('a card without an image is a single column', () => {
+    make({})
+    expect(w!.get('article').classes().some((c) => c.startsWith('md:grid-cols'))).toBe(false)
   })
 
-  it('split layout puts the image on the requested side', () => {
-    make({ image: '/a.webp', layout: 'split', imageSide: 'right' })
+  it('the split card puts the image on the requested side', () => {
+    make({ image: '/a.webp', imageSide: 'right' })
     expect(w!.get('figure').classes()).toContain('md:order-last')
   })
 

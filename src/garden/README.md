@@ -37,13 +37,35 @@ A single progress value 0..1 per plant drives everything (`phase(progress)` in `
 
 Vine: `path`, `duration` (ms, default 2400), `delay`, `size`, `viewBox`, `grown`, `isStatic`. Draws the stem and drives its children (they inherit `grown`).
 
-Plant / Spray (a `<g>` in absolute coordinates, place inside any `<svg>`): `species`, `seed`, `anchor`, `side` (1 or -1), `reach` (stem px), `size`, `leaves`, `branches`, `bud`, `spread` (degrees between the path tangent and the stem start, default 120), `branchSpecies`, `grown`, `delay`, `duration`, `isStatic`, `progress`. `Spray` defaults to 3 branches.
+Plant / Spray (a `<g>` in absolute coordinates, place inside any `<svg>`): `species`, `seed`, `anchor`, `side` (1 or -1), `reach` (stem px), `size`, `leaves`, `branches`, `bud`, `spread` (degrees between the path tangent and the stem start, default 120), `branchSpecies`, `palette`, `grown`, `delay`, `duration`, `isStatic`, `progress`. `Spray` defaults to 3 branches.
 
 Flower, Bloom, Cornflower, Bell, ForgetMeNot, Daisy (thin wrappers over `Flower`): one flower with its base at `x`, `y` (use `Plant` to grow one out of a vine). Props: `x`, `y`, `rotate`, `size`, `seed`, `bud`, `delay`, `grown`, `isStatic`, `progress`, `duration`.
 
 Leaf / Bud: `x`, `y`, `rotate`, `size`, `delay`, `grown`, `isStatic`. Their base is the origin, so put them on an anchor.
 
-PageVine: a tall winding vine that draws as the page scrolls. Props: `seed`, `height` (px; 0 measures the parent with a ResizeObserver), `width` (strip, default 180), `side` (`left` or `right`), `density`, `coverage` (fraction of the parent height), `compact` (hairline edge vine with tiny flowers), `isStatic`. The path is procedural (`makeVinePath`); plants and leaves are placed along it by `placeItems`, all seeded. One passive scroll listener throttled with `requestAnimationFrame` writes a single CSS variable; each plant starts its own timeline when the drawn tip passes its anchor and stays open. `scrollProgress(scrollY, pageHeight, viewportHeight)` maps scroll to a clamped 0..1 with the tip at 60% of the viewport and the vine complete at the page bottom.
+## Sprouts
+
+A decorative overlay that grows vines and flowers out of and around its parent (a card, a photo, a heading wrapper). It renders one absolutely positioned `<svg aria-hidden="true" focusable="false">` with `pointer-events: none`, sized to the parent's padding box plus `reach` px on every side, measured with a ResizeObserver. It takes no space in the layout.
+
+```vue
+<div class="relative">
+  <!-- card content -->
+  <Sprouts :seed="item.id" />
+</div>
+```
+
+Props (`SproutsProps`): `seed` (string or number), `variant` (`auto` default, `corners`, `edge`, `wrap`, `hang`, `climb`, `burst`), `density` (`1` about 3-4 flowers, `2` default about 6-9, `3` about 10-14, scaled within the band by the parent's perimeter; plus buds, leaf pairs and tiny filler blossoms that are not counted), `trigger` (`visible` default, `active`, `manual`), `active`, `progress` (0..1, with `manual`), `reach` (px; default 56 at viewport widths of 640px and up, 32 below; at least 12), `isStatic`, `sway` (opt-in idle sway).
+
+- Variants: `corners` (vines leave one or two corners and curl outward, flowers at the tips), `edge` (a vine creeping along one outer edge with side branches), `wrap` (a vine hugging a corner just outside the border), `hang` (a garland over the top edge with vines hanging down the sides, mostly bells and forget-me-nots), `climb` (a vine climbing one side from the bottom edge), `burst` (curved branches from several border points, each ending in a flower, a cluster or a bud; a branch with no room for one is dropped). `auto` picks one per seed; consecutive numeric seeds always get different variants, so pass the card index or id.
+- Lazy render and caps: nothing is rendered inside the svg until growth starts (or with `manual`/`isStatic`), so cards that are never seen cost no nodes. Below 640px viewport width the density is capped at 2, below 380px at 1. All plants of one overlay share one `<defs>` set (one gradient trio per palette). A parent with no size yet waits and starts growing once it has one. Resizes are debounced (150ms) and ignored under 5px; a real resize re-lays out the art (same seed, new size) with a short fade-in.
+- Containment: the art lives in the ring of `reach` px around the parent and overlaps the parent box by at most `SPROUT_OVERLAP` (8px), only along its border, flower glow included (`SPROUT_GLOW`, 1.1x the petal radius in Sprouts). Vines are traced in a perimeter frame (arc position plus outward offset) and every plant is checked point by point; a plant that would reach further in is shrunk, turned or dropped.
+- Triggers: `visible` grows once when 25% of the parent is visible, or when it covers a quarter of the viewport (for parents much taller than the screen) (one IntersectionObserver, disconnected after), `active` grows once `active` becomes true (carousel slides; it stays grown after), `manual` lets `progress` drive the whole overlay. `isStatic` and `prefers-reduced-motion` render the final grown state at once.
+- Growth: every vine has its own seeded delay (0 to 1.4s after a 0.1 to 0.5s pause), duration and ease, so sprouts appear out of sync; each plant starts when its vine reaches its anchor plus a random lag and runs the usual single timeline (stem, leaves, calyx, bud, petals, then stamens and pollen).
+- Cost: all overlays share one `requestAnimationFrame` loop (`registry.ts`). At most `MAX_GROWING_PLANTS` (80) plants grow at once page-wide: an overlay takes one slot per plant when it starts and frees each slot as that plant's own timeline completes; queued overlays start nearest to the viewport centre first (re-read each time one is popped). A grower that throws is dropped and the loop keeps running. A finished overlay does no per-frame work. About 650-2200 SVG nodes per grown card on desktop. With `sway`, at most `MAX_SWAYING` (6) plants sway page-wide, given to the overlays nearest the viewport centre (one passive scroll listener while any are registered). No CSS filters.
+- Clipping requirement: the parent must be positioned (`position: relative`), and no ancestor between it and the space the art grows into may clip (`overflow: hidden/auto/scroll`), or the art is cut: leave at least `reach` px of non-clipping margin around the parent. The overlay overflows its parent by `reach` px, so near the viewport edge an ancestor needs `overflow-x: clip` to avoid horizontal scroll. The parent's content must stay inside its box (text overflowing the box can be covered).
+- Helpers: `layoutSprouts(options)` is the pure, seeded layout (vines, plants, leaves, timings) for any box; also `pickVariant(seed)`, `vineDrawn`, `itemProgress`, `SPROUT_VARIANTS`, `SPROUT_FLOWERS`, `SPROUT_OVERLAP`; `enqueueGrowth`, `growthStats` and `registerSway` expose the shared registry.
+
+Extra muted hues in the blue, violet and pale family live in `EXTRA_PALETTES`; pass one as `palette` to `Plant` (or a `PlantSpec`) to recolour any species.
 
 `isStatic` renders everything fully grown with no animation. `prefers-reduced-motion: reduce` and a missing `IntersectionObserver` also render fully grown.
 
@@ -53,8 +75,8 @@ Returns a ref that becomes `true` when `el` enters the viewport (immediately `tr
 
 ## Types
 
-`index.ts` exports `Anchor`, `ArtProps`, `FlowerGeometry`, `FlowerSpec`, `GrowthPhase`, `PageVineProps`, `PathModel`, `PlantGeometry`, `PlantProps`, `PlantSpec`, `Species`, `SpeciesProps`, `TimelineOptions`, `VineItem`, `VinePath`, `VineProps` and more.
+`index.ts` exports `SproutsProps`, `SproutVariant`, `SproutDensity`, `SproutTrigger`, `SproutLayout`, `SproutLayoutOptions`, `Anchor`, `ArtProps`, `FlowerGeometry`, `FlowerSpec`, `GrowthPhase`, `PathModel`, `PlantGeometry`, `PlantProps`, `PlantSpec`, `Species`, `SpeciesProps`, `TimelineOptions`, `VineProps` and more.
 
 ## Dev demo
 
-`garden-demo.html` at the repo root (served by `npm run dev` only, never in the production build) renders one plant per species with a progress slider, `?p=0.5` and `?zoom=3`.
+`garden-demo.html` at the repo root (served by `npm run dev` only, never in the production build) shows a gallery of mock cards with `Sprouts` (every variant at density 1, 2 and 3 on small, wide and tall cards, plus an `auto` row) and a progress slider; `?p=0.5` sets the progress, `?live=1` uses the real `visible` trigger, `?view=species` shows one plant per species (`?zoom=3`).
