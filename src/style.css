@@ -6,3 +6,13 @@ body {
   @apply bg-gradient-to-b from-night-950 to-night-800 font-sans text-ink;
   min-height: 100vh;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
