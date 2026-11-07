@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import DetailModal from './DetailModal.vue'
+import MediaFrame from './MediaFrame.vue'
+import CardGarden from './CardGarden.vue'
+import type { Fit } from '../lib/motion'
 import type { CardLink } from '../types/card'
 import { fitTags } from '../lib/normalize'
 
@@ -18,8 +21,11 @@ const props = withDefaults(defineProps<{
   layout?: 'split' | 'stacked'
   imageSide?: 'left' | 'right'
   compact?: boolean
-  // Small square logo (company, school): shown as a crisp tile on the blurred wash instead of filling the frame.
+  // Small square logo (company, school): a contained tile on the flat media surface.
   logo?: boolean
+  fit?: Fit | 'auto'
+  // Spotlight title: an accent underline drawn in when the section enters.
+  underline?: boolean
 }>(), {
   eyebrow: '',
   meta: '',
@@ -34,6 +40,8 @@ const props = withDefaults(defineProps<{
   imageSide: 'left',
   compact: false,
   logo: false,
+  fit: 'auto',
+  underline: false,
 })
 
 const first = (...v: string[]): string => v.find((s) => s.trim()) ?? ''
@@ -50,60 +58,31 @@ const shownLinks = computed(() => props.links
 const chips = computed(() => fitTags(props.tags, props.compact ? 40 : 56))
 const split = computed(() => props.layout === 'split')
 const open = ref(false)
-const wash = ref<HTMLCanvasElement | null>(null)
-// Image -> 6x4 pixels -> smoothed up to the 48x30 canvas: two one-off draws act as a blur
-// (no ctx.filter, which older Safari lacks), so the CSS stretch shows a soft gradient, not cells.
-function paintWash(e: Event) {
-  const c = wash.value
-  const ctx = c?.getContext('2d')
-  if (!c || !ctx) return
-  ctx.drawImage(e.target as HTMLImageElement, 0, 0, 6, 4)
-  ctx.globalCompositeOperation = 'copy' // replace, so the 6x4 draft never shows through transparent images
-  ctx.drawImage(c, 0, 0, 6, 4, 0, 0, c.width, c.height)
-}
 </script>
 
 <template>
   <article
-    class="relative grid w-full overflow-hidden rounded-[1.75rem] border border-line bg-surface text-ink"
+    class="relative grid w-full rounded-[1.75rem] border border-line bg-surface text-ink"
     :class="[
       // Stacked: the image row keeps its height and the text row takes any extra (equal-height slides).
       image ? 'grid-rows-[auto_1fr]' : '',
       split ? 'md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] md:grid-rows-none' : '',
     ]"
   >
+    <CardGarden :seed="title" />
     <!-- Phones and stacked cards: the image band takes a share of the screen height; split: it fills the row. -->
-    <figure
+    <MediaFrame
       v-if="image"
-      class="relative m-2 flex items-center justify-center overflow-hidden rounded-[1.35rem] bg-night-900 [contain:paint] sm:m-3"
+      :src="image"
+      :logo="logo"
+      :fit="fit"
+      class="m-2 sm:m-3"
       :class="[
         'h-[clamp(7rem,20vh,15rem)] sm:h-[clamp(7rem,24vh,15rem)] supports-[height:1svh]:h-[clamp(7rem,20svh,15rem)] supports-[height:1svh]:sm:h-[clamp(7rem,24svh,15rem)]',
         split ? 'md:h-auto md:min-h-[clamp(14rem,42vh,26rem)] supports-[height:1svh]:md:h-auto supports-[height:1svh]:md:min-h-[clamp(14rem,42svh,26rem)]' : '',
         split && imageSide === 'right' ? 'md:order-last' : '',
       ]"
-    >
-      <!-- Real images are square or portrait logos and shots, so the image is never cropped; a soft wash of its
-           colors fills the frame. The wash is a 48x30 canvas painted once from the already loaded image and stretched
-           by CSS: no filter layer, no extra request, no per-frame cost. -->
-      <canvas
-        ref="wash"
-        width="48"
-        height="30"
-        aria-hidden="true"
-        class="absolute inset-0 h-full w-full opacity-35"
-      />
-      <img
-        :src="image"
-        alt=""
-        loading="lazy"
-        :class="logo ? 'relative aspect-square h-[62%] max-h-36 w-auto rounded-2xl object-cover shadow-[0_12px_28px_rgba(0,0,0,0.45)]' : 'absolute inset-0 h-full w-full object-contain p-[7%]'"
-        @load="paintWash"
-      >
-      <span
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-0 rounded-[1.35rem] ring-1 ring-inset ring-white/10"
-      />
-    </figure>
+    />
 
     <div
       class="flex min-w-0 flex-col"
@@ -127,6 +106,12 @@ function paintWash(e: Event) {
         :class="compact ? 'text-2xl sm:text-[1.7rem] short:text-[1.4rem]' : 'text-[1.65rem] sm:text-4xl lg:text-[2.75rem] sm:short:text-3xl lg:short:text-[2.1rem] xshort:text-2xl'"
       >
         {{ title }}
+        <span
+          v-if="underline"
+          data-underline
+          aria-hidden="true"
+          class="mt-2 block h-[3px] w-24 rounded-full bg-accent/70"
+        />
       </h3>
       <p
         v-if="summary"
