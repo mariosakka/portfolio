@@ -388,7 +388,7 @@ describe('garden folder rules', () => {
   const files = readdirSync(here).filter((f) => /\.(vue|ts|css)$/.test(f) && !f.endsWith('.test.ts'))
   it('has no imports from outside src/garden except vue', () => {
     expect(files.length).toBeGreaterThan(0)
-    expect(files).toEqual(expect.arrayContaining(['index.ts', 'useGrow.ts', 'types.ts', 'Vine.vue', 'garden.css', 'rng.ts', 'anchor.ts', 'flowers.ts', 'grow.ts', 'timeline.ts', 'Plant.vue', 'FlowerArt.vue', 'Spray.vue', 'Bell.vue', 'ForgetMeNot.vue']))
+    expect(files).toEqual(expect.arrayContaining(['index.ts', 'useGrow.ts', 'types.ts', 'Vine.vue', 'garden.css', 'rng.ts', 'anchor.ts', 'flowers.ts', 'grow.ts', 'timeline.ts', 'Plant.vue', 'Sprouts.vue', 'sproutLayout.ts', 'registry.ts', 'FlowerArt.vue', 'Spray.vue', 'Bell.vue', 'ForgetMeNot.vue']))
     for (const f of files) {
       const src = readFileSync(join(here, f), 'utf8')
       for (const m of src.matchAll(/(?:from|import)\s*\(?\s*['"]([^'"]+)['"]/g)) {

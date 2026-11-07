@@ -208,6 +208,8 @@ export interface PlantSpec {
   spread?: number
   /** Species of the side branches, cycled. */
   branchSpecies?: Species[]
+  /** Override the species palette (side branches inherit it). */
+  palette?: Palette
 }
 
 export interface PlantNode {
@@ -255,4 +257,84 @@ export interface SpeciesProps extends ArtProps {
   bud?: boolean
   duration?: number
   progress?: number
+}
+
+/** Arrangement of a `Sprouts` overlay; `auto` picks one from the seed. */
+export type SproutVariant = 'corners' | 'edge' | 'wrap' | 'hang' | 'climb' | 'burst'
+/** 1 = about 3-4 flowers, 2 = about 6-9, 3 = about 10-14 per parent. */
+export type SproutDensity = 1 | 2 | 3
+/** `visible`: grows once when ~25% of the parent is visible; `active`: grows once `active` is true; `manual`: `progress` drives it. */
+export type SproutTrigger = 'visible' | 'active' | 'manual'
+
+export interface SproutsProps {
+  seed?: string | number
+  variant?: SproutVariant | 'auto'
+  density?: SproutDensity
+  trigger?: SproutTrigger
+  /** With `trigger="active"`: start growing when this becomes true (never retracts). */
+  active?: boolean
+  /** With `trigger="manual"`: whole overlay progress 0..1. */
+  progress?: number
+  /** Width in px of the ring around the parent the art may use (default 40). */
+  reach?: number
+  /** Final grown state, no animation. */
+  isStatic?: boolean
+  /** Opt-in idle sway once grown; globally capped to a few plants nearest the viewport. */
+  sway?: boolean
+}
+
+export interface SproutLayoutOptions {
+  seed: string | number
+  variant?: SproutVariant | 'auto'
+  density?: SproutDensity
+  /** Parent box size in px (the art's coordinate system has the parent at 0,0 to width,height). */
+  width: number
+  height: number
+  reach?: number
+}
+
+export interface SproutVine {
+  id: string
+  path: PathModel
+  /** Stroke width in px. */
+  width: number
+  /** ms after the trigger. */
+  delay: number
+  duration: number
+  /** Ease-out exponent of the draw: drawn = 1 - (1 - t) ** ease. */
+  ease: number
+}
+
+export interface SproutPlant {
+  id: string
+  spec: PlantSpec
+  delay: number
+  duration: number
+  /** Open flowers on this plant (main plus side branches, buds excluded). */
+  flowers: number
+}
+
+export interface SproutLeaf {
+  id: string
+  x: number
+  y: number
+  rotate: number
+  size: number
+  delay: number
+  duration: number
+}
+
+export interface SproutLayout {
+  variant: SproutVariant
+  width: number
+  height: number
+  reach: number
+  vines: SproutVine[]
+  plants: SproutPlant[]
+  leaves: SproutLeaf[]
+  /** Open flowers in total. */
+  flowers: number
+  buds: number
+  /** ms until everything is grown. */
+  total: number
 }

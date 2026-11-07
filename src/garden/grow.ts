@@ -37,7 +37,8 @@ function growNode(spec: PlantSpec, anchor: Anchor, reach: number, size: number, 
   const bend = reach * 0.1 * (rnd() < 0.5 ? -1 : 1)
   const { stem, tip } = growStem(anchor, reach, dir0, endAngle, bend)
   const tilt = Math.round((rnd() - 0.5) * (spec.species === 'bell' ? 16 : 28))
-  const flower = generateFlower(spec.species, seed, { closed: bud })
+  const generated = generateFlower(spec.species, seed, { closed: bud })
+  const flower = spec.palette ? { ...generated, palette: spec.palette } : generated
   const scale = SPECIES_SCALE[spec.species] * size
   const out: PlantNode['leaves'] = []
   for (let i = 0; i < leaves; i++) {

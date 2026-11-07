@@ -9,7 +9,7 @@ import type { PlantProps } from './types'
 
 // A flower growing out of a vine: stem from the anchor, leaves on the stem, bud, petals, stamens, pollen.
 const props = withDefaults(defineProps<PlantProps>(), {
-  seed: 1, side: 1, reach: 60, size: 1, leaves: 2, branches: 0, bud: false, spread: 120, branchSpecies: undefined,
+  seed: 1, side: 1, reach: 60, size: 1, leaves: 2, branches: 0, bud: false, spread: 120, branchSpecies: undefined, palette: undefined,
   grown: undefined, delay: 0, duration: 3200, isStatic: false, progress: undefined, sway: false,
 })
 const el = ref<SVGGElement | null>(null)
@@ -18,6 +18,7 @@ const { grown, isStatic } = useGrown(props, el)
 const geo = computed(() => growPlant({
   species: props.species, seed: props.seed, anchor: props.anchor, side: props.side, reach: props.reach, size: props.size,
   leaves: props.leaves, branches: props.branches, bud: props.bud, spread: props.spread, branchSpecies: props.branchSpecies,
+  ...(props.palette ? { palette: props.palette } : {}),
 }))
 const timeline = useGrowthTimeline(grown, { duration: props.duration, delay: props.delay, isStatic })
 const p = computed(() => (isStatic.value ? 1 : props.progress ?? timeline.value))

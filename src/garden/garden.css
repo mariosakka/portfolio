@@ -12,6 +12,10 @@
 .g-vine.g-is-static .g-vine-stem { stroke-dashoffset: 0; }
 .g-vine.g-is-static .g-vine-stem { transition: none; }
 
+/* Sprouts: absolutely positioned over the parent plus `reach` px on every side; never intercepts input. */
+.g-sprouts { position: absolute; display: block; overflow: hidden; pointer-events: none; }
+.g-sprout-leaf > g { transform-origin: 0 0; }
+
 /* Flower parts animate from inline transform/opacity/dash values; origin is the receptacle. */
 .g-flower-art .g-petal, .g-flower-art .g-sepal, .g-flower-art .g-receptacle, .g-flower-art .g-disk { transform-origin: 0 0; }
 .g-flower-art .g-anther, .g-flower-art .g-pollen { transform-box: fill-box; transform-origin: center; }
