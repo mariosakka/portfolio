@@ -6,7 +6,7 @@ Owner: Mohamad-Mario Sakka (GitHub: `mariosakka`). Date: 2026-11-07.
 
 The current portfolio (https://github.com/mariosakka/mms-portfolio, React + Firebase, live at mms-portfolio.web.app) is being replaced because the owner wants: a cleaner look, no admin page, and to stop paying for / depending on Google Cloud. The new site is a **static Vue 3 app hosted on GitHub Pages** on the owner's Namecheap domain. Content lives in JSON files in the repo; editing content = edit JSON, push.
 
-A second, later project (separate repo, **out of scope here**) will extract the animated flower/vine components into an npm package. This project must build them so they can be lifted out cleanly.
+The reusable card-garden overlay is published separately as `@mariosakka/sprouts` with the Vue adapter `@mariosakka/sprouts-vue`. The portfolio consumes that adapter for every card overlay in its static-SVG mode, avoiding a live animation loop on every card; its small section-heading vine remains local until the package exposes the corresponding primitive API.
 
 ## Goals
 

@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import DetailModal from './DetailModal.vue'
 import MediaFrame from './MediaFrame.vue'
 import CardGarden from './CardGarden.vue'
-import type { SproutDensity, SproutVariant } from '../garden'
+import type { Density as SproutDensity, Variant as SproutVariant } from '@mariosakka/sprouts'
 import type { Fit } from '../lib/motion'
 import type { CardLink } from '../types/card'
 import { fitTags } from '../lib/normalize'
@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<{
   fit?: Fit | 'auto'
   // Spotlight title: an accent underline drawn in when the section enters.
   underline?: boolean
-  // Card sprouts: grow on view by default; pass `active` (coverflow slide, top deck card) to grow when it is true.
+  // Card sprouts use the static, published SVG overlay; these values preserve each card's arrangement selection.
   active?: boolean
   density?: SproutDensity
   variant?: SproutVariant | 'auto'

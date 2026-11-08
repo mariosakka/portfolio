@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Sprouts } from '../garden'
-import type { SproutDensity, SproutVariant } from '../garden'
+import { Sprouts } from '@mariosakka/sprouts-vue'
+import type { Density as SproutDensity, Variant as SproutVariant } from '@mariosakka/sprouts'
 import { useMedia } from '../lib/useMotion'
 
-// Vines and flowers growing out of and around the parent card (the garden <Sprouts> overlay), up to `reach` px
-// past its box. The parent must be position: relative and keep `reach` px of unclipped room; the art is
-// absolute, aria-hidden and ignores pointer events, so it never changes layout. `seed` keeps one card's
-// arrangement stable. `trigger="active"` grows when `active` becomes true (coverflow slide, top deck card).
+// The published Sprouts adapter draws a deterministic SVG around each positioned card. This portfolio chooses
+// its static mode to avoid running a live animation loop for every card; `seed` keeps each arrangement stable.
 const props = withDefaults(defineProps<{
   seed: string | number
   variant?: SproutVariant | 'auto' | 'default'
@@ -29,10 +27,30 @@ const reach = computed(() => props.reach ?? (wide.value ? 56 : 32))
     :seed="seed"
     :variant="variant === 'default' ? 'auto' : variant"
     :density="density"
-    :trigger="trigger"
-    :active="active"
-    :reach="props.reach"
-    :is-static="isStatic"
+    :reach="reach"
+    static
+    :style="{ '--sprout-reach': `${reach}px` }"
   />
   <slot :reach="reach" />
 </template>
+
+<style scoped>
+:deep(.sprouts) {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+:deep(.sprouts > svg) {
+  position: absolute;
+  top: calc(-1 * var(--sprout-reach));
+  left: calc(-1 * var(--sprout-reach));
+  display: block;
+  overflow: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :deep(.sprouts > svg) { transition: none; }
+}
+</style>

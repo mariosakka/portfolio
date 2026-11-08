@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import MediaFrame from './MediaFrame.vue'
 import CardGarden from './CardGarden.vue'
-import { Sprouts } from '../garden'
+import { Sprouts } from '@mariosakka/sprouts-vue'
 
 const load = async (w: ReturnType<typeof mount>, nw: number, nh: number, fw: number, fh: number) => {
   Object.defineProperties(w.element, { clientWidth: { value: fw }, clientHeight: { value: fh } })
@@ -41,21 +41,18 @@ describe('MediaFrame', () => {
 })
 
 describe('CardGarden', () => {
-  it('renders a Sprouts overlay (aria-hidden svg) beside its slot, with the seed, density and reach passed through', () => {
+  it('renders the published Sprouts overlay beside its slot, with its stable layout props passed through', () => {
     const w = mount(CardGarden, { props: { seed: 'card-x', density: 3, reach: 44, isStatic: true }, slots: { default: '<i>x</i>' } })
     const sprouts = w.findComponent(Sprouts)
     expect(sprouts.exists()).toBe(true)
-    expect(sprouts.props()).toMatchObject({ seed: 'card-x', density: 3, reach: 44, variant: 'auto', trigger: 'visible', isStatic: true })
-    const svg = w.get('svg.g-sprouts')
-    expect(svg.attributes('aria-hidden')).toBe('true')
-    expect(svg.attributes('style')).toContain('-44px')
+    expect(sprouts.props()).toMatchObject({ seed: 'card-x', density: 3, reach: 44, variant: 'auto', static: true })
+    expect(w.get('.sprouts').attributes('aria-hidden')).toBe('true')
     expect(w.html()).toContain('<i>x</i>')
   })
 
-  it('maps variant default to auto, passes a pinned variant and the active trigger through', () => {
+  it('maps variant default to auto and passes a pinned variant through', () => {
     expect(mount(CardGarden, { props: { seed: 1 } }).findComponent(Sprouts).props('variant')).toBe('auto')
-    const p = mount(CardGarden, { props: { seed: 1, variant: 'hang', trigger: 'active', active: false } }).findComponent(Sprouts).props()
-    expect(p).toMatchObject({ variant: 'hang', trigger: 'active', active: false })
+    expect(mount(CardGarden, { props: { seed: 1, variant: 'hang' } }).findComponent(Sprouts).props('variant')).toBe('hang')
   })
 
   it.each([[true, 56], [false, 32]])('passes the slot reach by breakpoint (wide %s: %spx), or the override', async (wide, px) => {

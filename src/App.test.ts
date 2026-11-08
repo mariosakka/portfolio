@@ -13,7 +13,7 @@ test('has no page-tall vine or overlay outside cards: every sprouts overlay is i
   const wrapper = mount(App, { attachTo: document.body })
   const root = wrapper.get('#app-root').element
   expect(root.querySelectorAll('[class*="page-vine"], [class*="PageVine"]')).toHaveLength(0)
-  const overlays = [...root.querySelectorAll('svg.g-sprouts')]
+  const overlays = [...root.querySelectorAll('div.sprouts')]
   expect(overlays.length).toBeGreaterThan(5)
   for (const o of overlays) {
     const parent = o.parentElement!
